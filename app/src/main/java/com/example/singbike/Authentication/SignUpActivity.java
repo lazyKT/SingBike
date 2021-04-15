@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import
  com.example.singbike.MainActivity;
+import com.example.singbike.Models.User;
 import com.example.singbike.R;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -77,6 +78,13 @@ public class SignUpActivity extends AppCompatActivity {
                         else if ( !pwdET.getText().toString().equals(confirmPwdET.getText().toString()) ) {
                             errorTV.setVisibility(View.VISIBLE);
                             errorTV.setText(R.string.confirm_pwd_err);
+                        }
+                        /* Validation Success */
+                        else {
+                            User user = new User();
+                            user.setEmail(emailET.getText().toString());
+                            user.setUsername(unameET.getText().toString());
+                            user.setPassword(pwdET.getText().toString());
                         }
                     }
                 }
