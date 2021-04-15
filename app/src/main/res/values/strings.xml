@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">SingBike</string>
+
+    <!-- Authentication -->
+    <string name="ride">RIDE</string>
+    <string name="signup">SIGN UP</string>
+    <string name="signin">SIGN IN</string>
+    <string name="username">USERNAME</string>
+    <string name="pwd">PASSWORD</string>
+    <string name="email">EMAIL ADDRESS</string>
+    <string name="cPwd">CONFIRM PASSWORD</string>
+
+    <!-- error message -->
+    <string name="uname_err">Username Must be at least 4 characters long.</string>
+    <string name="email_err">Invalid Email Format</string>
+    <string name="pwd_err_length">Password must contain at least 8 charaters</string>
+    <string name="pwd_err_chars">Password must contain at least 1 Capital Letter, 1 Small Letter and 1 digit.</string>
+    <string name="confirm_pwd_err">Passwords are not equal.</string>
+
+</resources>
