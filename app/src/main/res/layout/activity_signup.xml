@@ -97,7 +97,7 @@
         android:layout_marginEnd="70dp"
         android:ems="10"
         android:hint="@string/pwd"
-        android:inputType="textPersonName"
+        android:inputType="textPassword"
         android:textSize="16sp"
         android:background="@drawable/edit_text_border"
         android:padding="10dp"

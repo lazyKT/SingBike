@@ -1,43 +1,91 @@
 package com.example.singbike;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
+import android.util.Log;
+import android.view.MenuItem;
 
-import com.example.singbike.Authentication.SignInDialogFragment;
+import com.example.singbike.Fragments.AccountFragment;
+import com.example.singbike.Fragments.ActivityFragment;
+import com.example.singbike.Fragments.HomeFragment;
+import com.example.singbike.Models.User;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
+
+    private final static String DEBUG_BOT_NAV = "DEBUG_BOTTOM_NAVIGATION";
+    private final static String DEBUG_SAVEDINSTANCES = "DEBUG_SAVEDINSTANCES";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // ride button instantiation
-        Button rideButton = (Button) findViewById (R.id.rideButton);
+        User currentUser = new User();
 
+        /* Receiving User Details passed from SignUP */
+        Bundle bundle = getIntent().getExtras();
 
+        if (bundle != null)
+            currentUser = bundle.getParcelable ("user");
 
-        /* onClick action on ride button */
-        rideButton.setOnClickListener (
-                new View.OnClickListener() {
+//        Log.d (DEBUG_SAVEDINSTANCES, savedInstanceState.toString());
+
+        final FragmentManager fragmentManager = getSupportFragmentManager();
+
+        if (savedInstanceState == null) {
+            // by default Home Page will be shown first
+            fragmentManager.beginTransaction()
+                    .setReorderingAllowed(true)
+                    .add (R.id.fragmentContainerView, HomeFragment.class, null)
+                    .commit();
+        }
+        BottomNavigationView botNavigationView = (BottomNavigationView) findViewById (R.id.botNavView);
+        /* onClick Action on Navigation Menus */
+        botNavigationView.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
-                    public void onClick (View view) {
-                        // open login dialog
-                        openLoginDialog();
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                        switch (item.getItemId()) {
+                            case R.id.home_menu:
+                                /* go to home page */
+                                fragmentManager.beginTransaction()
+                                        .setReorderingAllowed(true)
+                                        .replace (R.id.fragmentContainerView, HomeFragment.class, null)
+                                        .addToBackStack("home")
+                                        .commit();
+                                Log.d (DEBUG_BOT_NAV, "at Home Page");
+                                break;
+
+                            case R.id.activity_menu:
+                                /* go to Activity Page */
+                                fragmentManager.beginTransaction()
+                                        .replace (R.id.fragmentContainerView, ActivityFragment.class, null)
+                                        .setReorderingAllowed (true)
+                                        .addToBackStack ("activity")
+                                        .commit();
+                                Log.d (DEBUG_BOT_NAV, "at Activity Page");
+                                break;
+
+                            case R.id.account_menu:
+                                /* go to Account Page */
+                                fragmentManager.beginTransaction()
+                                        .setReorderingAllowed (true)
+                                        .replace (R.id.fragmentContainerView, AccountFragment.class, null)
+                                        .addToBackStack ("account")
+                                        .commit();
+                                Log.d (DEBUG_BOT_NAV, "at Account Page");
+                                break;
+                        }
+
+                        return true;
                     }
                 }
         );
 
-
-    }
-
-
-    // open login dialog upon onClick event of ride Button
-    private void openLoginDialog () {
-        SignInDialogFragment signInDialogFragment = new SignInDialogFragment();
-        signInDialogFragment.show(getSupportFragmentManager(), "signin");
     }
 }

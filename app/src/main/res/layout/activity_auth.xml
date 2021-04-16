@@ -4,20 +4,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lightGray"
     tools:context=".MainActivity">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/fragmentContainerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toTopOf="@+id/botNavView"
-        />
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/botNavView"
-        android:layout_width="match_parent"
+    <!-- Ride Button -->
+    <Button
+        android:id="@+id/rideButton"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        app:menu="@menu/bot_navigation_menu"
+        android:layout_marginBottom="50dp"
+        android:background="@drawable/round_corner"
+        android:backgroundTint="@color/actionBtn"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:text="@string/ride"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
