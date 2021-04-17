@@ -8,6 +8,7 @@
 package com.example.singbike.Authentication;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,9 +18,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import
  com.example.singbike.MainActivity;
+import com.example.singbike.Models.User;
 import com.example.singbike.R;
 
+import java.util.regex.Pattern;
+
 public class SignUpActivity extends AppCompatActivity {
+
+    private static final String DEBUG_SIGNUP = "DEBUG_SIGN_UP";
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
@@ -78,6 +84,30 @@ public class SignUpActivity extends AppCompatActivity {
                             errorTV.setVisibility(View.VISIBLE);
                             errorTV.setText(R.string.confirm_pwd_err);
                         }
+                        /* Validation Success */
+                        else {
+                            Log.d (DEBUG_SIGNUP, "Credentials Valid!");
+
+                            /*
+                             * Upon receiving valid signup credentials, post those to the server,
+                             * Currently, the server is not available yet.
+                             * Later, will implement a communication with server here.
+                             * Upon Successful Post Request to Server, the app will receive back the user details
+                             * from the server which will be later created as a User object and be passed
+                             * to MainActivity.
+                             * That details will also be saved in the device memory (exclude password). so that
+                             * the users do not need to sign in everytime when they open the app.
+                             * These details will be deleted only when the app is un-installed or the user signs out.
+                             */
+
+                            User user = new User();
+                            user.setEmail(emailET.getText().toString());
+                            user.setUsername(unameET.getText().toString());
+
+                            Intent intent = new Intent (getApplicationContext(), MainActivity.class);
+                            intent.putExtra ("user", user);
+                            startActivity(intent);
+                        }
                     }
                 }
         );
@@ -99,17 +129,26 @@ public class SignUpActivity extends AppCompatActivity {
      */
     private int validateCredentials (String val, String type) {
 
+        /* to validate email address format */
+        Pattern email_regex = Pattern.compile ("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+        /* to validate password complexity */
+        Pattern pwd_regex = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$");
+
         switch (type) {
             case "uname":
                 if (val.length() < 4)
                     return 0;
                 return 1;
             case "email":
+                if (email_regex.matcher(val).find())
+                    return 1;
                 return 0;
             case "pwd":
                 if (val.length() < 8)
                     return -1;
-                return 1;
+                if (pwd_regex.matcher(val).find())
+                    return 1;
+                return 0;
         }
 
         return 0;

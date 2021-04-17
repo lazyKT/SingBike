@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- home menu -->
+    <item
+        android:id="@+id/home_menu"
+        android:icon="@drawable/menu_home_foreground"
+        android:title="@string/home"
+        app:showAsAction="ifRoom"
+        />
+
+    <!-- activity menu -->
+    <item
+        android:id="@+id/activity_menu"
+        android:icon="@drawable/menu_activity_foreground"
+        android:title="@string/activity"
+        app:showAsAction="ifRoom"
+        />
+
+    <!-- account menu -->
+    <item
+        android:id="@+id/account_menu"
+        android:icon="@drawable/menu_account_foreground"
+        android:title="@string/account"
+        app:showAsAction="ifRoom"
+        />
+
+</menu>
