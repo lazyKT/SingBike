@@ -22,4 +22,10 @@
     <string name="activity">ACTIVITY</string>
     <string name="account">ACCOUNT</string>
 
+    <!-- account tab -->
+    <string name="edit_profile">Edit Profile</string>
+    <string name="change_pwd">Change Password</string>
+    <string name="update">UPDATE PROFILE</string>
+
+
 </resources>
