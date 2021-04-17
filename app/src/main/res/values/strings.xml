@@ -27,5 +27,13 @@
     <string name="change_pwd">Change Password</string>
     <string name="update">UPDATE PROFILE</string>
 
+    <!-- account tab options -->
+    <string-array name="account_options">
+        <item>ACHIEVEMENTS</item>
+        <item>WALLET</item>
+        <item>CONTACT</item>
+        <item>LOGOUT</item>
+    </string-array>
+
 
 </resources>

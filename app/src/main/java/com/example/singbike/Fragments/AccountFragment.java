@@ -7,7 +7,11 @@ import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.singbike.Adapters.OptionsRecyclerViewAdapter;
+import com.example.singbike.Fragments.AccountTab.ProfileFragment;
 import com.example.singbike.R;
 
 public class AccountFragment extends Fragment {
@@ -40,6 +44,18 @@ public class AccountFragment extends Fragment {
                     }
                 }
         );
+
+        /* Container for other options, payment, setting etc ... */
+        final RecyclerView optionsRV = view.findViewById (R.id.accountRecyclerView);
+        final String[] options = getResources().getStringArray(R.array.account_options);
+
+        // instantiate layoutmanager to attach a view to recyclerView
+        LinearLayoutManager layoutManager = new LinearLayoutManager (getActivity());
+        optionsRV.setLayoutManager (layoutManager);
+
+        OptionsRecyclerViewAdapter adapter = new OptionsRecyclerViewAdapter (options);
+        optionsRV.setAdapter(adapter);
+
     }
 
 }

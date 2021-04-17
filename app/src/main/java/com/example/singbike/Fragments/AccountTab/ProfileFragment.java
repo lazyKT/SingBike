@@ -1,5 +1,5 @@
 // editable profile page
-package com.example.singbike.Fragments;
+package com.example.singbike.Fragments.AccountTab;
 
 import android.os.Bundle;
 import android.view.View;
