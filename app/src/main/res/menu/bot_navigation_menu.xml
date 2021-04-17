@@ -14,7 +14,7 @@
     <item
         android:id="@+id/activity_menu"
         android:icon="@drawable/menu_activity_foreground"
-        android:title="@string/home"
+        android:title="@string/activity"
         app:showAsAction="ifRoom"
         />
 
@@ -22,7 +22,7 @@
     <item
         android:id="@+id/account_menu"
         android:icon="@drawable/menu_account_foreground"
-        android:title="@string/home"
+        android:title="@string/account"
         app:showAsAction="ifRoom"
         />
 

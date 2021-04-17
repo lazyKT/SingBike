@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.singbike.Fragments.AccountFragment;
 import com.example.singbike.Fragments.ActivityFragment;
@@ -24,13 +25,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        User currentUser = new User();
+        User currentUser = null;
 
         /* Receiving User Details passed from SignUP */
         Bundle bundle = getIntent().getExtras();
 
         if (bundle != null)
             currentUser = bundle.getParcelable ("user");
+
+        if (currentUser != null)
+            Toast.makeText (getApplicationContext(), "Welcome " + currentUser.getUsername(), Toast.LENGTH_LONG ).show();
 
 //        Log.d (DEBUG_SAVEDINSTANCES, savedInstanceState.toString());
 
