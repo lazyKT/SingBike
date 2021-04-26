@@ -1,6 +1,8 @@
 package com.example.singbike.Fragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -91,6 +93,12 @@ public class AccountFragment extends  Fragment{
                                         .commit();
                                 break;
                             case "LOGOUT":
+                                // remove the sharePreferences value from the device storage
+                                SharedPreferences sharedPreferences = getActivity().getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.clear();
+                                editor.apply();
+                                // logout user
                                 Intent intent = new Intent (requireActivity(), AuthActivity.class);
                                 startActivity(intent);
                                 break;
