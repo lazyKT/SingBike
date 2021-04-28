@@ -40,6 +40,19 @@
         <item>LOGOUT</item>
     </string-array>
 
+    <!-- achievements -->
+    <string-array name="achievements">
+        <item>Complete 10 rides.</item>
+        <item>Complete 20 rides.</item>
+        <item>Complete 50 rides.</item>
+        <item>Complete 75 rides.</item>
+        <item>Complete 100 rides.</item>
+        <item>Ride 3 km.</item>
+        <item>Ride 5 km.</item>
+        <item>Ride 10 km.</item>
+        <item>Ride 15 km.</item>
+    </string-array>
+
     <!-- share preference keys -->
     <string name="authState">AUTH_STATE</string>
     <string name="fristStartUp">FIRST_TIME_START_UP</string>
