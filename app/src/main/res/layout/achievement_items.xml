@@ -35,7 +35,7 @@
                     android:layout_marginStart="10dp"
                     android:text="@string/achievements"
                     android:textColor="@color/actionBtn"
-                    android:textSize="14dp"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
 
                 <ProgressBar

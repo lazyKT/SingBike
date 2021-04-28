@@ -59,5 +59,10 @@
     <string name="isSignedin">IS_SIGNED_IN</string>
     <string name="userID">USER_ID</string>
 
+    <!-- wallet tabl -->
+    <string name="availableBalance">Available Balance</string>
+    <string name="transactionHistory">Transaction History</string>
+    <string name="sgd">SGD</string>
+    <string name="topup">Top Up</string>
 
 </resources>
