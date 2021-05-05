@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.example.singbike.Fragments.AccountFragment;
 import com.example.singbike.Fragments.ActivityFragment;
+import com.example.singbike.Fragments.BookingFragment;
 import com.example.singbike.Fragments.HomeFragment;
 import com.example.singbike.Models.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -63,6 +64,16 @@ public class MainActivity extends AppCompatActivity {
                                         .addToBackStack("home")
                                         .commit();
                                 Log.d (DEBUG_BOT_NAV, "at Home Page");
+                                break;
+
+                            case R.id.booking_menu:
+                                /* go to booking page */
+                                fragmentManager.beginTransaction()
+                                        .setReorderingAllowed(true)
+                                        .replace (R.id.fragmentContainerView, BookingFragment.class, null)
+                                        .addToBackStack("booking")
+                                        .commit();
+                                Log.d (DEBUG_BOT_NAV, "at Booking Page");
                                 break;
 
                             case R.id.activity_menu:

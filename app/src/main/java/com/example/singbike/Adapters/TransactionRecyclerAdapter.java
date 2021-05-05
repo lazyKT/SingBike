@@ -17,20 +17,24 @@ import java.util.ArrayList;
 
 public class TransactionRecyclerAdapter extends RecyclerView.Adapter<TransactionRecyclerAdapter.ViewHolder> {
 
+    /* implement OnClickListener on individual RecyclerView Item */
+    public interface TransactionItemOnClickListener {
+        void transactionItemOnClick (Transaction transaction);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         /* inner class */
         final TextView transactionType, transactionTime, amountTV, sgdTV;
 
         public ViewHolder(View v) {
             super(v);
-
             this.transactionType = v.findViewById (R.id.transTypeTV);
             this.transactionTime = v.findViewById (R.id.transactionTimeTV);
             this.amountTV = v.findViewById (R.id.transactionAmountTV);
             this.sgdTV = v.findViewById (R.id.sgdTV);
         }
 
-        public void bind (Transaction transaction, Context context) {
+        public void bind (final Transaction transaction, Context context, final TransactionItemOnClickListener listener) {
             this.transactionType.setText (transaction.getType());
             this.transactionTime.setText (transaction.getTime());
             this.amountTV.setText (transaction.getAmountStr());
@@ -44,16 +48,28 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
                 this.sgdTV.setTextColor(Color.RED);
             }
 
+            /* on Click action on each Transaction */
+            itemView.setOnClickListener (
+                    new View.OnClickListener () {
+                        @Override
+                        public void onClick (View v) {
+                            listener.transactionItemOnClick(transaction);
+                        }
+                    }
+            );
+
         }
 
     }
 
     private ArrayList<Transaction> transactions;
     private Context context;
+    private TransactionItemOnClickListener listener;
 
-    public TransactionRecyclerAdapter (ArrayList<Transaction> transactions, Context context) {
+    public TransactionRecyclerAdapter (ArrayList<Transaction> transactions, Context context, TransactionItemOnClickListener listener) {
         this.transactions = transactions;
         this.context = context;
+        this.listener = listener;
     }
 
     @NonNull
@@ -69,7 +85,7 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
 
     @Override
     public void onBindViewHolder (ViewHolder viewHolder, final int position) {
-        viewHolder.bind(transactions.get(position), this.context);
+        viewHolder.bind(transactions.get(position), this.context, this.listener);
     }
 
     @Override

@@ -19,6 +19,7 @@
 
     <!-- navigation menu -->
     <string name="home">HOME</string>
+    <string name="booking">BOOKINGS</string>
     <string name="activity">ACTIVITY</string>
     <string name="account">ACCOUNT</string>
 
@@ -59,10 +60,24 @@
     <string name="isSignedin">IS_SIGNED_IN</string>
     <string name="userID">USER_ID</string>
 
-    <!-- wallet tabl -->
+    <!-- wallet tab -->
     <string name="availableBalance">Available Balance</string>
     <string name="transactionHistory">Transaction History</string>
+    <string name="transactionInfo">Transaction Info</string>
     <string name="sgd">SGD</string>
     <string name="topup">Top Up</string>
+    <string name="transactionTime">Time:</string>
+    <string name="transactionType">Transaction Type:</string>
+    <string name="transactionAmount">Transaction Amount:</string>
+
+    <!-- booking tab -->
+    <string name="currentBooking">Current Booking(s)</string>
+    <string name="bookHistory">Booking History</string>
+    <string name="bookTime">Time</string>
+    <string name="bookingDate">Date</string>
+    <string name="status">Booking Status :</string>
+    <string name="completed">Trip Completed</string>
+    <string name="cancelled">Trip Cancelled</string>
+
 
 </resources>

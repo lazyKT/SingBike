@@ -10,6 +10,14 @@
         app:showAsAction="ifRoom"
         />
 
+    <!-- booking menu -->
+    <item
+        android:id="@+id/booking_menu"
+        android:icon="@drawable/booking_icon_foreground"
+        android:title="@string/booking"
+        app:showAsAction="ifRoom"
+        />
+
     <!-- activity menu -->
     <item
         android:id="@+id/activity_menu"

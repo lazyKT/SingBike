@@ -1,8 +1,10 @@
 package com.example.singbike.Fragments.AccountTab;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -16,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.singbike.Adapters.TransactionRecyclerAdapter;
 import com.example.singbike.Models.Transaction;
 import com.example.singbike.R;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.ArrayList;
 
@@ -51,7 +54,7 @@ public class WalletFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated (View view, Bundle savedInstanceState) {
+    public void onViewCreated (final View view, Bundle savedInstanceState) {
 
         super.onViewCreated (view, savedInstanceState);
 
@@ -64,7 +67,37 @@ public class WalletFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager (requireActivity());
         transactionRecyclerView.setLayoutManager(layoutManager);
 
-        TransactionRecyclerAdapter adapter = new TransactionRecyclerAdapter(transactions, requireActivity());
+        TransactionRecyclerAdapter adapter = new TransactionRecyclerAdapter(transactions, requireActivity(),
+                new TransactionRecyclerAdapter.TransactionItemOnClickListener() {
+                    @Override
+                    public void transactionItemOnClick(Transaction transaction) {
+                        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog (
+                                requireActivity(),
+                                R.style.BottomSheetDialogTheme
+                        );
+
+                        /* display bottom sheet for transaction info */
+                        View bottomSheetView = LayoutInflater.from (requireActivity())
+                                .inflate(R.layout.transaction_sheet, (LinearLayout)view.findViewById(R.id.transactionBottomSheet));
+                        TextView transTypeTV, transAmountTV, transTimeTV;
+                        transTypeTV = bottomSheetView.findViewById (R.id.transactionTypeTV_Sheet);
+                        transAmountTV = bottomSheetView.findViewById (R.id.transactionAmountTV_Sheet);
+                        transTimeTV = bottomSheetView.findViewById (R.id.transactionTimeTV_Sheet);
+
+                        transTimeTV.setText(transaction.getTime());
+                        transAmountTV.setText(transaction.getAmountStr());
+                        transTypeTV.setText(transaction.getType());
+
+                        if (transaction.getType().equals("Top Up"))
+                            transAmountTV.setTextColor (Color.GREEN);
+                        else
+                            transAmountTV.setTextColor (Color.RED);
+
+                        bottomSheetDialog.setContentView(bottomSheetView);
+                        bottomSheetDialog.show();
+                    }
+                });
+
         transactionRecyclerView.setAdapter(adapter);
     }
 
