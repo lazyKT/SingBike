@@ -6,7 +6,9 @@
  */
 
 package com.example.singbike.Authentication;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -26,20 +28,21 @@ import java.util.regex.Pattern;
 public class SignUpActivity extends AppCompatActivity {
 
     private static final String DEBUG_SIGNUP = "DEBUG_SIGN_UP";
+    private static final String DEBUG_SP = "DEBUG_WRITE_SP";
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        final EditText unameET = (EditText) findViewById (R.id.unameET_signup);
-        final EditText emailET = (EditText) findViewById (R.id.emailET_signup);
-        final EditText pwdET = (EditText) findViewById (R.id.pwdET_signup);
-        final EditText confirmPwdET = (EditText) findViewById (R.id.confirmPwdET_signup);
-        final TextView errorTV = (TextView) findViewById (R.id.errorTV_signup);
+        final EditText unameET = findViewById (R.id.unameET_signup);
+        final EditText emailET = findViewById (R.id.emailET_signup);
+        final EditText pwdET = findViewById (R.id.pwdET_signup);
+        final EditText confirmPwdET = findViewById (R.id.confirmPwdET_signup);
+        final TextView errorTV = findViewById (R.id.errorTV_signup);
 
-        final Button signUpBtn = (Button) findViewById (R.id.signUpBtn_signup);
-        final Button signInBtn = (Button) findViewById (R.id.signInBtn_signup);
+        final Button signUpBtn = findViewById (R.id.signUpBtn_signup);
+        final Button signInBtn = findViewById (R.id.signInBtn_signup);
 
         /* Back to Sign In Page */
         signInBtn.setOnClickListener (
@@ -99,6 +102,18 @@ public class SignUpActivity extends AppCompatActivity {
                              * the users do not need to sign in everytime when they open the app.
                              * These details will be deleted only when the app is un-installed or the user signs out.
                              */
+
+                            /*
+                             * save the user login state in the device memory
+                             * so that user do not need to login every time when he opens the app.
+                             */
+                            // initialise sharedPreferences
+                            Log.d (DEBUG_SP, "Writing to SharedPreferences ...");
+                            SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
+                            // initialise sharePreferences editor to write new key-value pairs
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean(getString(R.string.isSignedin), true);
+                            editor.apply(); // update(write) values asynchronously
 
                             User user = new User();
                             user.setEmail(emailET.getText().toString());

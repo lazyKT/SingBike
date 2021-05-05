@@ -19,7 +19,65 @@
 
     <!-- navigation menu -->
     <string name="home">HOME</string>
+    <string name="booking">BOOKINGS</string>
     <string name="activity">ACTIVITY</string>
     <string name="account">ACCOUNT</string>
+
+    <!-- account tab -->
+    <string name="edit_profile">Edit Profile</string>
+    <string name="change_pwd">Change Password</string>
+    <string name="update">UPDATE PROFILE</string>
+
+    <!-- account options -->
+    <string name="contact">CONTACT</string>
+    <string name="wallet">WALLET</string>
+    <string name="achievements">ACHIEVEMENTS</string>
+
+    <!-- account tab options array -->
+    <string-array name="account_options">
+        <item>ACHIEVEMENTS</item>
+        <item>WALLET</item>
+        <item>CONTACT</item>
+        <item>LOGOUT</item>
+    </string-array>
+
+    <!-- achievements -->
+    <string-array name="achievements">
+        <item>Complete 10 rides.</item>
+        <item>Complete 20 rides.</item>
+        <item>Complete 50 rides.</item>
+        <item>Complete 75 rides.</item>
+        <item>Complete 100 rides.</item>
+        <item>Ride 3 km.</item>
+        <item>Ride 5 km.</item>
+        <item>Ride 10 km.</item>
+        <item>Ride 15 km.</item>
+    </string-array>
+
+    <!-- share preference keys -->
+    <string name="authState">AUTH_STATE</string>
+    <string name="fristStartUp">FIRST_TIME_START_UP</string>
+    <string name="isSignedin">IS_SIGNED_IN</string>
+    <string name="userID">USER_ID</string>
+
+    <!-- wallet tab -->
+    <string name="availableBalance">Available Balance</string>
+    <string name="transactionHistory">Transaction History</string>
+    <string name="transactionInfo">Transaction Info</string>
+    <string name="sgd">SGD</string>
+    <string name="topup">Top Up</string>
+    <string name="transactionTime">Time:</string>
+    <string name="transactionType">Transaction Type:</string>
+    <string name="transactionAmount">Transaction Amount:</string>
+
+    <!-- booking tab -->
+    <string name="currentBooking">Current Booking(s)</string>
+    <string name="bookHistory">Booking History</string>
+    <string name="bookTime">Time</string>
+    <string name="bookingDate">Date</string>
+    <string name="status">Booking Status :</string>
+    <string name="completed">Trip Completed</string>
+    <string name="cancelled">Trip Cancelled</string>
+
 
 </resources>
