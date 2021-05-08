@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">SingBike</string>
 
+    <string name="cancel">Cancel</string>
+
     <!-- Authentication -->
     <string name="ride">RIDE</string>
     <string name="signup">SIGN UP</string>
@@ -15,7 +17,7 @@
     <string name="email_err">Invalid Email Format</string>
     <string name="pwd_err_length">Password must contain at least 8 charaters</string>
     <string name="pwd_err_chars">Password must contain at least 1 Capital Letter, 1 Small Letter and 1 digit.</string>
-    <string name="confirm_pwd_err">Passwords are not equal.</string>
+    <string name="confirm_pwd_err">Passwords do not match.</string>
 
     <!-- navigation menu -->
     <string name="home">HOME</string>
@@ -27,6 +29,12 @@
     <string name="edit_profile">Edit Profile</string>
     <string name="change_pwd">Change Password</string>
     <string name="update">UPDATE PROFILE</string>
+
+    <!-- change password -->
+    <string name="currentPassword">Current Password</string>
+    <string name="newPassword">New Password</string>
+    <string name="confirmPassword">Confirm Password</string>
+    <string name="notMatch">* Passwords Do Not Match.</string>
 
     <!-- account options -->
     <string name="contact">CONTACT</string>
