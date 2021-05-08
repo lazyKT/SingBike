@@ -79,6 +79,8 @@
     <string name="transactionAmount">Transaction Amount:</string>
 
     <!-- booking tab -->
+    <string name="singleBooking">Booking</string>
+    <string name="bookingDetails">Booking Details</string>
     <string name="currentBooking">Current Booking(s)</string>
     <string name="bookHistory">Booking History</string>
     <string name="bookTime">Time</string>
@@ -86,6 +88,8 @@
     <string name="status">Booking Status :</string>
     <string name="completed">Trip Completed</string>
     <string name="cancelled">Trip Cancelled</string>
+    <string name="bikeID">Bike ID :</string>
+    <string name="bikeDetails">Bike Details</string>
 
 
 </resources>

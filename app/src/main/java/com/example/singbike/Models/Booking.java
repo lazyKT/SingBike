@@ -50,4 +50,8 @@ public class Booking implements Parcelable {
 
     public String getBookingDate () { return this.bookingDate; }
 
+    public String getBookingDateTime () {
+        return String.format("%s %s", this.getBookingDate(), getBookingTime());
+    }
+
 }
