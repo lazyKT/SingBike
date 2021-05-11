@@ -67,6 +67,7 @@
     <string name="fristStartUp">FIRST_TIME_START_UP</string>
     <string name="isSignedin">IS_SIGNED_IN</string>
     <string name="userID">USER_ID</string>
+    <string name="savedCards">CREDIT_CARDS</string>
 
     <!-- wallet tab -->
     <string name="availableBalance">Available Balance</string>
@@ -77,6 +78,23 @@
     <string name="transactionTime">Time:</string>
     <string name="transactionType">Transaction Type:</string>
     <string name="transactionAmount">Transaction Amount:</string>
+    <string name="enterManual">Enter Amount</string>
+    <string name="dummyAmount">5.0</string>
+    <string name="quickTopUp">Quick Top Up</string>
+    <string name="paymentMethod">Payment Method</string>
+    <string name="addNewCard">Add New Card</string>
+    <string name="cards">Cards</string>
+    <string name="cardNum">Card Number</string>
+    <string name="nameOnCard">Name on Card</string>
+    <string name="expiryDate">Expriy</string>
+    <string name="cvc">CVC</string>
+    <string-array name="quickTopUpAmounts">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+    </string-array>
 
     <!-- booking tab -->
     <string name="singleBooking">Booking</string>

@@ -1,6 +1,7 @@
 // editable profile page
 package com.example.singbike.Fragments.AccountTab;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,27 +15,81 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.example.singbike.Models.User;
 import com.example.singbike.R;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.regex.Pattern;
 
 public class ProfileFragment extends Fragment {
 
     private static final String DEBUG_VALIDATION = "DEBUG_PWD_VALIDATION";
+    private static final String REQUEST_TAG = "USER_REQUEST";
+    private RequestQueue requestQueue;
+    private User user;
 
     public ProfileFragment () {
         super (R.layout.fragment_profile);
     }
 
+    @Override
+    public void onAttach(@NonNull final Context context) {
+        super.onAttach(context);
+        /* Fetch user Details */
+        // instantiate request queue
+        requestQueue = Volley.newRequestQueue(context);
+        String url = "https://jsonplaceholder.typicode.com/users/1";
 
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse (JSONObject object) {
+                    /* request success */
+                    // convert request to local User Object
+                    jsonToObject (object);
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse (VolleyError e) {
+                    /* request failed */
+                    Toast.makeText(context, "Unable to fetch User Details", Toast.LENGTH_LONG).show();
+                }
+            }
+        );
+
+        requestQueue.add(request);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        /* When fragment is detached */
+        if (requestQueue != null)
+            requestQueue.cancelAll(REQUEST_TAG);
+    }
 
     @Override
     public void onViewCreated (@NonNull final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        final EditText usernameET = view.findViewById (R.id.unameET_profile);
+        final EditText emailET = view.findViewById (R.id.emailET_profile);
         final Button changePasswordButton = view.findViewById (R.id.changePwdBtn);
+
+        if (user != null) {
+            usernameET.setText(user.getUsername());
+            emailET.setText(user.getEmail());
+        }
 
         changePasswordButton.setOnClickListener (
                 new View.OnClickListener () {
@@ -130,6 +185,22 @@ public class ProfileFragment extends Fragment {
             return -2;
 
         return 0;
+    }
+
+    /**
+     * convert json object to local User Object
+     * @param json -> json object get from the server
+     */
+    private void jsonToObject (JSONObject json) {
+        try {
+            String username = json.getString ("username");
+            String email = json.getString ("email");
+
+            user = new User(username, email);
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 }

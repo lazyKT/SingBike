@@ -2,13 +2,13 @@ package com.example.singbike.Fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -20,7 +20,6 @@ import com.example.singbike.Adapters.BookingHistoryAdapter;
 import com.example.singbike.Models.Booking;
 import com.example.singbike.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 
@@ -33,6 +32,14 @@ public class BookingFragment extends Fragment {
 
     public BookingFragment () {
         super(R.layout.fragment_booking);
+    }
+
+    @Override
+    public void onCreate (Bundle savedInstaceState) {
+        super.onCreate (savedInstaceState);
+
+        TransitionInflater inflater = TransitionInflater.from (requireActivity());
+        setEnterTransition (inflater.inflateTransition (R.transition.slide_right));
     }
 
     @Override

@@ -1,10 +1,13 @@
 package com.example.singbike;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +26,14 @@ public class AuthActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
+
+        /* check INTERNET permission to log into the App */
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) !=
+                PackageManager.PERMISSION_GRANTED) {
+            /* INTERNET Permission Granted */
+        }
+//        else
+
 
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
 
