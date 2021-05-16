@@ -53,6 +53,7 @@
     <string name="contact">CONTACT</string>
     <string name="wallet">WALLET</string>
     <string name="achievements">ACHIEVEMENTS</string>
+    <string name="contactemail">sinbike@gmail.com</string>
 
     <!-- account tab options array -->
     <string-array name="account_options">
