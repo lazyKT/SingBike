@@ -1,6 +1,18 @@
 <resources>
     <string name="app_name">SingBike</string>
 
+    <string name="cancel">Cancel</string>
+
+    <!-- intro -->
+    <string name="introBtn">Start Riding</string>
+    <string name="slide1Title">Slide 1</string>
+    <string name="slide2Title">Slide 2</string>
+    <string name="slide3Title">Slide 3</string>
+    <string name="slide1Description">Description 1</string>
+    <string name="slide2Description">Description 2</string>
+    <string name="slide3Description">Description 3</string>
+    <string name="dots">Indicator Dots</string>
+
     <!-- Authentication -->
     <string name="ride">RIDE</string>
     <string name="signup">SIGN UP</string>
@@ -9,13 +21,16 @@
     <string name="pwd">PASSWORD</string>
     <string name="email">EMAIL ADDRESS</string>
     <string name="cPwd">CONFIRM PASSWORD</string>
+    <string name="googleSignIn">Sign in with Google</string>
+    <string name="join">Join SingBike</string>
+    <string name="signInBanner">Already have an account?</string>
 
     <!-- error message -->
     <string name="uname_err">Username Must be at least 4 characters long.</string>
     <string name="email_err">Invalid Email Format</string>
     <string name="pwd_err_length">Password must contain at least 8 charaters</string>
     <string name="pwd_err_chars">Password must contain at least 1 Capital Letter, 1 Small Letter and 1 digit.</string>
-    <string name="confirm_pwd_err">Passwords are not equal.</string>
+    <string name="confirm_pwd_err">Passwords do not match.</string>
 
     <!-- navigation menu -->
     <string name="home">HOME</string>
@@ -28,6 +43,12 @@
     <string name="change_pwd">Change Password</string>
     <string name="update">UPDATE PROFILE</string>
 
+    <!-- change password -->
+    <string name="currentPassword">Current Password</string>
+    <string name="newPassword">New Password</string>
+    <string name="confirmPassword">Confirm Password</string>
+    <string name="notMatch">* Passwords Do Not Match.</string>
+
     <!-- account options -->
     <string name="contact">CONTACT</string>
     <string name="wallet">WALLET</string>
@@ -35,10 +56,11 @@
 
     <!-- account tab options array -->
     <string-array name="account_options">
-        <item>ACHIEVEMENTS</item>
-        <item>WALLET</item>
-        <item>CONTACT</item>
-        <item>LOGOUT</item>
+        <item>Achievements</item>
+        <item>Wallet</item>
+        <item>Help Centre</item>
+        <item>Report</item>
+        <item>Log Out</item>
     </string-array>
 
     <!-- achievements -->
@@ -59,6 +81,7 @@
     <string name="fristStartUp">FIRST_TIME_START_UP</string>
     <string name="isSignedin">IS_SIGNED_IN</string>
     <string name="userID">USER_ID</string>
+    <string name="savedCards">CREDIT_CARDS</string>
 
     <!-- wallet tab -->
     <string name="availableBalance">Available Balance</string>
@@ -69,8 +92,27 @@
     <string name="transactionTime">Time:</string>
     <string name="transactionType">Transaction Type:</string>
     <string name="transactionAmount">Transaction Amount:</string>
+    <string name="enterManual">Enter Amount</string>
+    <string name="dummyAmount">5.0</string>
+    <string name="quickTopUp">Quick Top Up</string>
+    <string name="paymentMethod">Payment Method</string>
+    <string name="addNewCard">Add New Card</string>
+    <string name="cards">Cards</string>
+    <string name="cardNum">Card Number</string>
+    <string name="nameOnCard">Name on Card</string>
+    <string name="expiryDate">Expriy</string>
+    <string name="cvc">CVC</string>
+    <string-array name="quickTopUpAmounts">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+    </string-array>
 
     <!-- booking tab -->
+    <string name="singleBooking">Booking</string>
+    <string name="bookingDetails">Booking Details</string>
     <string name="currentBooking">Current Booking(s)</string>
     <string name="bookHistory">Booking History</string>
     <string name="bookTime">Time</string>
@@ -78,6 +120,8 @@
     <string name="status">Booking Status :</string>
     <string name="completed">Trip Completed</string>
     <string name="cancelled">Trip Cancelled</string>
+    <string name="bikeID">Bike ID :</string>
+    <string name="bikeDetails">Bike Details</string>
 
 
 </resources>

@@ -3,6 +3,7 @@ package com.example.singbike.Fragments.AccountTab;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +12,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.singbike.Adapters.TransactionRecyclerAdapter;
+import com.example.singbike.BottomSheets.TopUpBottomSheet;
 import com.example.singbike.Models.Transaction;
 import com.example.singbike.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -53,6 +56,15 @@ public class WalletFragment extends Fragment {
         transactions.add (new Transaction("Top Up", "Wed, 21 Apr, 15:40", 10.00));
     }
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        TransitionInflater inflater = TransitionInflater.from(requireActivity());
+        setEnterTransition(inflater.inflateTransition(R.transition.slide_right));
+    }
+
     @Override
     public void onViewCreated (final View view, Bundle savedInstanceState) {
 
@@ -61,6 +73,27 @@ public class WalletFragment extends Fragment {
         final TextView balanceTextView = view.findViewById (R.id.balanceTV);
         final Button topUpButton = view.findViewById (R.id.topUpBtn);
         final RecyclerView transactionRecyclerView = view.findViewById (R.id.transactionRecyclerView);
+
+        /* Top Up Wallet */
+        topUpButton.setOnClickListener (
+          new View.OnClickListener() {
+              @Override
+              public void onClick (View v) {
+                  requireActivity().getSupportFragmentManager()
+                          .beginTransaction()
+//                          .setCustomAnimations(
+//                                  R.anim.slide_top, // enter
+//                                  R.anim.fade_out, // exit
+//                                  R.anim.fade_in, // pop enter
+//                                  R.anim.slide_bottom
+//                          )
+                          .replace (R.id.fragmentContainerView, TopUpFragment.class, null)
+                          .addToBackStack ("TopUp")
+                          .setReorderingAllowed (true)
+                          .commit();
+              }
+          }
+        );
 
         balanceTextView.setText("5");
 
@@ -95,10 +128,13 @@ public class WalletFragment extends Fragment {
 
                         bottomSheetDialog.setContentView(bottomSheetView);
                         bottomSheetDialog.show();
+
+
                     }
                 });
 
         transactionRecyclerView.setAdapter(adapter);
     }
+
 
 }

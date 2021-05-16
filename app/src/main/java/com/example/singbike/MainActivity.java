@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                                         .replace (R.id.fragmentContainerView, HomeFragment.class, null)
                                         .addToBackStack("home")
                                         .commit();
-                                Log.d (DEBUG_BOT_NAV, "at Home Page");
+//                                Log.d (DEBUG_BOT_NAV, "at Home Page");
                                 break;
 
                             case R.id.booking_menu:
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                                         .replace (R.id.fragmentContainerView, BookingFragment.class, null)
                                         .addToBackStack("booking")
                                         .commit();
-                                Log.d (DEBUG_BOT_NAV, "at Booking Page");
+//                                Log.d (DEBUG_BOT_NAV, "at Booking Page");
                                 break;
 
                             case R.id.activity_menu:
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                                         .setReorderingAllowed (true)
                                         .addToBackStack ("activity")
                                         .commit();
-                                Log.d (DEBUG_BOT_NAV, "at Activity Page");
+//                                Log.d (DEBUG_BOT_NAV, "at Activity Page");
                                 break;
 
                             case R.id.account_menu:
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                                         .replace (R.id.fragmentContainerView, AccountFragment.class, null)
                                         .addToBackStack ("account")
                                         .commit();
-                                Log.d (DEBUG_BOT_NAV, "at Account Page");
+//                                Log.d (DEBUG_BOT_NAV, "at Account Page");
                                 break;
                         }
 

@@ -6,11 +6,18 @@ package com.example.singbike.Models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 public class User implements Parcelable {
 
     private String username, email;
 
     public User () {}
+
+    public User (String username, String email) {
+        this.username = username;
+        this.email = email;
+    }
 
     protected User(Parcel in) {
         username = in.readString();
@@ -51,5 +58,10 @@ public class User implements Parcelable {
     public String getUsername () { return this.username; }
 
     public String getEmail () { return this.email; }
+
+    @NonNull
+    public String toString () {
+        return String.format ("username: %s, email: %s\n", this.getUsername(), this.getEmail());
+    }
 
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -29,6 +30,15 @@ public class AccountFragment extends  Fragment{
     public AccountFragment () {
         super (R.layout.fragment_account);
     }
+
+    @Override
+    public void onCreate (Bundle savedInstaceState) {
+        super.onCreate (savedInstaceState);
+
+        TransitionInflater inflater = TransitionInflater.from (requireActivity());
+        setEnterTransition (inflater.inflateTransition (R.transition.slide_right));
+    }
+
 
     @Override
     public void onViewCreated (@NonNull View view, Bundle savedInstanceState) {
@@ -94,8 +104,8 @@ public class AccountFragment extends  Fragment{
                                 break;
                             case "LOGOUT":
                                 // remove the sharePreferences value from the device storage
-                                SharedPreferences sharedPreferences = getActivity().getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
-                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                SharedPreferences preferences = requireActivity().getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
+                                SharedPreferences.Editor editor = preferences.edit();
                                 editor.clear();
                                 editor.apply();
                                 // logout user

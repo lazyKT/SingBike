@@ -133,7 +133,7 @@ public class SignUpActivity extends AppCompatActivity {
      * Validation of sign up process.
      * Username: *username must be at least 4 characters long
      * Email: *We will not ask for email verification, however, users must fill in valid email format. eg-example@domain.com
-     * Password: *Password must be 8 characters long and must consist of at least 1 Capital Letter, 1 small letter and 1
+     * Password: *Password must be 8 characters long and must consist of at least 1 Capital Letter, 1 small letter and 1 number
      * Confirm Password: *User must be able to confirm the passwords.
      * @param val Text value (credentials) obtained via EditText
      * @param type type of credentials

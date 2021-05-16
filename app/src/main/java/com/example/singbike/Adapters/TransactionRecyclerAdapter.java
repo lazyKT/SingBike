@@ -39,11 +39,13 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
             this.transactionTime.setText (transaction.getTime());
             this.amountTV.setText (transaction.getAmountStr());
 
+            /* if transaction type is TopUp, set text color to Green */
             if (transaction.getType().equals("Top Up")) {
                 this.amountTV.setTextColor(Color.GREEN);
                 this.sgdTV.setTextColor(Color.GREEN);
             }
             else {
+                /* if transaction type is Ride, set text color to Red */
                 this.amountTV.setTextColor(Color.RED);
                 this.sgdTV.setTextColor(Color.RED);
             }
