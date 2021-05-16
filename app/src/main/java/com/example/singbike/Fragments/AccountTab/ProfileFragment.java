@@ -23,7 +23,6 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.singbike.Models.User;
 import com.example.singbike.R;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.json.JSONException;
@@ -34,40 +33,14 @@ import java.util.regex.Pattern;
 public class ProfileFragment extends Fragment {
 
     private static final String DEBUG_VALIDATION = "DEBUG_PWD_VALIDATION";
+    private static final String DEBUG_NETWORK = "DEBUG_NETWORK_REQUEST";
+    private static final String DEBUG_JSON = "DEBUG_JSON_RESOLVER";
     private static final String REQUEST_TAG = "USER_REQUEST";
     private RequestQueue requestQueue;
-    private User user;
+    private User user = null;
 
     public ProfileFragment () {
         super (R.layout.fragment_profile);
-    }
-
-    @Override
-    public void onAttach(@NonNull final Context context) {
-        super.onAttach(context);
-        /* Fetch user Details */
-        // instantiate request queue
-        requestQueue = Volley.newRequestQueue(context);
-        String url = "https://jsonplaceholder.typicode.com/users/1";
-
-        JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse (JSONObject object) {
-                    /* request success */
-                    // convert request to local User Object
-                    jsonToObject (object);
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse (VolleyError e) {
-                    /* request failed */
-                    Toast.makeText(context, "Unable to fetch User Details", Toast.LENGTH_LONG).show();
-                }
-            }
-        );
-
-        requestQueue.add(request);
     }
 
     @Override
@@ -86,10 +59,30 @@ public class ProfileFragment extends Fragment {
         final EditText emailET = view.findViewById (R.id.emailET_profile);
         final Button changePasswordButton = view.findViewById (R.id.changePwdBtn);
 
-        if (user != null) {
-            usernameET.setText(user.getUsername());
-            emailET.setText(user.getEmail());
-        }
+        /* fetch user details */
+        requestQueue = Volley.newRequestQueue(requireActivity());
+        final String url = "https://jsonplaceholder.typicode.com/users/1";
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject json) {
+                        user = jsonToObject(json);
+
+                        Log.d(DEBUG_JSON, user.getUsername() == null ? "null user" : user.getUsername());
+
+                        usernameET.setText(user.getUsername());
+                        emailET.setText(user.getEmail());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d (DEBUG_NETWORK, error.getMessage());
+                    }
+                });
+
+        requestQueue.add(request);
 
         changePasswordButton.setOnClickListener (
                 new View.OnClickListener () {
@@ -187,12 +180,41 @@ public class ProfileFragment extends Fragment {
         return 0;
     }
 
+
+    private User fetchUserDetails (Context context) {
+
+        requestQueue = Volley.newRequestQueue(context);
+        final String url = "https://jsonplaceholder.typicode.com/users/1";
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+            new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject json) {
+                    user = jsonToObject(json);
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.d (DEBUG_NETWORK, error.getMessage());
+                }
+        });
+
+        requestQueue.add(request);
+
+        return user;
+    }
+
+
     /**
      * convert json object to local User Object
      * @param json -> json object get from the server
      */
-    private void jsonToObject (JSONObject json) {
+    private User jsonToObject (JSONObject json) {
         try {
+
+            Log.d(DEBUG_JSON, "username = " + json.getString("username"));
+            Log.d(DEBUG_JSON, "email = " + json.getString("email"));
             String username = json.getString ("username");
             String email = json.getString ("email");
 
@@ -201,6 +223,8 @@ public class ProfileFragment extends Fragment {
         catch (JSONException e) {
             e.printStackTrace();
         }
+
+        return user;
     }
 
 }

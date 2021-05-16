@@ -20,9 +20,18 @@
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme"/>
+
         <activity
             android:name=".AuthActivity"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+            android:theme="@style/AppTheme"/>
+
+        <activity
+            android:name=".IntroActivity"
+            android:theme="@style/AppTheme"/>
+
+        <activity
+            android:name=".SplashScreenActivity"
+            android:theme="@style/AppTheme.Launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

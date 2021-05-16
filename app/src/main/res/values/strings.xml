@@ -3,6 +3,16 @@
 
     <string name="cancel">Cancel</string>
 
+    <!-- intro -->
+    <string name="introBtn">Start Riding</string>
+    <string name="slide1Title">Slide 1</string>
+    <string name="slide2Title">Slide 2</string>
+    <string name="slide3Title">Slide 3</string>
+    <string name="slide1Description">Description 1</string>
+    <string name="slide2Description">Description 2</string>
+    <string name="slide3Description">Description 3</string>
+    <string name="dots">Indicator Dots</string>
+
     <!-- Authentication -->
     <string name="ride">RIDE</string>
     <string name="signup">SIGN UP</string>
@@ -11,6 +21,9 @@
     <string name="pwd">PASSWORD</string>
     <string name="email">EMAIL ADDRESS</string>
     <string name="cPwd">CONFIRM PASSWORD</string>
+    <string name="googleSignIn">Sign in with Google</string>
+    <string name="join">Join SingBike</string>
+    <string name="signInBanner">Already have an account?</string>
 
     <!-- error message -->
     <string name="uname_err">Username Must be at least 4 characters long.</string>
@@ -43,10 +56,11 @@
 
     <!-- account tab options array -->
     <string-array name="account_options">
-        <item>ACHIEVEMENTS</item>
-        <item>WALLET</item>
-        <item>CONTACT</item>
-        <item>LOGOUT</item>
+        <item>Achievements</item>
+        <item>Wallet</item>
+        <item>Help Centre</item>
+        <item>Report</item>
+        <item>Log Out</item>
     </string-array>
 
     <!-- achievements -->
