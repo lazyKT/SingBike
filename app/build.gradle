@@ -11,6 +11,14 @@ android {
         versionCode 1
         versionName "1.0"
 
+        // creating manifest holder
+        // init local properties
+        def localProperties = new Properties()
+        file ("../local.properties").withInputStream {localProperties.load(it)}
+
+        // share API Key via manifestPlaceHolder
+        manifestPlaceholders = [ googleMapAPIKey: "${localProperties.getProperty("MAPS_API_KEY")}" ]
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

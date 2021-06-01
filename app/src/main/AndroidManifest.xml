@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.singbike">
 
     <!-- Internet permission -->
@@ -24,7 +25,7 @@
         <!-- API-KEY for Google MAP -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="${MAPS_API_KEY}" />
+            android:value="${googleMapAPIKey}" />
 
         <!-- Google Play Services -->
         <meta-data
