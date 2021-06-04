@@ -38,6 +38,13 @@
     <string name="activity">ACTIVITY</string>
     <string name="account">ACCOUNT</string>
 
+    <!-- home tab -->
+    <string name="unlock">UNLOCK</string>
+    <string name="dollar">$</string>
+    <string name="balance">Balance</string>
+    <string name="unlock_now">UNLOCK NOW</string>
+    <string name="reserve_now">RESERVE NOW</string>
+
     <!-- account tab -->
     <string name="edit_profile">Edit Profile</string>
     <string name="change_pwd">Change Password</string>
