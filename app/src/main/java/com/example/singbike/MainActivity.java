@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final static String DEBUG_BOT_NAV = "DEBUG_BOTTOM_NAVIGATION";
     private final static String DEBUG_SAVEDINSTANCES = "DEBUG_SAVEDINSTANCES";
+    private final static String DEBUG_CAMERA_PERMISSION = "DEBUG_CAM_PERMISSION";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,5 +104,35 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        /* this method will be called after the permission dialog action */
+
+        final int CAMERA_ACCESS = 0;
+        final int LOCATION_ACCESS = 1;
+
+        switch (requestCode) {
+            case CAMERA_ACCESS:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d (DEBUG_CAMERA_PERMISSION, "onRequestPermission GRANTED!!!");
+                }
+                else {
+                    // explain to user why we need this permission
+                    Log.d (DEBUG_CAMERA_PERMISSION, "onRequestPermission DENIED. Show your DIALOG!!!");
+                    Toast.makeText(this, R.string.camera_request, Toast.LENGTH_LONG).show();
+                }
+                break;
+            case LOCATION_ACCESS:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                }
+                else {
+
+                }
+        }
     }
 }

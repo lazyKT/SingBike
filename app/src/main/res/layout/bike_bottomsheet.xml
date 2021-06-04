@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/bikeBottomSheet"
+    android:background="@drawable/bottom_sheet_background"
+    android:orientation="vertical"
+    android:elevation="5dp">
+
+    <!-- title -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/bottom_sheet_background"
+        android:backgroundTint="@color/colorAccent"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:layout_marginBottom="10dp">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/logo"
+            android:contentDescription="@string/app_name"
+            android:layout_margin="10dp"
+            />
+
+        <TextView
+            android:id="@+id/bikeID_bikeBottomSheet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="@string/signin"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <Button
+            android:id="@+id/unlockNowButton_BikeBtmSheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/unlock_now"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:layout_marginVertical="5dp"
+            android:paddingVertical="20dp"
+            />
+        <Button
+            android:id="@+id/reserveNowButton_BikeBtmSheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/reserve_now"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:backgroundTint="@color/actionBtn"
+            android:layout_marginVertical="5dp"
+            android:paddingVertical="20dp"
+            />
+        <Button
+            android:id="@+id/cancelButton_BikeBtmSheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:textStyle="bold"
+            android:textColor="@color/darkGray"
+            android:textAppearance="@style/TextButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

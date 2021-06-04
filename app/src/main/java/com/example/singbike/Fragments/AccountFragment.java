@@ -78,7 +78,7 @@ public class AccountFragment extends  Fragment{
                     public void onOptionsClick(String options) {
                         Toast.makeText (requireActivity(), options + " Clicked", Toast.LENGTH_LONG).show();
                         switch (options) {
-                            case "CONTACT":
+                            case "Contact":
                                 (requireActivity()).getSupportFragmentManager()
                                         .beginTransaction()
                                         .setReorderingAllowed (true)
@@ -86,7 +86,7 @@ public class AccountFragment extends  Fragment{
                                         .replace (R.id.fragmentContainerView, ContactFragment.class, null)
                                         .commit();
                                 break;
-                            case "WALLET":
+                            case "Wallet":
                                 (requireActivity()).getSupportFragmentManager()
                                         .beginTransaction()
                                         .setReorderingAllowed (true)
@@ -94,7 +94,7 @@ public class AccountFragment extends  Fragment{
                                         .replace (R.id.fragmentContainerView, WalletFragment.class, null)
                                         .commit();
                                 break;
-                            case "ACHIEVEMENTS":
+                            case "Achievements":
                                 (requireActivity()).getSupportFragmentManager()
                                         .beginTransaction()
                                         .setReorderingAllowed (true)
@@ -102,7 +102,7 @@ public class AccountFragment extends  Fragment{
                                         .replace (R.id.fragmentContainerView, AchievementsFragment.class, null)
                                         .commit();
                                 break;
-                            case "LOGOUT":
+                            case "Logout":
                                 // remove the sharePreferences value from the device storage
                                 SharedPreferences preferences = requireActivity().getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
                                 SharedPreferences.Editor editor = preferences.edit();
