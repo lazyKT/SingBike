@@ -110,7 +110,10 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+        /* this method will be called after the permission dialog action */
+
         final int CAMERA_ACCESS = 0;
+        final int LOCATION_ACCESS = 1;
 
         switch (requestCode) {
             case CAMERA_ACCESS:
@@ -120,8 +123,16 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     // explain to user why we need this permission
                     Log.d (DEBUG_CAMERA_PERMISSION, "onRequestPermission DENIED. Show your DIALOG!!!");
+                    Toast.makeText(this, R.string.camera_request, Toast.LENGTH_LONG).show();
                 }
+                break;
+            case LOCATION_ACCESS:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
+                }
+                else {
+
+                }
         }
     }
 }

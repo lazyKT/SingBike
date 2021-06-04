@@ -32,6 +32,11 @@
     <string name="pwd_err_chars">Password must contain at least 1 Capital Letter, 1 Small Letter and 1 digit.</string>
     <string name="confirm_pwd_err">Passwords do not match.</string>
 
+    <!-- permission request messages -->
+    <string name="allow">Allow</string>
+    <string name="never">Never</string>
+    <string name="camera_request">You must allow the app to use camera to unlock a bike:)</string>
+
     <!-- navigation menu -->
     <string name="home">HOME</string>
     <string name="booking">BOOKINGS</string>
