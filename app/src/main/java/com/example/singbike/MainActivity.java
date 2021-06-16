@@ -2,14 +2,18 @@ package com.example.singbike;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.singbike.Dialogs.ReservationDialog;
 import com.example.singbike.Fragments.AccountFragment;
 import com.example.singbike.Fragments.ActivityFragment;
 import com.example.singbike.Fragments.BookingFragment;
@@ -17,11 +21,13 @@ import com.example.singbike.Fragments.HomeFragment;
 import com.example.singbike.Models.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+    implements ReservationDialog.ReservationDialogListener {
 
     private final static String DEBUG_BOT_NAV = "DEBUG_BOTTOM_NAVIGATION";
     private final static String DEBUG_SAVEDINSTANCES = "DEBUG_SAVEDINSTANCES";
     private final static String DEBUG_CAMERA_PERMISSION = "DEBUG_CAM_PERMISSION";
+    private static final String DEBUG_RESERVE = "DEBUG_RESERVE_RESULT";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,5 +140,17 @@ public class MainActivity extends AppCompatActivity {
 
                 }
         }
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialogFragment) {
+        // Confirmation Result for Reservation of the bicycle
+        Log.d (DEBUG_RESERVE, "After Positive Click!");
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialogFragment) {
+        // Confirmation Result for Reservation of the bicycle
+        Log.d (DEBUG_RESERVE, "After Negative Click!");
     }
 }

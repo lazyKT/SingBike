@@ -12,14 +12,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 
+import com.example.singbike.Dialogs.ReservationDialog;
 import com.example.singbike.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -39,17 +44,40 @@ public class HomeFragment extends Fragment implements
         GoogleMap.OnCameraMoveListener,
         GoogleMap.OnCameraMoveStartedListener,
         GoogleMap.OnCameraMoveCanceledListener,
-        GoogleMap.OnMarkerClickListener{
+        GoogleMap.OnMarkerClickListener {
 
     public HomeFragment () {
         super (R.layout.fragment_home);
     }
 
     private static final String DEBUG_MAP = "GOOGLE_MAP_DEBUG";
-    private final static String DEBUG_CAMERA_PERMISSION = "DEBUG_CAM_PERMISSION";
+    private static final String DEBUG_CAMERA_PERMISSION = "DEBUG_CAM_PERMISSION";
+    private static final String DEBUG_FRAGMENT = "DEBUG_HOME_FRAG";
 
     private static final int CAMERA_ACCESS = 0;
     private GoogleMap map;
+
+    @Override
+    public void onCreate (@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d (DEBUG_FRAGMENT, "OnCreate Home Fragment!");
+        getParentFragmentManager().setFragmentResultListener("reservation", this,
+            new FragmentResultListener() {
+                @Override
+                public void onFragmentResult (@NonNull String requestKey, @NonNull Bundle bundle) {
+                    // receive reservation result from dialog fragment
+                    int confirmResult = bundle.getInt ("reserve_confirm");
+                    if (confirmResult == 0)
+                        Toast.makeText (requireActivity(), "You have cancel the bike reservation!!", Toast.LENGTH_LONG).show();
+                }
+            });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d (DEBUG_FRAGMENT, "OnResume Home Fragment!");
+    }
 
     @Override
     public void onViewCreated (@NonNull final View view, Bundle savedInstanceState) {
@@ -78,8 +106,8 @@ public class HomeFragment extends Fragment implements
                     @Override
                     public void onClick (View v)
                     {
-                        // open camera
-                        viewCamera();
+                        // ask users whether open camera to scan qr code or key in manually
+                        openUnlockOptions();
                     }
                 }
         );
@@ -134,8 +162,46 @@ public class HomeFragment extends Fragment implements
 
     }
 
+    private void addMarkers (GoogleMap map) {
+        Marker bike1 = map.addMarker(
+                new MarkerOptions ()
+                        .position (new LatLng(1.2830, 103.8513))
+                        .title ("30ad3214")
+                        .snippet ("Bike-1")
+                        .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
+        );
+        bike1.setTag (0);
+
+        Marker bike2 = map.addMarker(
+                new MarkerOptions ()
+                        .position (new LatLng(1.2831, 103.8514))
+                        .title ("0032f413c")
+                        .snippet ("Bike-2")
+                        .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
+        );
+        bike2.setTag (1);
+
+        Marker bike3 = map.addMarker(
+                new MarkerOptions ()
+                        .position (new LatLng(1.2831, 103.8513))
+                        .title ("003214ca32")
+                        .snippet ("Bike-3")
+                        .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
+        );
+        bike3.setTag (2);
+
+        Marker bike4 = map.addMarker(
+                new MarkerOptions ()
+                        .position (new LatLng(1.2833, 103.8513))
+                        .title ("003214a345")
+                        .snippet ("Bike-4")
+                        .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
+        );
+        bike4.setTag (3);
+    }
+
     @Override
-    public boolean onMarkerClick(@NonNull Marker marker) {
+    public boolean onMarkerClick(@NonNull final Marker marker) {
         // when the user click on the marker
 
         // open bike unlock options
@@ -182,6 +248,10 @@ public class HomeFragment extends Fragment implements
                     @Override
                     public void onClick(View v) {
                         // reserve now
+                        bottomSheetDialog.dismiss();
+                        // send bikeID to the dialogFragment
+                        ReservationDialog dialog = ReservationDialog.newInstance(marker.getTitle());
+                        dialog.show (getChildFragmentManager(), dialog.getTag());
                     }
                 }
         );
@@ -192,43 +262,62 @@ public class HomeFragment extends Fragment implements
         return false;
     }
 
-
-    private void addMarkers (GoogleMap map) {
-        Marker bike1 = map.addMarker(
-            new MarkerOptions ()
-                .position (new LatLng(1.2830, 103.8513))
-                .title ("Bike1")
-                .snippet ("Bike-1")
-                .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
+    /**
+     * Open the BottomSheet which offers users to unlock a bike.
+     * Option-1: Open the camera and scan the qr code
+     * Option-2: Manually key in (enter) the bike id.
+     */
+    private void openUnlockOptions () {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
+                requireActivity(),
+                R.style.BottomSheetDialogTheme
         );
-        bike1.setTag (0);
+        final View bottomSheet = LayoutInflater.from (requireActivity())
+                .inflate (R.layout.unlock_options_bottomsheet, (LinearLayout) requireActivity().findViewById(R.id.unlcok_options_bottomsheet));
 
-        Marker bike2 = map.addMarker(
-                new MarkerOptions ()
-                        .position (new LatLng(1.2831, 103.8514))
-                        .title ("Bike2")
-                        .snippet ("Bike-2")
-                        .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
-        );
-        bike2.setTag (1);
+        final Button scanQRCodeButton = bottomSheet.findViewById (R.id.scanQRCodeButton);
+        final Button manualKeyInButton = bottomSheet.findViewById (R.id.manualKeyInButton);
+        final Button cancelManualKeyInButton = bottomSheet.findViewById (R.id.cancelButton_UnlockOptionsBtmSheet);
+        final EditText manualKeyInBikeIDET = bottomSheet.findViewById (R.id.bikeIDEditText);
 
-        Marker bike3 = map.addMarker(
-                new MarkerOptions ()
-                        .position (new LatLng(1.2831, 103.8513))
-                        .title ("Bike3")
-                        .snippet ("Bike-3")
-                        .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
-        );
-        bike3.setTag (2);
+        cancelManualKeyInButton.setVisibility (View.GONE);
+        manualKeyInBikeIDET.setVisibility (View.GONE);
 
-        Marker bike4 = map.addMarker(
-                new MarkerOptions ()
-                        .position (new LatLng(1.2833, 103.8513))
-                        .title ("Bike4")
-                        .snippet ("Bike-4")
-                        .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
+        scanQRCodeButton.setOnClickListener (
+            new View.OnClickListener () {
+                @Override
+                public void onClick(View v) {
+                    // open camera to scan qr code
+                    viewCamera();
+                }
+            }
         );
-        bike4.setTag (3);
+
+        manualKeyInButton.setOnClickListener (
+            new View.OnClickListener () {
+                @Override
+                public void onClick (View v) {
+                    // show textbox to key in manually
+                    scanQRCodeButton.setVisibility (View.GONE);
+                    cancelManualKeyInButton.setVisibility (View.VISIBLE);
+                    manualKeyInBikeIDET.setVisibility (View.VISIBLE);
+                }
+            }
+        );
+
+        cancelManualKeyInButton.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    scanQRCodeButton.setVisibility (View.VISIBLE);
+                    cancelManualKeyInButton.setVisibility (View.GONE);
+                    manualKeyInBikeIDET.setVisibility (View.GONE);
+                }
+            }
+        );
+
+        bottomSheetDialog.setContentView (bottomSheet);
+        bottomSheetDialog.show();
     }
 
 
@@ -279,5 +368,4 @@ public class HomeFragment extends Fragment implements
         Intent cameraIntent = new Intent("android.media.action.IMAGE_CAPTURE");
         startActivity(cameraIntent);
     }
-
 }

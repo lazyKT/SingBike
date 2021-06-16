@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/unlcok_options_bottomsheet"
+    android:background="@drawable/bottom_sheet_background"
+    android:orientation="vertical"
+    android:elevation="5dp"
+    >
+
+    <!-- title -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bottom_sheet_background"
+        android:backgroundTint="@color/colorAccent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="10dp">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/logo"
+            android:contentDescription="@string/app_name"
+            android:layout_margin="10dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/unlock_bike"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:layout_margin="10dp"
+            />
+
+    </LinearLayout>
+
+    <!-- content options -->
+
+    <Button
+        android:id="@+id/scanQRCodeButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="20dp"
+        android:layout_marginVertical="5dp"
+        android:backgroundTint="@color/actionBtn"
+        android:text="@string/scan_qr"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        />
+
+    <EditText
+        android:id="@+id/bikeIDEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_bikeID"
+        android:textSize="17sp"
+        android:autofillHints="@string/bikeID"
+        android:inputType="text" />
+
+    <Button
+        android:id="@+id/manualKeyInButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="20dp"
+        android:layout_marginVertical="5dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:text="@string/manual_unlock"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        />
+
+    <Button
+        android:id="@+id/cancelButton_UnlockOptionsBtmSheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="15dp"
+        android:layout_marginVertical="5dp"
+        android:text="@string/cancel"
+        android:textColor="@color/darkGray"
+        android:textStyle="bold"
+        />
+
+</LinearLayout>

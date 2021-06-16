@@ -14,7 +14,7 @@ import com.example.singbike.R;
 
 public class IntroSlideFragment extends Fragment {
 
-    private int slideNum;
+    private final int slideNum;
 
     public IntroSlideFragment (int slideNum) {
         this.slideNum = slideNum;
@@ -34,14 +34,17 @@ public class IntroSlideFragment extends Fragment {
             case 0:
                 slideTtitle.setText(getResources().getString(R.string.slide1Title));
                 slideDescription.setText(getResources().getString(R.string.slide1Description));
+                slideImageView.setImageResource (R.drawable.location);
                 break;
             case 1:
                 slideTtitle.setText(getResources().getString(R.string.slide2Title));
                 slideDescription.setText(getResources().getString(R.string.slide2Description));
+                slideImageView.setImageResource (R.drawable.qr_scan);
                 break;
             case 2:
                 slideTtitle.setText(getResources().getString(R.string.slide3Title));
                 slideDescription.setText(getResources().getString(R.string.slide3Description));
+                slideImageView.setImageResource (R.drawable.ride_bycicle);
                 break;
             default:
                 slideTtitle.setText(getResources().getString(R.string.introBtn));

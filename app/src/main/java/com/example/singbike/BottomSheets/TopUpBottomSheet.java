@@ -62,19 +62,7 @@ public class TopUpBottomSheet extends BottomSheetDialogFragment {
 
         int maxHeight = Resources.getSystem().getDisplayMetrics().heightPixels - 50; // screen height - 50
 
-//        bottomSheetBehavior.setPeekHeight(maxHeight);
         Log.d (DEBUG_BS_HEIGHT, "Layout Height " + maxHeight);
-
-        /* components inside add card form */
-
-        /* Payment Methods */
-//        paymentMethodRV = v.findViewById (R.id.cardsRecyclerView);
-//
-//        LinearLayoutManager paymethodLayoutManager = new LinearLayoutManager (requireActivity());
-//        paymentMethodRV.setLayoutManager (paymethodLayoutManager);
-//
-//        PaymentMethodRecyclerAdapter paymentMethodRecyclerAdapter = new PaymentMethodRecyclerAdapter();
-//        paymentMethodRV.setAdapter (paymentMethodRecyclerAdapter);
 
         /* add new payment method/card */
         final LinearLayout addNewCardLayout = v.findViewById (R.id.addNewCardLayoutButton);

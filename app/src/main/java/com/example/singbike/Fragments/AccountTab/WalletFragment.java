@@ -14,11 +14,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.singbike.Adapters.TransactionRecyclerAdapter;
-import com.example.singbike.BottomSheets.TopUpBottomSheet;
 import com.example.singbike.Models.Transaction;
 import com.example.singbike.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -29,6 +29,10 @@ public class WalletFragment extends Fragment {
 
     private static final String DEBUG_ON_ATTACH = "DEBUG_ON_ATTACH";
     private ArrayList<Transaction> transactions;
+
+    private int amountAdded = 0;
+
+    private TextView balanceTextView;
 
     public WalletFragment () {
         super (R.layout.fragment_wallet);
@@ -61,16 +65,37 @@ public class WalletFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        /* fragment transition animation */
         TransitionInflater inflater = TransitionInflater.from(requireActivity());
         setEnterTransition(inflater.inflateTransition(R.transition.slide_right));
+
+        /* receive data from TopUp Fragment */
+        getParentFragmentManager().setFragmentResultListener ("TopUp", this,
+            new FragmentResultListener() {
+                @Override
+                public void onFragmentResult (@NonNull String requestKey, @NonNull Bundle bundle) {
+                    amountAdded = bundle.getInt ("amountAdded");
+                }
+            });
+
+        Log.d ("onCreate_WalletFragment", String.valueOf(amountAdded));
     }
 
     @Override
-    public void onViewCreated (final View view, Bundle savedInstanceState) {
+    public void onResume() {
+        super.onResume();
+        Log.d ("onResume_WalletFragment", String.valueOf(amountAdded));
+        amountAdded = amountAdded + 5;
+        balanceTextView.setText (String.valueOf(amountAdded));
+    }
+
+    @Override
+    public void onViewCreated (@NonNull final View view, Bundle savedInstanceState) {
 
         super.onViewCreated (view, savedInstanceState);
+        Log.d ("onViewCreated_Wallet", String.valueOf (amountAdded));
 
-        final TextView balanceTextView = view.findViewById (R.id.balanceTV);
+        balanceTextView = view.findViewById (R.id.balanceTV);
         final Button topUpButton = view.findViewById (R.id.topUpBtn);
         final RecyclerView transactionRecyclerView = view.findViewById (R.id.transactionRecyclerView);
 
@@ -81,12 +106,6 @@ public class WalletFragment extends Fragment {
               public void onClick (View v) {
                   requireActivity().getSupportFragmentManager()
                           .beginTransaction()
-//                          .setCustomAnimations(
-//                                  R.anim.slide_top, // enter
-//                                  R.anim.fade_out, // exit
-//                                  R.anim.fade_in, // pop enter
-//                                  R.anim.slide_bottom
-//                          )
                           .replace (R.id.fragmentContainerView, TopUpFragment.class, null)
                           .addToBackStack ("TopUp")
                           .setReorderingAllowed (true)
@@ -94,8 +113,8 @@ public class WalletFragment extends Fragment {
               }
           }
         );
-
-        balanceTextView.setText("5");
+        amountAdded = amountAdded + 5;
+        balanceTextView.setText (String.valueOf(amountAdded));
 
         LinearLayoutManager layoutManager = new LinearLayoutManager (requireActivity());
         transactionRecyclerView.setLayoutManager(layoutManager);

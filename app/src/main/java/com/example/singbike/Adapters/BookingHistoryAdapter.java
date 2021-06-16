@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,28 +20,34 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter <BookingHistoryA
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView bookingTimeTV, bookingStatusTV, bookingDateTV;
+        private final TextView bookingTimeTV, bookingStatusTV, bookingDateTV;
+        private final ImageView bookingIndicatorIcon;
 
         public ViewHolder (View v) {
             super(v);
             this.bookingStatusTV = v.findViewById (R.id.bookingStatusTextView);
             this.bookingTimeTV = v.findViewById (R.id.bookingTimeTextView);
             this.bookingDateTV = v.findViewById (R.id.bookingDateTextView);
+            this.bookingIndicatorIcon = v.findViewById (R.id.bookingIndicatorIcon);
         }
 
         public void bind (Booking booking) {
             this.bookingTimeTV.setText (booking.getBookingTime());
             this.bookingDateTV.setText (booking.getBookingDate());
-            if (booking.getBookingStatus().equals("Cancelled"))
+            if (booking.getBookingStatus().equals("Cancelled")) {
                 this.bookingStatusTV.setTextColor(Color.RED);
-            else
-                this.bookingStatusTV.setTextColor(Color.DKGRAY);
+                this.bookingIndicatorIcon.setImageResource (R.drawable.delete);
+            }
+            else {
+                this.bookingStatusTV.setTextColor(Color.GREEN);
+                this.bookingIndicatorIcon.setImageResource (R.drawable.past_booking);
+            }
             this.bookingStatusTV.setText (booking.getBookingStatus());
         }
     }
 
-    private ArrayList<Booking> bookings;
-    private Context context;
+    private final ArrayList<Booking> bookings;
+    private final Context context;
 
     public BookingHistoryAdapter (Context context, ArrayList<Booking> bookings) {
         this.context = context;
