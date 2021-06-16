@@ -30,3 +30,22 @@ implementation 'androidx.fragment:fragment:1.3.3'
 // import SwipeRefreshLayout
 implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 ```
+
+- androidx.viewpager2:viewpager2:1.0.0
+```
+// import viewpager2 for intro slides
+implementation "androidx.viewpager2:viewpager2:1.0.0"
+```
+
+- com.google.code.gson:gson:2.8.6
+```
+// gson import: to store objects in sharedpreferences
+implementation "com.google.code.gson:gson:2.8.6"
+```
+
+- androidx.preference:preference:1.1.1
+```
+// androidx preferences manager
+implementation "androidx.preference:preference:1.1.1"
+```
+
