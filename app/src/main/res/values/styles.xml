@@ -32,5 +32,9 @@
         <item name="android:textSize">16sp</item>
     </style>
 
-
+    <!-- round corner dialog box -->
+    <style name="RoundCornerDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/popup_dialog</item>
+    </style>
+    
 </resources>

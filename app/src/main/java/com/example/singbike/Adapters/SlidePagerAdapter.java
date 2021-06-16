@@ -10,7 +10,7 @@ import com.example.singbike.Fragments.IntroSlideFragment;
 /* The pager adapter which provides the pages to view */
 public class SlidePagerAdapter extends FragmentStateAdapter {
 
-    private int numPages;
+    private final int numPages;
 
     public SlidePagerAdapter (FragmentActivity activity, int numPages) {
         super(activity);

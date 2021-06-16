@@ -35,14 +35,15 @@ public class SignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        final EditText unameET = findViewById (R.id.unameET_signup);
-        final EditText emailET = findViewById (R.id.emailET_signup);
-        final EditText pwdET = findViewById (R.id.pwdET_signup);
-        final EditText confirmPwdET = findViewById (R.id.confirmPwdET_signup);
-        final TextView errorTV = findViewById (R.id.errorTV_signup);
+        final EditText unameET = findViewById (R.id.usernameET_SignUp);
+        final EditText emailET = findViewById (R.id.emailET_SignUp);
+        final EditText pwdET = findViewById (R.id.passwordET_SignUp);
 
-        final Button signUpBtn = findViewById (R.id.signUpBtn_signup);
-        final Button signInBtn = findViewById (R.id.signInBtn_signup);
+        final TextView errorTV = findViewById (R.id.errorTV_SignUp);
+        errorTV.setVisibility(View.GONE);
+
+        final Button signUpBtn = findViewById (R.id.signUpButton_SignUp);
+        final Button signInBtn = findViewById (R.id.signInBtn_SingUp);
 
         /* Back to Sign In Page */
         signInBtn.setOnClickListener (
@@ -61,6 +62,8 @@ public class SignUpActivity extends AppCompatActivity {
                     @Override
                     public void onClick (View v) {
                         // validate the credentials
+
+                        errorTV.setVisibility(View.VISIBLE);
 
                         /* username validation */
                         if ( validateCredentials (unameET.getText().toString(), "uname") < 1) {
@@ -81,11 +84,6 @@ public class SignUpActivity extends AppCompatActivity {
                         else if ( validateCredentials (pwdET.getText().toString(), "pwd") < 1) {
                             errorTV.setVisibility(View.VISIBLE);
                             errorTV.setText(R.string.pwd_err_chars);
-                        }
-                        /* confirm password validation. */
-                        else if ( !pwdET.getText().toString().equals(confirmPwdET.getText().toString()) ) {
-                            errorTV.setVisibility(View.VISIBLE);
-                            errorTV.setText(R.string.confirm_pwd_err);
                         }
                         /* Validation Success */
                         else {

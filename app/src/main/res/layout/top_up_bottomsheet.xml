@@ -120,6 +120,18 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="50dp"/>
 
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textAppearance="@style/TextButtonStyle"
+                        android:id="@+id/cancelTopUpButtonTopUp"
+                        android:text="@string/cancel"
+                        android:textColor="@color/darkGray"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="50dp"/>
+
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>

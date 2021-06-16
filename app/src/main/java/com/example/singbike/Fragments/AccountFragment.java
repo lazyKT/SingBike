@@ -102,7 +102,7 @@ public class AccountFragment extends  Fragment{
                                         .replace (R.id.fragmentContainerView, AchievementsFragment.class, null)
                                         .commit();
                                 break;
-                            case "Logout":
+                            case "Log Out":
                                 // remove the sharePreferences value from the device storage
                                 SharedPreferences preferences = requireActivity().getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
                                 SharedPreferences.Editor editor = preferences.edit();

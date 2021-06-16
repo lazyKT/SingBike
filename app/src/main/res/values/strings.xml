@@ -1,16 +1,17 @@
 <resources>
     <string name="app_name">SingBike</string>
 
+    <string name="ok">Okay</string>
     <string name="cancel">Cancel</string>
 
     <!-- intro -->
     <string name="introBtn">Start Riding</string>
-    <string name="slide1Title">Slide 1</string>
-    <string name="slide2Title">Slide 2</string>
-    <string name="slide3Title">Slide 3</string>
-    <string name="slide1Description">Description 1</string>
-    <string name="slide2Description">Description 2</string>
-    <string name="slide3Description">Description 3</string>
+    <string name="slide1Title">Locate</string>
+    <string name="slide2Title">Unlock</string>
+    <string name="slide3Title">Ride</string>
+    <string name="slide1Description">Locate the bikes on the map.</string>
+    <string name="slide2Description">Scan the QR Code on the bike to unlock.</string>
+    <string name="slide3Description">Enjoy the convenient ride.</string>
     <string name="dots">Indicator Dots</string>
 
     <!-- Authentication -->
@@ -23,7 +24,7 @@
     <string name="cPwd">CONFIRM PASSWORD</string>
     <string name="googleSignIn">Sign in with Google</string>
     <string name="join">Join SingBike</string>
-    <string name="signInBanner">Already have an account?</string>
+    <string name="signInBanner"><u>Already have an account?</u></string>
 
     <!-- error message -->
     <string name="uname_err">Username Must be at least 4 characters long.</string>
@@ -48,7 +49,14 @@
     <string name="dollar">$</string>
     <string name="balance">Balance</string>
     <string name="unlock_now">UNLOCK NOW</string>
+    <string name="unlock_bike">UNLOCK BIKE</string>
+    <string name="scan_qr">SCAN QR CODE</string>
+    <string name="manual_unlock">KEY IN BIKE ID</string>
+    <string name="enter_bikeID">Enter Bike ID</string>
     <string name="reserve_now">RESERVE NOW</string>
+    <string name="reserve_confirm">Confirm Reservation</string>
+    <string name="reserve_question">You are about to make a bike reservation!</string>
+    <string name="confirm">Confirm</string>
 
     <!-- account tab -->
     <string name="edit_profile">Edit Profile</string>

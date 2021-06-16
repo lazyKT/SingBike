@@ -80,7 +80,7 @@ public class TopUpFragment extends Fragment {
         final RecyclerView paymentMethodRV, quickTopUpRV;
         final EditText topUpAmountEditText = v.findViewById (R.id.topUpAmountET);
         final Button topUpButton = v.findViewById (R.id.topUpButtonTopUp);
-
+        final Button cancelTopUpButton = v.findViewById (R.id.cancelTopUpButtonTopUp);
 
         /*  hide add new card form */
         newCardForm.setVisibility(View.GONE);
@@ -168,7 +168,7 @@ public class TopUpFragment extends Fragment {
         quickTopUpRV = v.findViewById (R.id.quickTopUpRecyclerView);
         LinearLayoutManager quickTopUpLayoutManager = new LinearLayoutManager(requireActivity(), LinearLayoutManager.HORIZONTAL, false);
         quickTopUpRV.setLayoutManager(quickTopUpLayoutManager);
-        QuickTopUpRVAdapter quickTopUpRVAdapter = new QuickTopUpRVAdapter(requireActivity(),
+        final QuickTopUpRVAdapter quickTopUpRVAdapter = new QuickTopUpRVAdapter(requireActivity(),
                 new QuickTopUpRVAdapter.TopUpOnClickListener() {
                     @Override
                     public void onClickTopUpListener(String amount) {
@@ -182,16 +182,46 @@ public class TopUpFragment extends Fragment {
                 new View.OnClickListener () {
                     @Override
                     public void onClick (View v) {
-                        requireActivity().getSupportFragmentManager()
-                                .beginTransaction()
-                                .addToBackStack ("wallet")
-                                .setReorderingAllowed(true)
-                                .replace (R.id.fragmentContainerView, WalletFragment.class, null)
-                                .commit();
+
+                        if (paymentMethodRecyclerAdapter.getItemCount() < 1) {
+                            Toast.makeText (requireActivity(), "Please Choose Payment Method!", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
+                        if (topUpAmountEditText.getText().toString().equals("")) {
+                            Toast.makeText (requireActivity(), "Please Enter Top up amount!", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
+                        /* pass the topup amount back to the wallet fragment */
+                        Bundle topUpBundle = new Bundle();
+                        topUpBundle.putInt ("amountAdded", Integer.parseInt(topUpAmountEditText.getText().toString()));
+                        getParentFragmentManager().setFragmentResult ("TopUp", topUpBundle);
+
+                        backToWalletPage();
                     }
                 }
         );
 
+        /* cancel Top Up Process and goes back to wallet page */
+        cancelTopUpButton.setOnClickListener (
+            new View.OnClickListener () {
+                @Override
+                public void onClick (View v) {
+                    backToWalletPage();
+                }
+            }
+        );
+    }
+
+    /* go back to wallet page */
+    private void backToWalletPage () {
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .addToBackStack ("wallet")
+                .setReorderingAllowed(true)
+                .replace (R.id.fragmentContainerView, WalletFragment.class, null)
+                .commit();
     }
 
     private void saveCreditCard (ArrayList<PaymentMethod> paymentMethods) {
