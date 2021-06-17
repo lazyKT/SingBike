@@ -13,23 +13,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@color/colorAccent"
-        android:gravity="center"
+        android:background="@drawable/title_layout"
+        android:backgroundTint="@color/white"
+        android:gravity="center_vertical"
         android:padding="10dp"
+        android:elevation="10dp"
+        android:translationZ="10dp"
         >
 
         <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:src="@drawable/booking"/>
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="15dp"
+            android:src="@drawable/visa"
+            android:contentDescription="@string/app_name" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:text="@string/topup"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:layout_marginHorizontal="10dp"
             />
 
