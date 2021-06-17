@@ -57,7 +57,7 @@ public class ProfileFragment extends Fragment {
 
         final EditText usernameET = view.findViewById (R.id.unameET_profile);
         final EditText emailET = view.findViewById (R.id.emailET_profile);
-        final Button changePasswordButton = view.findViewById (R.id.changePwdBtn);
+        final Button changePasswordButton = view.findViewById (R.id.changePwdButton);
 
         /* fetch user details */
         requestQueue = Volley.newRequestQueue(requireActivity());

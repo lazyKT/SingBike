@@ -8,14 +8,15 @@
 
     <ImageView
         android:id="@+id/avatarIV"
-        android:layout_width="100dp"
+        android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/menu_account_foreground"
-        tools:srcCompat="@tools:sample/avatars" />
+        app:srcCompat="@drawable/man"
+        tools:srcCompat="@tools:sample/avatars"
+        android:contentDescription="@string/app_name" />
 
     <TextView
         android:id="@+id/usernameTV_account"

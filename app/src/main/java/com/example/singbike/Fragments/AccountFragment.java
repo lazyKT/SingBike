@@ -20,6 +20,7 @@ import com.example.singbike.AuthActivity;
 import com.example.singbike.Fragments.AccountTab.AchievementsFragment;
 import com.example.singbike.Fragments.AccountTab.ContactFragment;
 import com.example.singbike.Fragments.AccountTab.ProfileFragment;
+import com.example.singbike.Fragments.AccountTab.RideHistoryFragment;
 import com.example.singbike.Fragments.AccountTab.WalletFragment;
 import com.example.singbike.R;
 
@@ -32,8 +33,8 @@ public class AccountFragment extends  Fragment{
     }
 
     @Override
-    public void onCreate (Bundle savedInstaceState) {
-        super.onCreate (savedInstaceState);
+    public void onCreate (Bundle savedInstanceState) {
+        super.onCreate (savedInstanceState);
 
         TransitionInflater inflater = TransitionInflater.from (requireActivity());
         setEnterTransition (inflater.inflateTransition (R.transition.slide_right));
@@ -52,7 +53,7 @@ public class AccountFragment extends  Fragment{
                     public void onClick (View v) {
                         Log.d (D_EDIT, "button tapped!");
 
-                        getActivity().getSupportFragmentManager()
+                        (requireActivity()).getSupportFragmentManager()
                                 .beginTransaction()
                                 .replace (R.id.fragmentContainerView, ProfileFragment.class, null)
                                 .setReorderingAllowed(true)
@@ -67,7 +68,7 @@ public class AccountFragment extends  Fragment{
         final RecyclerView optionsRV = view.findViewById (R.id.accountRecyclerView);
         final String[] options = getResources().getStringArray(R.array.account_options);
 
-        // instantiate layoutmanager to attach a view to recyclerView
+        // instantiate layout manager to attach a view to recyclerView
         LinearLayoutManager layoutManager = new LinearLayoutManager (getActivity());
         optionsRV.setLayoutManager (layoutManager);
 
@@ -100,6 +101,14 @@ public class AccountFragment extends  Fragment{
                                         .setReorderingAllowed (true)
                                         .addToBackStack ("achievements")
                                         .replace (R.id.fragmentContainerView, AchievementsFragment.class, null)
+                                        .commit();
+                                break;
+                            case "Ride History":
+                                (requireActivity()).getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .setReorderingAllowed (true)
+                                        .addToBackStack ("ride history")
+                                        .replace (R.id.fragmentContainerView, RideHistoryFragment.class, null)
                                         .commit();
                                 break;
                             case "Log Out":
