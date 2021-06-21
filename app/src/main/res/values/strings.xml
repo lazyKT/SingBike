@@ -101,6 +101,13 @@
         <item>Ride 15 km.</item>
     </string-array>
 
+    <!-- ride history -->
+    <string name="promo_code">Promo Fare</string>
+    <string name="total_fare">Total Fare</string>
+    <string name="ride_fare">Ride Fare</string>
+    <string name="ride_id">Ride ID:</string>
+    <string name="report_problem">Report a Problem</string>
+
     <!-- share preference keys -->
     <string name="authState">AUTH_STATE</string>
     <string name="fristStartUp">FIRST_TIME_START_UP</string>
