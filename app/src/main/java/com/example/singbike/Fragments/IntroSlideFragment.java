@@ -44,7 +44,7 @@ public class IntroSlideFragment extends Fragment {
             case 2:
                 slideTtitle.setText(getResources().getString(R.string.slide3Title));
                 slideDescription.setText(getResources().getString(R.string.slide3Description));
-                slideImageView.setImageResource (R.drawable.ride_bycicle);
+                slideImageView.setImageResource (R.drawable.ride_bicycle);
                 break;
             default:
                 slideTtitle.setText(getResources().getString(R.string.introBtn));

@@ -7,17 +7,24 @@
 package com.example.singbike.Authentication;
 
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 
+import com.example.singbike.MainActivity;
 import com.example.singbike.R;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 public class SignInDialogFragment extends BottomSheetDialogFragment {
+
+    private static final String DEBUG_LOGIN = "DEBUG_LOGIN";
 
     public SignInDialogFragment() {}
 
@@ -33,8 +40,6 @@ public class SignInDialogFragment extends BottomSheetDialogFragment {
         View v = layoutInflater.inflate(R.layout.fragment_signin, viewGroup, false);
 
         final View bottomSheet = v.findViewById (R.id.signInBottomSheet);
-
-
 
         return v;
     }
