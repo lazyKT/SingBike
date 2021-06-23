@@ -61,7 +61,10 @@
     <!-- account tab -->
     <string name="edit_profile">Edit Profile</string>
     <string name="change_pwd">Change Password</string>
+    <string name="upload_avatar">Upload New Avatar</string>
     <string name="update">UPDATE PROFILE</string>
+    <string name="choose_gallery">Choose From Gallery</string>
+    <string name="take_photo">Take Photo</string>
     <string name="dummy_time">1.3</string>
     <string name="dummy_distance">7.9</string>
     <string name="hours">Hours</string>
@@ -72,6 +75,12 @@
     <string name="newPassword">New Password</string>
     <string name="confirmPassword">Confirm Password</string>
     <string name="notMatch">* Passwords Do Not Match.</string>
+    <string name="currentPasswordEmpty">Please Enter Current Password</string>
+    <string name="currentPasswordWrong">Authentication Failed. Incorrect Password!</string>
+    <string name="newPasswordEmpty">Please Enter New Password</string>
+    <string name="confirmPasswordEmpty">Please Enter the Confirm Password</string>
+    <string name="passwordNotMatch">Passwords are not matched!</string>
+    <string name="networkError">Network Error. Please Check your connection</string>
 
     <!-- account options -->
     <string name="contact">CONTACT</string>
@@ -107,6 +116,9 @@
     <string name="ride_fare">Ride Fare</string>
     <string name="ride_id">Ride ID:</string>
     <string name="report_problem">Report a Problem</string>
+
+    <!-- report -->
+    <string name="report_title">How Can We Help You?</string>
 
     <!-- share preference keys -->
     <string name="authState">AUTH_STATE</string>

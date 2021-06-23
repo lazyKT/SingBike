@@ -18,9 +18,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.singbike.Adapters.OptionsRecyclerViewAdapter;
 import com.example.singbike.AuthActivity;
+import com.example.singbike.EditProfileActivity;
 import com.example.singbike.Fragments.AccountTab.AchievementsFragment;
 import com.example.singbike.Fragments.AccountTab.ContactFragment;
 import com.example.singbike.Fragments.AccountTab.ProfileFragment;
+import com.example.singbike.Fragments.AccountTab.ReportFragment;
 import com.example.singbike.Fragments.AccountTab.RideHistoryFragment;
 import com.example.singbike.Fragments.AccountTab.WalletFragment;
 import com.example.singbike.R;
@@ -52,15 +54,8 @@ public class AccountFragment extends  Fragment{
                 new View.OnClickListener () {
                     @Override
                     public void onClick (View v) {
-                        Log.d (D_EDIT, "button tapped!");
-
-                        (requireActivity()).getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace (R.id.fragmentContainerView, ProfileFragment.class, null)
-                                .setReorderingAllowed(true)
-                                .addToBackStack ("profile")
-                                .commit();
-
+                        Intent intent = new Intent (requireActivity(), EditProfileActivity.class);
+                        startActivity(intent);
                     }
                 }
         );
@@ -109,6 +104,14 @@ public class AccountFragment extends  Fragment{
                                         .setReorderingAllowed (true)
                                         .addToBackStack ("ride history")
                                         .replace (R.id.fragmentContainerView, RideHistoryFragment.class, null)
+                                        .commit();
+                                break;
+                            case "Report":
+                                (requireActivity()).getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .addToBackStack ("report")
+                                        .setReorderingAllowed (true)
+                                        .replace (R.id.fragmentContainerView, ReportFragment.class, null)
                                         .commit();
                                 break;
                             case "Log Out":

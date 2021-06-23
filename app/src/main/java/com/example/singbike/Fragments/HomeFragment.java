@@ -74,12 +74,6 @@ public class HomeFragment extends Fragment implements
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        Log.d (DEBUG_FRAGMENT, "OnResume Home Fragment!");
-    }
-
-    @Override
     public void onViewCreated (@NonNull final View view, Bundle savedInstanceState) {
 
         super.onViewCreated(view, savedInstanceState);
@@ -111,6 +105,12 @@ public class HomeFragment extends Fragment implements
                     }
                 }
         );
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d (DEBUG_FRAGMENT, "OnResume Home Fragment!");
     }
 
     @Override
@@ -330,7 +330,7 @@ public class HomeFragment extends Fragment implements
             openCamera();
         }
         else if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
-            // tell the use why we need them to allow camera permission
+            // tell the user why we need them to allow camera permission
             Log.d (DEBUG_CAMERA_PERMISSION, "Camera Permission in Home Fragment. EXPLAIN WHY U NEED THIS!");
             final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage(R.string.camera_request)

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.singbike">
 
     <!-- Internet permission -->
@@ -58,7 +57,11 @@
         </activity>
         <activity
             android:name=".Authentication.SignUpActivity"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+            android:theme="@style/AppTheme" />
+
+        <activity android:name=".EditProfileActivity"
+            android:theme="@style/AppTheme" />
+
     </application>
 
 </manifest>

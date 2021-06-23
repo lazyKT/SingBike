@@ -1,18 +1,27 @@
 // editable profile page
 package com.example.singbike.Fragments.AccountTab;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.android.volley.Request;
@@ -58,6 +67,7 @@ public class ProfileFragment extends Fragment {
         final EditText usernameET = view.findViewById (R.id.unameET_profile);
         final EditText emailET = view.findViewById (R.id.emailET_profile);
         final Button changePasswordButton = view.findViewById (R.id.changePwdButton);
+        ImageButton changeAvatarButton = view.findViewById(R.id.avatarIV_profile);
 
         /* fetch user details */
         requestQueue = Volley.newRequestQueue(requireActivity());
@@ -78,11 +88,23 @@ public class ProfileFragment extends Fragment {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d (DEBUG_NETWORK, error.getMessage());
+                        if (null != error)
+                            Log.d (DEBUG_NETWORK, error.getMessage());
                     }
                 });
 
         requestQueue.add(request);
+
+        /* upload new avatar */
+        changeAvatarButton.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // open change avatar options bottom sheet
+                    openChangeAvatarOptionsSheet();
+                }
+            }
+        );
 
         changePasswordButton.setOnClickListener (
                 new View.OnClickListener () {
@@ -98,7 +120,6 @@ public class ProfileFragment extends Fragment {
                                 .inflate (R.layout.change_password, (LinearLayout) view.findViewById (R.id.changePwdBottomSheet));
                         /* initialize components */
                         final EditText currentPwdEditText, newPwdEditText, confirmPwdEditText;
-                        final TextView errorTextView = bottomSheetView.findViewById (R.id.errorTV_changePwd);
                         final Button changeButton = bottomSheetView.findViewById (R.id.changePwdButton_sheet);
 
                         currentPwdEditText = bottomSheetView.findViewById (R.id.currentPwdEditText);
@@ -123,15 +144,6 @@ public class ProfileFragment extends Fragment {
                                         bottomSheetDialog.dismiss();
                                     }
                                     else {
-                                        errorTextView.setVisibility(View.VISIBLE);
-                                        errorTextView.setPadding(5,5,5,5);
-                                        if (validationResult == -1)
-                                            errorTextView.setText(requireActivity().getResources().getString(R.string.confirm_pwd_err));
-                                        else if (validationResult == -2)
-                                            errorTextView.setText(requireActivity().getResources().getString(R.string.pwd_err_chars));
-                                        else
-                                            errorTextView.setText(requireActivity().getResources().getString(R.string.pwd_err_length));
-
                                         currentPwdEditText.setText("");
                                         newPwdEditText.setText("");
                                         confirmPwdEditText.setText("");
@@ -180,32 +192,6 @@ public class ProfileFragment extends Fragment {
         return 0;
     }
 
-
-    private User fetchUserDetails (Context context) {
-
-        requestQueue = Volley.newRequestQueue(context);
-        final String url = "https://jsonplaceholder.typicode.com/users/1";
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-            new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject json) {
-                    user = jsonToObject(json);
-                }
-            },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d (DEBUG_NETWORK, error.getMessage());
-                }
-        });
-
-        requestQueue.add(request);
-
-        return user;
-    }
-
-
     /**
      * convert json object to local User Object
      * @param json -> json object get from the server
@@ -227,4 +213,88 @@ public class ProfileFragment extends Fragment {
         return user;
     }
 
+    /* open change avatar options bottom sheet */
+    private void openChangeAvatarOptionsSheet () {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
+            requireActivity(),
+            R.style.BottomSheetDialogTheme
+        );
+        final View bottomSheet = LayoutInflater.from (requireActivity())
+                .inflate (R.layout.change_avatar_options, (LinearLayout) requireActivity().findViewById(R.id.changeAvatarSheet));
+        final Button chooseFromGallery = bottomSheet.findViewById (R.id.chooseGalleryButton_UploadAvatar);
+        final Button takePhoto = bottomSheet.findViewById (R.id.openCameraButton_UploadAvatar);
+        final Button cancelButton = bottomSheet.findViewById (R.id.cancelButton_UploadAvatar);
+
+        chooseFromGallery.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // open Gallery
+                }
+            }
+        );
+
+        takePhoto.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // open camera
+                    viewCamera();
+                }
+            }
+        );
+
+        cancelButton.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    bottomSheetDialog.dismiss();
+                }
+            }
+        );
+
+        bottomSheetDialog.setContentView(bottomSheet);
+        bottomSheetDialog.show();
+    }
+
+
+    /* request for camera permissions to take new profile picture */
+    private void viewCamera () {
+        if (ContextCompat.checkSelfPermission(
+                requireActivity(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED ) {
+            // permission already granted
+            // open camera
+            openCamera();
+        }
+        else if (shouldShowRequestPermissionRationale (Manifest.permission.CAMERA)) {
+            // request permission for first time,
+            // explain the user why the app needs to use this permission
+            final AlertDialog.Builder builder = new AlertDialog.Builder (requireActivity());
+            builder.setTitle (R.string.camera_request)
+                    .setPositiveButton (R.string.allow, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick (DialogInterface dialog, int which) {
+                            // allow camera permission
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton(R.string.never, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // permission denied
+                            dialog.dismiss();
+                        }
+                    });
+            builder.create();
+            builder.show();
+        }
+        else {
+
+        }
+    }
+
+    /* open camera to take new profile picture */
+    private void openCamera () {
+
+    }
 }
