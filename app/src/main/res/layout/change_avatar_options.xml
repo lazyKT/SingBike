@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/changeAvatarSheet"
+    android:background="@drawable/bottom_sheet_background"
+    android:orientation="vertical">
+
+    <!-- title -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bottom_sheet_background"
+        android:backgroundTint="@color/colorAccent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/logo"
+            android:layout_margin="10dp"
+            android:contentDescription="@string/app_name"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/upload_avatar"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="17sp"
+            />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/chooseGalleryButton_UploadAvatar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:text="@string/choose_gallery"
+        android:textColor="@color/colorPrimary"
+        android:textSize="16sp"
+        android:textAppearance="@style/TextButtonStyle"
+        android:textStyle="bold"
+        />
+
+    <Button
+        android:id="@+id/openCameraButton_UploadAvatar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:text="@string/take_photo"
+        android:textSize="16sp"
+        android:textColor="@color/colorPrimary"
+        android:textAppearance="@style/TextButtonStyle"
+        android:textStyle="bold"
+        />
+
+    <Button
+        android:id="@+id/cancelButton_UploadAvatar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:text="@string/cancel"
+        android:textSize="16sp"
+        android:textColor="@color/darkGray"
+        android:textAppearance="@style/TextButtonStyle"
+        android:textStyle="bold"
+        />
+
+</LinearLayout>
