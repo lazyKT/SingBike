@@ -32,6 +32,7 @@
     <string name="pwd_err_length">Password must contain at least 8 charaters</string>
     <string name="pwd_err_chars">Password must contain at least 1 Capital Letter, 1 Small Letter and 1 digit.</string>
     <string name="confirm_pwd_err">Passwords do not match.</string>
+    <string name="server_error">Can\'t Connect to Server</string>
 
     <!-- permission request messages -->
     <string name="allow">Allow</string>
@@ -48,6 +49,9 @@
     <string name="unlock">UNLOCK</string>
     <string name="dollar">$</string>
     <string name="balance">Balance</string>
+    <string name="credit_score">Credit Score</string>
+    <string name="one_hundred">100</string>
+    <string name="points">Pts</string>
     <string name="unlock_now">UNLOCK NOW</string>
     <string name="unlock_bike">UNLOCK BIKE</string>
     <string name="scan_qr">SCAN QR CODE</string>
@@ -60,6 +64,8 @@
 
     <!-- account tab -->
     <string name="edit_profile">Edit Profile</string>
+    <string name="join_on">Joined on</string>
+    <string name="last_update">Last Updated</string>
     <string name="change_pwd">Change Password</string>
     <string name="upload_avatar">Upload New Avatar</string>
     <string name="update">UPDATE PROFILE</string>
@@ -69,6 +75,10 @@
     <string name="dummy_distance">7.9</string>
     <string name="hours">Hours</string>
     <string name="km_travelled">Km Travelled</string>
+
+    <!-- credit score page -->
+    <string name="what_is_credit_score">What is a credit score?</string>
+    <string name="status_success">Great Job! You are such a great rider!</string>
 
     <!-- change password -->
     <string name="currentPassword">Current Password</string>
@@ -118,11 +128,23 @@
     <string name="report_problem">Report a Problem</string>
 
     <!-- report -->
-    <string name="report_title">How Can We Help You?</string>
+    <string name="report_header">How Can We Help You?</string>
+    <string name="report_title">Title</string>
+    <string name="problem_topic_title">Related Problem:</string>
+    <string name="report_description">Please Describe Your Problem.</string>
+    <string name="add_attachment">Add Attachments</string>
+    <string name="submit">Submit</string>
+    <string name="submitting">Submitting …</string>
+    <string-array name="problem_topics">
+        <item>Application</item>
+        <item>Vandalism</item>
+        <item>Bikes</item>
+        <item>Others</item>
+    </string-array>
 
     <!-- share preference keys -->
     <string name="authState">AUTH_STATE</string>
-    <string name="fristStartUp">FIRST_TIME_START_UP</string>
+    <string name="firstStartUp">FIRST_TIME_START_UP</string>
     <string name="isSignedin">IS_SIGNED_IN</string>
     <string name="userID">USER_ID</string>
     <string name="savedCards">CREDIT_CARDS</string>

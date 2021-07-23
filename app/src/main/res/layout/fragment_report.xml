@@ -38,25 +38,146 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_marginTop="25dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:orientation="vertical"
         android:padding="10dp"
-        android:backgroundTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout3">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/report_title"
-            android:textAlignment="center"
-            android:textSize="17sp"
-            android:textStyle="bold" />
+            android:paddingBottom="120dp"
+            android:background="@color/white"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/report_header"
+                android:textAlignment="center"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/problem_topic_title"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    />
+
+                <Spinner
+                    android:id="@+id/problemTopicsSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:entries="@array/problem_topics" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/report_title"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                />
+
+            <EditText
+                android:id="@+id/reportTitleET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/edit_text_border"
+                android:backgroundTint="@color/lightGray"
+                android:paddingVertical="5dp"
+                android:paddingHorizontal="10dp"
+                android:hint="@string/report_title"
+                android:inputType="text"
+                android:autofillHints="@string/report_title"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/report_description"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                />
+
+            <EditText
+                android:id="@+id/reportDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/edit_text_border"
+                android:backgroundTint="@color/lightGray"
+                android:paddingVertical="5dp"
+                android:paddingHorizontal="15dp"
+                android:hint="@string/report_description"
+                android:inputType="textMultiLine"
+                android:autofillHints="@string/report_description"
+                android:minLines="8"
+                android:scrollbars="vertical"
+                android:scrollbarAlwaysDrawVerticalTrack="true"
+                android:gravity="start|top"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/attachmentRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="10dp"
+                android:orientation="horizontal"
+                android:background="@color/lightGray"
+                />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/addAttachmentButton_Report"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:text="@string/add_attachment"
+                android:textAppearance="@style/TextButtonStyle"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:background="@drawable/ripple_effect_gray"
+                />
+
+            <Button
+                android:id="@+id/submitButton_Report"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:paddingVertical="15sp"
+                android:text="@string/submit"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:backgroundTint="@color/actionBtn"
+                />
+            
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

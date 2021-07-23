@@ -16,7 +16,7 @@ public class QuickTopUpRVAdapter extends RecyclerView.Adapter<QuickTopUpRVAdapte
 
     /* onClick Action on quickTopUp */
     public interface TopUpOnClickListener {
-        public void onClickTopUpListener (String amountStr);
+        void onClickTopUpListener (String amountStr);
     }
 
 
@@ -43,8 +43,8 @@ public class QuickTopUpRVAdapter extends RecyclerView.Adapter<QuickTopUpRVAdapte
         }
     }
 
-    private String[] quickTopUpAmounts;
-    private TopUpOnClickListener topUpOnClickListener;
+    private final String[] quickTopUpAmounts;
+    private final TopUpOnClickListener topUpOnClickListener;
 
     public QuickTopUpRVAdapter (Context context, TopUpOnClickListener topUpOnClickListener) {
         this.quickTopUpAmounts = context.getResources().getStringArray(R.array.quickTopUpAmounts);

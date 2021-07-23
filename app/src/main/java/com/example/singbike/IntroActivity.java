@@ -1,12 +1,14 @@
 package com.example.singbike;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.singbike.Adapters.SlidePagerAdapter;
@@ -15,12 +17,18 @@ public class IntroActivity extends AppCompatActivity {
 
     private static final int numPages = 3;
     private ViewPager2 viewPager;
-
+    private final String FINISH_INTRO_SECTION = "FINISH_INTRO_SECTION";
 
     @Override
     public void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
+
+        /* check whether the app is launched for first time */
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences (getApplicationContext());
+        /* the app is not launched for the first time, redirect to login page */
+        if (!preferences.getBoolean(FINISH_INTRO_SECTION, false))
+            startActivity (new Intent(IntroActivity.this, AuthActivity.class));
 
         final ImageView indicator1 = findViewById (R.id.slideIndicator1);
         final ImageView indicator2 = findViewById (R.id.slideIndicator2);
@@ -66,6 +74,9 @@ public class IntroActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick (View v) {
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putBoolean (FINISH_INTRO_SECTION, true);
+                        editor.apply();
                         Intent intent = new Intent(getApplicationContext(), AuthActivity.class);
                         startActivity(intent);
                     }

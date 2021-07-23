@@ -1,10 +1,13 @@
 package com.example.singbike.Fragments;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Camera;
 import android.os.Bundle;
@@ -17,6 +20,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -25,7 +32,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
 import com.example.singbike.Dialogs.ReservationDialog;
+import com.example.singbike.Fragments.AccountTab.ReportFragment;
+import com.example.singbike.Models.User;
 import com.example.singbike.R;
+import com.example.singbike.RideActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
@@ -37,6 +47,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
 
 public class HomeFragment extends Fragment implements
         OnMapReadyCallback,
@@ -53,6 +65,7 @@ public class HomeFragment extends Fragment implements
     private static final String DEBUG_MAP = "GOOGLE_MAP_DEBUG";
     private static final String DEBUG_CAMERA_PERMISSION = "DEBUG_CAM_PERMISSION";
     private static final String DEBUG_FRAGMENT = "DEBUG_HOME_FRAG";
+    private static final String DEBUG_SHARED_PREFS = "DEBUG_SHARED_PREFS";
 
     private static final int CAMERA_ACCESS = 0;
     private GoogleMap map;
@@ -78,6 +91,17 @@ public class HomeFragment extends Fragment implements
 
         super.onViewCreated(view, savedInstanceState);
 
+        final TextView creditScoreTextView = view.findViewById (R.id.creditScoreTextView_Home);
+        final TextView balanceTextView = view.findViewById (R.id.balanceTextView_Home);
+
+        /* get user details from local storage (SharedPreferences) */
+        User user = getUserDetails();
+        if (user != null) {
+            Log.d (DEBUG_SHARED_PREFS, user.toString());
+            creditScoreTextView.setText (String.valueOf(user.getCredits()));
+            balanceTextView.setText (String.valueOf(user.getBalance()));
+        }
+
         // map configuration
         GoogleMapOptions mapOptions = new GoogleMapOptions();
         mapOptions.mapType(GoogleMap.MAP_TYPE_TERRAIN)
@@ -100,10 +124,35 @@ public class HomeFragment extends Fragment implements
                     @Override
                     public void onClick (View v)
                     {
-                        // ask users whether open camera to scan qr code or key in manually
-                        openUnlockOptions();
+                        // check bluetooth feature is supported in user's device
+                        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                        if (bluetoothAdapter == null) {
+                            Toast.makeText (requireActivity(), "Your device does not support Bluetooth!", Toast.LENGTH_LONG).show();
+                        }
+                        if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
+                            // ask user to enable bluetooth
+                            Intent enableBluetooth = new Intent (BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                            requestBluetoothLauncher.launch (enableBluetooth);
+                        }
+//                        // ask users whether open camera to scan qr code or key in manually
+//                        openUnlockOptions();
                     }
                 }
+        );
+
+        final FloatingActionButton reportButton = view.findViewById (R.id.reportButton_Home);
+        reportButton.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    (requireActivity()).getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace (R.id.fragmentContainerView, ReportFragment.class, null)
+                            .setReorderingAllowed (true)
+                            .addToBackStack ("report")
+                            .commit();
+                }
+            }
         );
     }
 
@@ -297,10 +346,15 @@ public class HomeFragment extends Fragment implements
             new View.OnClickListener () {
                 @Override
                 public void onClick (View v) {
-                    // show textbox to key in manually
+                    // show text box to key in manually
                     scanQRCodeButton.setVisibility (View.GONE);
                     cancelManualKeyInButton.setVisibility (View.VISIBLE);
                     manualKeyInBikeIDET.setVisibility (View.VISIBLE);
+
+                    if (!manualKeyInBikeIDET.getText().toString().equals("")) {
+                        Intent intent = new Intent (requireActivity(), RideActivity.class);
+                        startActivity (intent);
+                    }
                 }
             }
         );
@@ -320,7 +374,15 @@ public class HomeFragment extends Fragment implements
         bottomSheetDialog.show();
     }
 
+    /* retrieve user details from SharedPreferences */
+    private User getUserDetails () {
+        Gson gson = new Gson();
+        SharedPreferences userPrefs = requireActivity().getSharedPreferences ("User", Context.MODE_PRIVATE);
+        String jsonData = userPrefs.getString ("UserDetails", "");
+        return gson.fromJson (jsonData, User.class);
+    }
 
+    /* check whether the camera permission has been already granted, otherwise, request one */
     private void viewCamera () {
 
         if (ContextCompat.checkSelfPermission(
@@ -368,4 +430,17 @@ public class HomeFragment extends Fragment implements
         Intent cameraIntent = new Intent("android.media.action.IMAGE_CAPTURE");
         startActivity(cameraIntent);
     }
+
+    /* Request for Bluetooth Permission */
+    ActivityResultLauncher<Intent> requestBluetoothLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        // user has allowed and enabled bluetooth
+                        openUnlockOptions();
+                    }
+                }
+            });
+
 }

@@ -18,10 +18,19 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import
  com.example.singbike.MainActivity;
 import com.example.singbike.Models.User;
 import com.example.singbike.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.regex.Pattern;
 
@@ -29,6 +38,9 @@ public class SignUpActivity extends AppCompatActivity {
 
     private static final String DEBUG_SIGNUP = "DEBUG_SIGN_UP";
     private static final String DEBUG_SP = "DEBUG_WRITE_SP";
+    private static final String DEBUG_REGISTER = "DEBUG_REGISTER_REQUEST";
+
+    private RequestQueue requestQueue; // network request for Sign In
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
@@ -100,32 +112,82 @@ public class SignUpActivity extends AppCompatActivity {
                              * the users do not need to sign in everytime when they open the app.
                              * These details will be deleted only when the app is un-installed or the user signs out.
                              */
+                            requestQueue = Volley.newRequestQueue (SignUpActivity.this);
+                            final String registerUrl = "http://10.0.2.2:8000/customers/";
 
-                            /*
-                             * save the user login state in the device memory
-                             * so that user do not need to login every time when he opens the app.
-                             */
-                            // initialise sharedPreferences
-                            Log.d (DEBUG_SP, "Writing to SharedPreferences ...");
-                            SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
-                            // initialise sharePreferences editor to write new key-value pairs
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putBoolean(getString(R.string.isSignedin), true);
-                            editor.apply(); // update(write) values asynchronously
+                            // construct JSON object to for POST Request
+                            JSONObject registerData = new JSONObject();
+                            try {
+                                registerData.put ("username", unameET.getText().toString());
+                                registerData.put ("email", emailET.getText().toString());
+                                registerData.put ("password", pwdET.getText().toString());
+                            }
+                            catch (JSONException je) {
+                                je.printStackTrace();
+                            }
 
-                            User user = new User();
-                            user.setEmail(emailET.getText().toString());
-                            user.setUsername(unameET.getText().toString());
+                            JsonObjectRequest registerRequest = new JsonObjectRequest (Request.Method.POST, registerUrl, registerData,
+                                new Response.Listener<JSONObject>() {
+                                    @Override
+                                    public void onResponse (JSONObject response) {
+                                        // successfully register
+                                        Log.d (DEBUG_REGISTER, response.toString());
 
-                            Intent intent = new Intent (getApplicationContext(), MainActivity.class);
-                            intent.putExtra ("user", user);
-                            startActivity(intent);
+                                        /*
+                                         * save the user login state in the device memory
+                                         * so that user do not need to login every time when he opens the app.
+                                         */
+                                        // initialise sharedPreferences
+                                        Log.d (DEBUG_SP, "Writing to SharedPreferences ...");
+                                        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
+                                        // initialise sharePreferences editor to write new key-value pairs
+                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                        editor.putBoolean(getString(R.string.isSignedin), true);
+                                        editor.apply(); // update(write) values asynchronously
+
+                                        User user = new User();
+                                        user.setEmail(emailET.getText().toString());
+                                        user.setUsername(unameET.getText().toString());
+
+                                        Intent intent = new Intent (getApplicationContext(), MainActivity.class);
+                                        intent.putExtra ("user", user);
+                                        startActivity(intent);
+                                    }
+                                }, new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse (VolleyError error) {
+                                        // registration error
+                                        error.printStackTrace();
+                                        Log.d (DEBUG_REGISTER, error.toString());
+                                    }
+                            });
+
+                            registerRequest.setTag ("RegisterRequest");
+                            requestQueue.add (registerRequest);
                         }
                     }
                 }
         );
 
     }
+
+
+    /* Cancel Network Request if the activity is not longer in the foreground */
+    @Override
+    public void onPause () {
+        super.onPause();
+        if (requestQueue != null)
+            requestQueue.cancelAll ("RegisterRequest");
+    }
+
+    /* Cancel Network Request if the activity is not longer in the foreground */
+    @Override
+    public void onStop () {
+        super.onStop();
+        if (requestQueue != null)
+            requestQueue.cancelAll ("RegisterRequest");
+    }
+
 
     /**
      * Validation of sign up process.

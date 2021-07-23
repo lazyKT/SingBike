@@ -122,8 +122,12 @@ public class AccountFragment extends  Fragment{
                                             public void onClick (DialogInterface dialogInterface, int which) {
                                                 dialogInterface.dismiss();
                                                 // remove the sharePreferences value from the device storage
+                                                SharedPreferences userPrefs = requireActivity().getSharedPreferences ("User", Context.MODE_PRIVATE);
                                                 SharedPreferences preferences = requireActivity().getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
                                                 SharedPreferences.Editor editor = preferences.edit();
+                                                SharedPreferences.Editor editor1 = userPrefs.edit();
+                                                editor1.clear();
+                                                editor1.apply();
                                                 editor.clear();
                                                 editor.apply();
                                                 // logout user

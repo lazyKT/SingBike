@@ -49,7 +49,7 @@ public class PaymentMethodRecyclerAdapter extends RecyclerView.Adapter<PaymentMe
         }
     }
 
-    private ArrayList<PaymentMethod> paymentMethods;
+    private final ArrayList<PaymentMethod> paymentMethods;
 
     public PaymentMethodRecyclerAdapter (ArrayList<PaymentMethod> paymentMethods) {
         this.paymentMethods = paymentMethods;
