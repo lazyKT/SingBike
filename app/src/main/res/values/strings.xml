@@ -38,6 +38,7 @@
     <string name="allow">Allow</string>
     <string name="never">Never</string>
     <string name="camera_request">You must allow the app to use camera to unlock a bike:)</string>
+    <string name="file_request">Do you want to allow SinBike to access your image files?</string>
 
     <!-- navigation menu -->
     <string name="home">HOME</string>
