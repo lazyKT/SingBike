@@ -1,16 +1,11 @@
 package com.example.singbike;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
-
-import android.Manifest;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,31 +15,29 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-import com.example.singbike.Authentication.SignInDialogFragment;
 import com.example.singbike.Authentication.SignUpActivity;
 import com.example.singbike.Models.User;
+import com.example.singbike.NetworkRequests.RetrofitClient;
+import com.example.singbike.NetworkRequests.RetrofitServices;
+import com.example.singbike.NetworkRequests.UserRequest;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.io.IOException;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
 
 public class AuthActivity extends AppCompatActivity {
 
     private static final String DEBUG_LOGIN = "DEBUG_LOGIN";
 
-    private RequestQueue signInRequest;
+    private TextView errorTV;
 
     @Override
     public void onStart () {
@@ -109,51 +102,16 @@ public class AuthActivity extends AppCompatActivity {
                         View bottomSheet = LayoutInflater.from(AuthActivity.this)
                                 .inflate (R.layout.fragment_signin, (LinearLayout) findViewById (R.id.signInBottomSheet));
 
-                        final EditText usernameET = bottomSheet.findViewById (R.id.usernameETSignIn);
+                        final EditText emailET = bottomSheet.findViewById (R.id.emailETSignIn);
                         final EditText passwordET = bottomSheet.findViewById (R.id.passwordETSignIn);
                         final Button signInButton = bottomSheet.findViewById (R.id.signInBtnSignIn);
-                        final TextView errorTextView = bottomSheet.findViewById (R.id.errorTV_SignIn);
+                        errorTV = bottomSheet.findViewById (R.id.errorTV_SignIn);
 
                         signInButton.setOnClickListener(
                                 new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        signInRequest = Volley.newRequestQueue (AuthActivity.this);
-                                        final String signInURL = "http://10.0.2.2:8000/customers/login/";
-
-                                        // Construct JSON Data for POST Request
-                                        JSONObject signInData = new JSONObject();
-                                        try {
-                                            signInData.put ("email", usernameET.getText().toString());
-                                            signInData.put ("password", passwordET.getText().toString());
-                                        }
-                                        catch (JSONException je) {
-                                            je.printStackTrace();
-                                        }
-
-                                        // Construct the request
-                                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, signInURL, signInData,
-                                            new Response.Listener<JSONObject>() {
-                                                @Override
-                                                public void onResponse(JSONObject response) {
-                                                    /* successfully sign in */
-                                                    errorTextView.setVisibility (View.GONE);
-                                                    handleSignInSuccess (AuthActivity.this, response);
-                                                }
-                                            }, new Response.ErrorListener () {
-                                                @Override
-                                                public void onErrorResponse (VolleyError error) {
-                                                    /* Error Sign In */
-                                                    errorTextView.setVisibility (View.VISIBLE);
-                                                    Log.d (DEBUG_LOGIN, "status code : " + String.valueOf(error.networkResponse.statusCode));
-                                                    String errorMessage = new String (error.networkResponse.data, StandardCharsets.UTF_8);
-                                                    Log.d (DEBUG_LOGIN, "message : " + errorMessage);
-                                                    errorTextView.setText (errorMessage);
-                                                }
-                                        });
-
-                                        jsonObjectRequest.setTag ("SignInRequest");
-                                        signInRequest.add (jsonObjectRequest);
+                                        handleSignIn (emailET.getText().toString(), passwordET.getText().toString());
                                     }
                                 }
                         );
@@ -170,41 +128,81 @@ public class AuthActivity extends AppCompatActivity {
     @Override
     public void onStop () {
         super.onStop();
-        if (signInRequest != null)
-            signInRequest.cancelAll ("SignInRequest");
+
     }
 
     /* Cancel Network Request if the activity is not longer in the foreground */
     @Override
     public void onPause () {
         super.onPause();
-        if (signInRequest != null)
-            signInRequest.cancelAll ("SignInRequest");
+
     }
 
-    /* sign in user */
-    private void handleSignInSuccess (Context context, JSONObject response) {
-        try {
-            JSONObject userJSONObject = response.getJSONObject ("customer");
-            User user = new User();
-            user.setID (userJSONObject.getInt ("id"));
-            user.setEmail (userJSONObject.getString("email"));
-            user.setUsername (userJSONObject.getString("username"));
-            user.setBalance (userJSONObject.getDouble("balance"));
-            user.setCredits (userJSONObject.getInt("credits"));
-            user.setCreated_at (userJSONObject.getString("created_at"));
-            user.setUpdated_at (userJSONObject.getString("updated_at"));
+    /* make sign in request */
+    private void handleSignIn (String email, String password) {
+        Retrofit retrofit = RetrofitClient.getRetrofit();
+        RetrofitServices services = retrofit.create (RetrofitServices.class);
 
-            /* save user details in SharedPreferences (Local Storage) */
-            saveToSharedPref (user);
+        UserRequest requestBody = new UserRequest ("", email, password);
 
-            Intent intent = new Intent (context, MainActivity.class);
-            intent.putExtra ("user", user);
-            startActivity (intent);
-        }
-        catch (JSONException je) {
-            je.printStackTrace();
-        }
+        Call<ResponseBody> call = services.signInRequest (requestBody);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call,@NonNull retrofit2.Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        Log.d (DEBUG_LOGIN, response.body().toString());
+                        try {
+                            JSONObject responseObj = new JSONObject(response.body().string());
+                            JSONObject userJsonObject = responseObj.getJSONObject ("customer");
+
+                            /* set new user */
+                            User user = new User();
+                            user.setID (userJsonObject.getInt("id"));
+                            user.setUsername (userJsonObject.getString("username"));
+                            user.setEmail (userJsonObject.getString("email"));
+                            user.setBalance (userJsonObject.getDouble("balance"));
+                            user.setCredits (userJsonObject.getInt("credits"));
+                            user.setCreated_at (userJsonObject.getString("created_at"));
+                            user.setUpdated_at (userJsonObject.getString("updated_at"));
+
+                            /* save user data in Local Storage (SharedPreferences) */
+                            saveToSharedPref (user);
+
+                            /* redirect to Home Page */
+                            startActivity (new Intent(AuthActivity.this, MainActivity.class));
+
+                        } catch (JSONException | IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        if (errorTV.getVisibility() == View.GONE) {
+                            errorTV.setVisibility (View.VISIBLE);
+                        }
+                        Log.d (DEBUG_LOGIN, "Response has empty body!!");
+                        errorTV.setText (response.message());
+                    }
+                }
+                else {
+                    Log.d (DEBUG_LOGIN, "Response has failed!");
+                    if (errorTV.getVisibility() == View.GONE) {
+                        errorTV.setVisibility (View.VISIBLE);
+                    }
+                    errorTV.setText (R.string.sign_in_fail);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                Log.d (DEBUG_LOGIN, "throwable : " + t.toString());
+                if (errorTV.getVisibility() == View.GONE) {
+                    errorTV.setVisibility (View.VISIBLE);
+                }
+                errorTV.setText (t.getMessage());
+            }
+        });
+
     }
 
     /* save user data in SharedPreferences */

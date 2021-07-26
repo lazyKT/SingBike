@@ -12,7 +12,7 @@ import java.util.Locale;
 
 public class User implements Parcelable {
 
-    private String username, email, created_at, updated_at;
+    private String username, email, password, created_at, updated_at;
     private double balance;
     private int id, credits;
 
@@ -21,6 +21,12 @@ public class User implements Parcelable {
     public User (String username, String email) {
         this.username = username;
         this.email = email;
+    }
+
+    public User (String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
     }
 
     public User (int id, String username, String email, int credits, double balance, String created_at, String updated_at) {
@@ -80,6 +86,8 @@ public class User implements Parcelable {
         this.email = email;
     }
 
+    public void setPassword (String password) { this.password = password; }
+
     public void setCreated_at (String created_at) { this.created_at = created_at; }
 
     public void setUpdated_at (String updated_at) { this.updated_at = updated_at; }
@@ -93,6 +101,8 @@ public class User implements Parcelable {
     public String getUsername () { return this.username; }
 
     public String getEmail () { return this.email; }
+
+    public String getPassword () { return this.password; }
 
     public String getCreated_at () { return this.created_at; }
 

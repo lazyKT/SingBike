@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
@@ -27,12 +28,22 @@ import com.android.volley.toolbox.Volley;
 import
  com.example.singbike.MainActivity;
 import com.example.singbike.Models.User;
+import com.example.singbike.NetworkRequests.RetrofitClient;
+import com.example.singbike.NetworkRequests.RetrofitServices;
+import com.example.singbike.NetworkRequests.UserRequest;
 import com.example.singbike.R;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.regex.Pattern;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -40,7 +51,7 @@ public class SignUpActivity extends AppCompatActivity {
     private static final String DEBUG_SP = "DEBUG_WRITE_SP";
     private static final String DEBUG_REGISTER = "DEBUG_REGISTER_REQUEST";
 
-    private RequestQueue requestQueue; // network request for Sign In
+    private TextView errorTV;
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
@@ -51,7 +62,7 @@ public class SignUpActivity extends AppCompatActivity {
         final EditText emailET = findViewById (R.id.emailET_SignUp);
         final EditText pwdET = findViewById (R.id.passwordET_SignUp);
 
-        final TextView errorTV = findViewById (R.id.errorTV_SignUp);
+        errorTV = findViewById (R.id.errorTV_SignUp);
         errorTV.setVisibility(View.GONE);
 
         final Button signUpBtn = findViewById (R.id.signUpButton_SignUp);
@@ -112,58 +123,12 @@ public class SignUpActivity extends AppCompatActivity {
                              * the users do not need to sign in everytime when they open the app.
                              * These details will be deleted only when the app is un-installed or the user signs out.
                              */
-                            requestQueue = Volley.newRequestQueue (SignUpActivity.this);
-                            final String registerUrl = "http://10.0.2.2:8000/customers/";
-
-                            // construct JSON object to for POST Request
-                            JSONObject registerData = new JSONObject();
-                            try {
-                                registerData.put ("username", unameET.getText().toString());
-                                registerData.put ("email", emailET.getText().toString());
-                                registerData.put ("password", pwdET.getText().toString());
-                            }
-                            catch (JSONException je) {
-                                je.printStackTrace();
-                            }
-
-                            JsonObjectRequest registerRequest = new JsonObjectRequest (Request.Method.POST, registerUrl, registerData,
-                                new Response.Listener<JSONObject>() {
-                                    @Override
-                                    public void onResponse (JSONObject response) {
-                                        // successfully register
-                                        Log.d (DEBUG_REGISTER, response.toString());
-
-                                        /*
-                                         * save the user login state in the device memory
-                                         * so that user do not need to login every time when he opens the app.
-                                         */
-                                        // initialise sharedPreferences
-                                        Log.d (DEBUG_SP, "Writing to SharedPreferences ...");
-                                        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
-                                        // initialise sharePreferences editor to write new key-value pairs
-                                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                                        editor.putBoolean(getString(R.string.isSignedin), true);
-                                        editor.apply(); // update(write) values asynchronously
-
-                                        User user = new User();
-                                        user.setEmail(emailET.getText().toString());
-                                        user.setUsername(unameET.getText().toString());
-
-                                        Intent intent = new Intent (getApplicationContext(), MainActivity.class);
-                                        intent.putExtra ("user", user);
-                                        startActivity(intent);
-                                    }
-                                }, new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse (VolleyError error) {
-                                        // registration error
-                                        error.printStackTrace();
-                                        Log.d (DEBUG_REGISTER, error.toString());
-                                    }
-                            });
-
-                            registerRequest.setTag ("RegisterRequest");
-                            requestQueue.add (registerRequest);
+                            UserRequest newUser = new UserRequest (
+                                    unameET.getText().toString(),
+                                    emailET.getText().toString(),
+                                    pwdET.getText().toString()
+                            );
+                            handleSignUp(newUser);
                         }
                     }
                 }
@@ -176,16 +141,14 @@ public class SignUpActivity extends AppCompatActivity {
     @Override
     public void onPause () {
         super.onPause();
-        if (requestQueue != null)
-            requestQueue.cancelAll ("RegisterRequest");
+
     }
 
     /* Cancel Network Request if the activity is not longer in the foreground */
     @Override
     public void onStop () {
         super.onStop();
-        if (requestQueue != null)
-            requestQueue.cancelAll ("RegisterRequest");
+
     }
 
 
@@ -230,4 +193,71 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
 
+    /* Handle SignUp Request with Retrofit2 */
+    private void handleSignUp (UserRequest user) {
+
+        Retrofit retrofit = RetrofitClient.getRetrofit();
+        RetrofitServices services = retrofit.create (RetrofitServices.class);
+
+        Call<ResponseBody> call = services.signUpRequest (user);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call,@NonNull retrofit2.Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        Log.d (DEBUG_REGISTER, response.body().toString());
+                        try {
+                            /* convert response to JSONObject*/
+                            JSONObject jsonObject = new JSONObject (response.body().string());
+                            JSONObject userJsonObject = jsonObject.getJSONObject("customer");
+
+                            /* set new user */
+                            User user = new User();
+                            user.setID (userJsonObject.getInt("id"));
+                            user.setUsername (userJsonObject.getString("username"));
+                            user.setEmail (userJsonObject.getString("email"));
+                            user.setBalance (userJsonObject.getDouble("balance"));
+                            user.setCredits (userJsonObject.getInt("credits"));
+                            user.setCreated_at (userJsonObject.getString("created_at"));
+                            user.setUpdated_at (userJsonObject.getString("updated_at"));
+
+                            /* save user data in Local Storage (SharedPreferences) */
+                            saveToSharedPref (user);
+
+                            /* redirect to Home Page */
+                            startActivity (new Intent(SignUpActivity.this, MainActivity.class));
+
+                        } catch (JSONException | IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        Log.d (DEBUG_REGISTER, "Response has empty body!!");
+                        errorTV.setText (response.message());
+                    }
+                }
+                else {
+                    Log.d (DEBUG_REGISTER, "Response has failed!");
+                    errorTV.setText (R.string.sign_up_fail);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                Log.d (DEBUG_REGISTER, "throwable : " + t.toString());
+                errorTV.setText (t.getMessage());
+            }
+        });
+    }
+
+    /* save user data in SharedPreferences */
+    private void saveToSharedPref (User user) {
+        SharedPreferences userPrefs = this.getSharedPreferences("User", MODE_PRIVATE);
+        SharedPreferences.Editor editor = userPrefs.edit();
+
+        Gson gson = new Gson();
+        String json = gson.toJson (user);
+        editor.putString ("UserDetails", json);
+        editor.apply();
+    }
 }

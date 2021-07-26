@@ -33,6 +33,8 @@
     <string name="pwd_err_chars">Password must contain at least 1 Capital Letter, 1 Small Letter and 1 digit.</string>
     <string name="confirm_pwd_err">Passwords do not match.</string>
     <string name="server_error">Can\'t Connect to Server</string>
+    <string name="sign_up_fail">Sign Up Failed! Try Again!</string>
+    <string name="sign_in_fail">Invalid Credentials</string>
 
     <!-- permission request messages -->
     <string name="allow">Allow</string>
