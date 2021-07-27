@@ -19,6 +19,26 @@ public class Achievement {
         this.drawableResource = drawableResource;
     }
 
+    public void setName (String name) {
+        this.name = name;
+    }
+
+    public void setMax (int max) {
+        this.max = max;
+    }
+
+    public void setCurrent (int current) {
+        this.current = current;
+    }
+
+    public void setReward (double reward) {
+        this.reward = reward;
+    }
+
+    public void setDrawableResource (int res) {
+        this.drawableResource = res;
+    }
+
     public double getReward() {
         return reward;
     }

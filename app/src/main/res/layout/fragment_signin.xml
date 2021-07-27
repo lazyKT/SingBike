@@ -46,24 +46,36 @@
         android:padding="15dp">
 
         <TextView
+            android:id="@+id/errorTV_SignIn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="@color/red"
+            android:text="@string/server_error"
+            android:visibility="gone"
+            android:layout_marginBottom="10dp"
+            />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:text="@string/username"
+            android:text="@string/email"
             android:textSize="15sp"
             android:textColor="@color/darkGray"
             android:textStyle="bold"/>
 
         <EditText
-            android:id="@+id/usernameETSignIn"
+            android:id="@+id/emailETSignIn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp"
             android:background="@drawable/edit_text_border"
             android:padding="10dp"
-            android:hint="@string/username"
-            android:inputType="text"
-            android:autofillHints="@string/username"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress"
+            android:autofillHints="@string/email"
+            android:textSize="15sp"
             />
 
         <TextView
@@ -85,6 +97,7 @@
             android:hint="@string/pwd"
             android:inputType="textPassword"
             android:autofillHints="@string/pwd"
+            android:textSize="15sp"
             />
 
         <Button

@@ -1,26 +1,64 @@
 package com.example.singbike;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.singbike.Adapters.SlidePagerAdapter;
+import com.example.singbike.LocalStorage.Achievement;
+import com.example.singbike.LocalStorage.AchievementDatabase;
+import com.example.singbike.Utilities.AppExecutor;
+
+import java.util.ArrayList;
+
 
 public class IntroActivity extends AppCompatActivity {
 
     private static final int numPages = 3;
     private ViewPager2 viewPager;
+    private boolean dataLoaded = false;
+    private AlertDialog loadingDialog = null;
 
 
     @Override
     public void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
+
+        /* check whether the app is launched for first time */
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences (getApplicationContext());
+        String FINISH_INTRO_SECTION = "FINISH_INTRO_SECTION";
+        boolean finishedIntroSection = preferences.getBoolean(FINISH_INTRO_SECTION, false);
+
+        /* the app is not launched for the first time, redirect to login page */
+        if (finishedIntroSection) {
+            startActivity(new Intent(IntroActivity.this, AuthActivity.class));
+        }
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean (FINISH_INTRO_SECTION, true);
+        editor.apply();
+
+        /* insert all achievements data into Local Database (Room) */
+        if (!finishedIntroSection)
+            bulkInsertAchievements();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final View v = LayoutInflater.from (this)
+                .inflate (R.layout.loading, null);
+        builder.setView (v);
+        builder.create();
+        loadingDialog = builder.show();
 
         final ImageView indicator1 = findViewById (R.id.slideIndicator1);
         final ImageView indicator2 = findViewById (R.id.slideIndicator2);
@@ -66,8 +104,10 @@ public class IntroActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick (View v) {
-                        Intent intent = new Intent(getApplicationContext(), AuthActivity.class);
-                        startActivity(intent);
+                        if (dataLoaded) {
+                            Intent intent = new Intent(getApplicationContext(), AuthActivity.class);
+                            startActivity(intent);
+                        }
                     }
                 }
         );
@@ -85,5 +125,42 @@ public class IntroActivity extends AppCompatActivity {
         else {
             viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
         }
+    }
+
+    private void bulkInsertAchievements () {
+
+        Log.i ("BULK_INSERT", "Inserting into Room DB");
+        final AchievementDatabase achievementDatabase = AchievementDatabase.getInstance (getApplicationContext());
+
+        final String[] achievementTiles = getResources().getStringArray (R.array.achievements_titles);
+        final int[] achievementGoals = getResources().getIntArray (R.array.achievements_goals);
+        final String[] achievementRewards = getResources().getStringArray (R.array.achievements_rewards);
+        final int totalAchievements = achievementTiles.length;
+
+        final ArrayList<Achievement> achievementArrayList = new ArrayList<>();
+
+        for (int i = 0; i < totalAchievements; i++) {
+            achievementArrayList.add(
+                    new Achievement (
+                            achievementTiles[i], achievementGoals[i], 0,
+                            Double.parseDouble(achievementRewards[i]), "", false)
+            );
+        }
+
+        AppExecutor.getInstance().getDiskIO().execute (new Runnable () {
+            @Override
+            public void run () {
+                achievementDatabase.achievementDAO().insertAll(achievementArrayList.toArray (new Achievement[totalAchievements]));
+                dataLoaded = true;
+                runOnUiThread (new Runnable () {
+                    @Override
+                    public void run () {
+                        loadingDialog.dismiss();
+                    }
+                });
+            }
+        });
+
+
     }
 }

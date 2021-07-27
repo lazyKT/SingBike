@@ -15,20 +15,44 @@
         android:textSize="17sp"
         android:textStyle="bold" />
 
+    <LinearLayout
+        android:id="@+id/loadingLayout_Achievements"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <ProgressBar
+            android:id="@+id/achievementLoadingProgBar"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="10dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/loading_achievement"
+            />
+
+    </LinearLayout>
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresheLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="gone"
         android:layout_marginTop="10dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/achievementRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="50dp"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/achievementRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="10dp"
+            android:paddingBottom="80dp"/>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

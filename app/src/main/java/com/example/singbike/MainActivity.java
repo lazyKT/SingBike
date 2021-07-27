@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -24,8 +25,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class MainActivity extends AppCompatActivity
     implements ReservationDialog.ReservationDialogListener {
 
-    private final static String DEBUG_BOT_NAV = "DEBUG_BOTTOM_NAVIGATION";
-    private final static String DEBUG_SAVEDINSTANCES = "DEBUG_SAVEDINSTANCES";
     private final static String DEBUG_CAMERA_PERMISSION = "DEBUG_CAM_PERMISSION";
     private static final String DEBUG_RESERVE = "DEBUG_RESERVE_RESULT";
 
@@ -60,6 +59,7 @@ public class MainActivity extends AppCompatActivity
         /* onClick Action on Navigation Menus */
         botNavigationView.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
+                    @SuppressLint("NonConstantResourceId")
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             case LOCATION_ACCESS:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                    //
                 }
                 else {
 
