@@ -104,7 +104,7 @@ public class HomeFragment extends Fragment implements
 
         // map configuration
         GoogleMapOptions mapOptions = new GoogleMapOptions();
-        mapOptions.mapType(GoogleMap.MAP_TYPE_TERRAIN)
+        mapOptions.mapType(GoogleMap.MAP_TYPE_NORMAL)
                 .compassEnabled(false)
                 .rotateGesturesEnabled(true)
                 .tiltGesturesEnabled(true);

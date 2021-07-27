@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">SinBike</string>
 
+    <string name="Google_MAPS_API_Key">AIzaSyAbdg7e4xDXnRqj5jWjddeR_onCEbvBZLA</string>
+
     <string name="ok">Okay</string>
     <string name="cancel">Cancel</string>
 
@@ -111,6 +113,7 @@
     </string-array>
 
     <!-- achievements -->
+    <string name="loading_achievement">Loading Achievements ...</string>
     <string-array name="achievements">
         <item>Complete 10 rides.</item>
         <item>Complete 20 rides.</item>
@@ -121,6 +124,42 @@
         <item>Ride 5 km.</item>
         <item>Ride 10 km.</item>
         <item>Ride 15 km.</item>
+    </string-array>
+
+    <string-array name="achievements_titles">
+        <item>Complete 10 rides.</item>
+        <item>Complete 20 rides.</item>
+        <item>Complete 50 rides.</item>
+        <item>Complete 75 rides.</item>
+        <item>Complete 100 rides.</item>
+        <item>Ride 3 km.</item>
+        <item>Ride 5 km.</item>
+        <item>Ride 10 km.</item>
+        <item>Ride 15 km.</item>
+    </string-array>
+
+    <integer-array name="achievements_goals">
+        <item>10</item>
+        <item>20</item>
+        <item>50</item>
+        <item>75</item>
+        <item>100</item>
+        <item>3</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+    </integer-array>
+
+    <string-array name="achievements_rewards">
+        <item>1.50</item>
+        <item>3.00</item>
+        <item>5.00</item>
+        <item>10.00</item>
+        <item>15.00</item>
+        <item>1.00</item>
+        <item>2.00</item>
+        <item>5.00</item>
+        <item>7.00</item>
     </string-array>
 
     <!-- ride history -->
