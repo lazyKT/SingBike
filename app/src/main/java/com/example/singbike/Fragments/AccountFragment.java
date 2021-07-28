@@ -165,6 +165,12 @@ public class AccountFragment extends  Fragment{
 
     }
 
+    /* display error dialog */
+    private void displayErrorDialog () {
+
+    }
+
+
     /* fetch Avatar from the server */
     private void fetchAvatar () {
 
