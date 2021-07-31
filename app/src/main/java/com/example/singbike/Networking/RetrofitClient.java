@@ -1,5 +1,5 @@
 /* Configurations for REST Retrofit Client */
-package com.example.singbike.NetworkRequests;
+package com.example.singbike.Networking;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

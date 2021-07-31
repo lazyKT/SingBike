@@ -1,32 +1,27 @@
-package com.example.singbike.NetworkRequests;
+package com.example.singbike.Networking.Requests;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class RideUpdateRequest {
 
-    private int customerID, tripID;
+    private int cust_id;
     private double distance, fare, promo, total;
-    private String endPoint, path;
+    private String end_point, path;
 
-    public RideUpdateRequest (int customerID, int tripID, double distance, double fare, double promo,
+    public RideUpdateRequest (int customerID, double distance, double fare, double promo,
                               double total, String endPoint) {
-        this.customerID = customerID;
-        this.tripID = tripID;
+        this.cust_id = customerID;
         this.distance = distance;
         this.fare = fare;
         this.promo = promo;
         this.total = total;
-        this.endPoint = endPoint;
+        this.end_point = endPoint;
         this.path = "";
     }
 
     public void setCustomerID (int customerID) {
-        this.customerID = customerID;
-    }
-
-    public void setTripID (int tripID) {
-        this.tripID = tripID;
+        this.cust_id = customerID;
     }
 
     public void setDistance (double distance) {
@@ -46,7 +41,7 @@ public class RideUpdateRequest {
     }
 
     public void setEndPoint (String endPoint) {
-        this.endPoint = endPoint;
+        this.end_point = endPoint;
     }
 
     public void setPath (ArrayList<String> points) {

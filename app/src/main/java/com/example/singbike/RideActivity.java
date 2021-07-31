@@ -17,13 +17,10 @@ public class RideActivity extends AppCompatActivity {
         ImageButton backButton = findViewById (R.id.backButton_Riding);
 
         backButton.setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+                v -> {
                     Intent intent = new Intent (RideActivity.this, MainActivity.class);
                     startActivity (intent);
                 }
-            }
         );
 
     }

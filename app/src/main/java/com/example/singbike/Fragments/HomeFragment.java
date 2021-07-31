@@ -75,15 +75,12 @@ public class HomeFragment extends Fragment implements
         super.onCreate(savedInstanceState);
         Log.d (DEBUG_FRAGMENT, "OnCreate Home Fragment!");
         getParentFragmentManager().setFragmentResultListener("reservation", this,
-            new FragmentResultListener() {
-                @Override
-                public void onFragmentResult (@NonNull String requestKey, @NonNull Bundle bundle) {
+                (requestKey, bundle) -> {
                     // receive reservation result from dialog fragment
                     int confirmResult = bundle.getInt ("reserve_confirm");
                     if (confirmResult == 0)
                         Toast.makeText (requireActivity(), "You have cancel the bike reservation!!", Toast.LENGTH_LONG).show();
-                }
-            });
+                });
     }
 
     @Override
@@ -120,39 +117,30 @@ public class HomeFragment extends Fragment implements
 
         final Button unlockButton = view.findViewById(R.id.unlockButton);
         unlockButton.setOnClickListener (
-                new View.OnClickListener () {
-                    @Override
-                    public void onClick (View v)
-                    {
-                        // check bluetooth feature is supported in user's device
-                        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                        if (bluetoothAdapter == null) {
-                            Toast.makeText (requireActivity(), "Your device does not support Bluetooth!", Toast.LENGTH_LONG).show();
-                        }
-                        if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
-                            // ask user to enable bluetooth
-                            Intent enableBluetooth = new Intent (BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                            requestBluetoothLauncher.launch (enableBluetooth);
-                        }
+                v -> {
+                    // check bluetooth feature is supported in user's device
+                    BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                    if (bluetoothAdapter == null) {
+                        Toast.makeText (requireActivity(), "Your device does not support Bluetooth!", Toast.LENGTH_LONG).show();
+                    }
+                    if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
+                        // ask user to enable bluetooth
+                        Intent enableBluetooth = new Intent (BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                        requestBluetoothLauncher.launch (enableBluetooth);
+                    }
 //                        // ask users whether open camera to scan qr code or key in manually
 //                        openUnlockOptions();
-                    }
                 }
         );
 
         final FloatingActionButton reportButton = view.findViewById (R.id.reportButton_Home);
         reportButton.setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    (requireActivity()).getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace (R.id.fragmentContainerView, ReportFragment.class, null)
-                            .setReorderingAllowed (true)
-                            .addToBackStack ("report")
-                            .commit();
-                }
-            }
+                v -> (requireActivity()).getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace (R.id.fragmentContainerView, ReportFragment.class, null)
+                        .setReorderingAllowed (true)
+                        .addToBackStack ("report")
+                        .commit()
         );
     }
 
@@ -272,36 +260,25 @@ public class HomeFragment extends Fragment implements
 
         /* cancel button click -> dismiss the bottom sheet */
         cancelButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        bottomSheetDialog.dismiss();
-                    }
-                }
+                v -> bottomSheetDialog.dismiss()
         );
 
         /* unlock now button -> open camera to scan bike's QR code */
         unlockNowButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // open camera
-                        viewCamera();
-                    }
+                v -> {
+                    // open camera
+                    viewCamera();
                 }
         );
 
         /* reserve now button -> go to reservation (booking) tab */
         reserveNowButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // reserve now
-                        bottomSheetDialog.dismiss();
-                        // send bikeID to the dialogFragment
-                        ReservationDialog dialog = ReservationDialog.newInstance(marker.getTitle());
-                        dialog.show (getChildFragmentManager(), dialog.getTag());
-                    }
+                v -> {
+                    // reserve now
+                    bottomSheetDialog.dismiss();
+                    // send bikeID to the dialogFragment
+                    ReservationDialog dialog = ReservationDialog.newInstance(marker.getTitle());
+                    dialog.show (getChildFragmentManager(), dialog.getTag());
                 }
         );
 
@@ -333,19 +310,14 @@ public class HomeFragment extends Fragment implements
         manualKeyInBikeIDET.setVisibility (View.GONE);
 
         scanQRCodeButton.setOnClickListener (
-            new View.OnClickListener () {
-                @Override
-                public void onClick(View v) {
+                v -> {
                     // open camera to scan qr code
                     viewCamera();
                 }
-            }
         );
 
         manualKeyInButton.setOnClickListener (
-            new View.OnClickListener () {
-                @Override
-                public void onClick (View v) {
+                v -> {
                     // show text box to key in manually
                     scanQRCodeButton.setVisibility (View.GONE);
                     cancelManualKeyInButton.setVisibility (View.VISIBLE);
@@ -356,18 +328,14 @@ public class HomeFragment extends Fragment implements
                         startActivity (intent);
                     }
                 }
-            }
         );
 
         cancelManualKeyInButton.setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+                v -> {
                     scanQRCodeButton.setVisibility (View.VISIBLE);
                     cancelManualKeyInButton.setVisibility (View.GONE);
                     manualKeyInBikeIDET.setVisibility (View.GONE);
                 }
-            }
         );
 
         bottomSheetDialog.setContentView (bottomSheet);
@@ -433,13 +401,10 @@ public class HomeFragment extends Fragment implements
 
     /* Request for Bluetooth Permission */
     ActivityResultLauncher<Intent> requestBluetoothLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        // user has allowed and enabled bluetooth
-                        openUnlockOptions();
-                    }
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    // user has allowed and enabled bluetooth
+                    openUnlockOptions();
                 }
             });
 

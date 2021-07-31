@@ -17,12 +17,13 @@ import com.example.singbike.R;
 
 public class ErrorDialog extends DialogFragment {
 
-    private final String errorTxt;
+    private final String errorTxt, title;
     private final Context context;
 
-    public ErrorDialog (Context context, String errorTxt) {
+    public ErrorDialog (Context context, String title, String errorTxt) {
         this.errorTxt = errorTxt;
         this.context = context;
+        this.title = title;
     }
 
     @NonNull
@@ -35,9 +36,11 @@ public class ErrorDialog extends DialogFragment {
                 .inflate (R.layout.dialog_error, null);
 
         builder.setView (v);
+        final TextView errorTitle = v.findViewById (R.id.errorTitle);
         final TextView errorTV =  v.findViewById (R.id.errorText);
         final Button dismissButton = v.findViewById (R.id.dismissButton_ErrorDialog);
 
+        errorTitle.setText (title);
         errorTV.setText (errorTxt);
 
         AlertDialog dialog = builder.create();

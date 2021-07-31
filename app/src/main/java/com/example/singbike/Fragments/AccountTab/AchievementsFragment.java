@@ -52,37 +52,26 @@ public class AchievementsFragment extends Fragment {
         achievementRecyclerView.setAdapter(adapter);
 
         /* fetching achievements and progress from Local Database (Rooms) */
-        AppExecutor.getInstance().getDiskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                // Run on different thread (not UI Thread)
-                Log.i ("Reterive Achievements", "Retrieving Achievements");
-                /* retrieve achievements from local database  */
-                AchievementDatabase achievementDatabase = AchievementDatabase.getInstance (requireContext());
-                achievementList = achievementDatabase.achievementDAO().getAll();
+        AppExecutor.getInstance().getDiskIO().execute(() -> {
+            // Run on different thread (not UI Thread)
+            Log.i ("Retrieve Achievements", "Retrieving Achievements");
+            /* retrieve achievements from local database  */
+            AchievementDatabase achievementDatabase = AchievementDatabase.getInstance (requireContext());
+            achievementList = achievementDatabase.achievementDAO().getAll();
 
-                /* update UI Thread */
-                requireActivity().runOnUiThread (new Runnable() {
-                    @Override
-                    public void run () {
-                        Log.i ("Reterive Achievements", "Updated UI Thread");
-                        loadingLayout.setVisibility (View.GONE);
-                        refreshLayout.setVisibility (View.VISIBLE);
-                        adapter.setAchievements (achievementList);
-                        adapter.notifyDataSetChanged();
-                    }
-                });
-            }
+            /* update UI Thread */
+            requireActivity().runOnUiThread (() -> {
+                Log.i ("Retrieve Achievements", "Updated UI Thread");
+                loadingLayout.setVisibility (View.GONE);
+                refreshLayout.setVisibility (View.VISIBLE);
+                adapter.setAchievements (achievementList);
+                adapter.notifyDataSetChanged();
+            });
         });
 
         /* refresh event */
         refreshLayout.setOnRefreshListener (
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh () {
-                        Toast.makeText(requireActivity(), "Refreshing", Toast.LENGTH_LONG).show();
-                    }
-                }
+                () -> Toast.makeText(requireActivity(), "Refreshing", Toast.LENGTH_LONG).show()
         );
 
     }

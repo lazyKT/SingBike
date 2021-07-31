@@ -52,12 +52,7 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
 
             /* on Click action on each Transaction */
             itemView.setOnClickListener (
-                    new View.OnClickListener () {
-                        @Override
-                        public void onClick (View v) {
-                            listener.transactionItemOnClick(transaction);
-                        }
-                    }
+                    v -> listener.transactionItemOnClick(transaction)
             );
 
         }
@@ -65,13 +60,17 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
     }
 
     private ArrayList<Transaction> transactions;
-    private Context context;
-    private TransactionItemOnClickListener listener;
+    private final Context context;
+    private final TransactionItemOnClickListener listener;
 
     public TransactionRecyclerAdapter (ArrayList<Transaction> transactions, Context context, TransactionItemOnClickListener listener) {
         this.transactions = transactions;
         this.context = context;
         this.listener = listener;
+    }
+
+    public void setTransactions (ArrayList<Transaction> transactions) {
+        this.transactions = transactions;
     }
 
     @NonNull
@@ -92,7 +91,7 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
 
     @Override
     public int getItemCount () {
-        return transactions.size();
+        return this.transactions.size();
     }
 
 }

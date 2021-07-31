@@ -18,6 +18,17 @@ public class User implements Parcelable {
 
     public User () {}
 
+    public User (User user1) {
+        this.username = user1.username;
+        this.email = user1.email;
+        this.password = user1.password;
+        this.credits = user1.credits;
+        this.created_at = user1.created_at;
+        this.updated_at = user1.updated_at;
+        this.id = user1.id;
+        this.balance = user1.balance;
+    }
+
     public User (String username, String email) {
         this.username = username;
         this.email = email;

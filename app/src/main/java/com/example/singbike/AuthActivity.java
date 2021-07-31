@@ -3,7 +3,6 @@ package com.example.singbike;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,13 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.singbike.Authentication.SignUpActivity;
 import com.example.singbike.Models.User;
-import com.example.singbike.NetworkRequests.RetrofitClient;
-import com.example.singbike.NetworkRequests.RetrofitServices;
+import com.example.singbike.Networking.RetrofitClient;
+import com.example.singbike.Networking.RetrofitServices;
 import com.example.singbike.NetworkRequests.UserRequest;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
@@ -63,62 +61,41 @@ public class AuthActivity extends AppCompatActivity {
         final Button googleSignInButton = findViewById (R.id.googleSignInButton);
 
         joinButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        startActivity(new Intent(getApplicationContext(), SignUpActivity.class));
-                    }
-                }
+                v -> startActivity(new Intent(getApplicationContext(), SignUpActivity.class))
         );
 
         googleSignInButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(AuthActivity.this);
-                        builder.setTitle("Coming Soon :D")
-                                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                        builder.create();
-                        builder.show();
-                    }
+                v -> {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(AuthActivity.this);
+                    builder.setTitle("Coming Soon :D")
+                            .setPositiveButton(R.string.ok, (dialog, which) -> dialog.dismiss());
+                    builder.create();
+                    builder.show();
                 }
         );
 
         signInButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+                v -> {
 //                        openLoginDialog();
-                        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
-                                AuthActivity.this,
-                                R.style.BottomSheetDialogTheme
-                        );
+                    final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
+                            AuthActivity.this,
+                            R.style.BottomSheetDialogTheme
+                    );
 
-                        View bottomSheet = LayoutInflater.from(AuthActivity.this)
-                                .inflate (R.layout.fragment_signin, (LinearLayout) findViewById (R.id.signInBottomSheet));
+                    View bottomSheet = LayoutInflater.from(AuthActivity.this)
+                            .inflate (R.layout.fragment_signin, findViewById (R.id.signInBottomSheet));
 
-                        final EditText emailET = bottomSheet.findViewById (R.id.emailETSignIn);
-                        final EditText passwordET = bottomSheet.findViewById (R.id.passwordETSignIn);
-                        final Button signInButton = bottomSheet.findViewById (R.id.signInBtnSignIn);
-                        errorTV = bottomSheet.findViewById (R.id.errorTV_SignIn);
+                    final EditText emailET = bottomSheet.findViewById (R.id.emailETSignIn);
+                    final EditText passwordET = bottomSheet.findViewById (R.id.passwordETSignIn);
+                    final Button signInButton1 = bottomSheet.findViewById (R.id.signInBtnSignIn);
+                    errorTV = bottomSheet.findViewById (R.id.errorTV_SignIn);
 
-                        signInButton.setOnClickListener(
-                                new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        handleSignIn (emailET.getText().toString(), passwordET.getText().toString());
-                                    }
-                                }
-                        );
+                    signInButton1.setOnClickListener(
+                            v1 -> handleSignIn (emailET.getText().toString(), passwordET.getText().toString())
+                    );
 
-                        bottomSheetDialog.setContentView(bottomSheet);
-                        bottomSheetDialog.show();
-                    }
+                    bottomSheetDialog.setContentView(bottomSheet);
+                    bottomSheetDialog.show();
                 }
         );
 

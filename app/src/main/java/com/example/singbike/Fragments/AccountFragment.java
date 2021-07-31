@@ -2,7 +2,6 @@ package com.example.singbike.Fragments;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -29,8 +28,8 @@ import com.example.singbike.Fragments.AccountTab.ReportFragment;
 import com.example.singbike.Fragments.AccountTab.RideHistoryFragment;
 import com.example.singbike.Fragments.AccountTab.WalletFragment;
 import com.example.singbike.Models.User;
-import com.example.singbike.NetworkRequests.RetrofitClient;
-import com.example.singbike.NetworkRequests.RetrofitServices;
+import com.example.singbike.Networking.RetrofitClient;
+import com.example.singbike.Networking.RetrofitServices;
 import com.example.singbike.R;
 import com.google.gson.Gson;
 
@@ -74,14 +73,19 @@ public class AccountFragment extends  Fragment{
         Gson gson = new Gson();
         SharedPreferences userPrefs = requireActivity().getSharedPreferences("User", Context.MODE_PRIVATE);
         String jsonString = userPrefs.getString ("UserDetails", "");
-        if (jsonString != null && !jsonString.equals("")) {
-            user = gson.fromJson (jsonString, User.class);
-            Log.d (REQUEST_TAG, user.toString());
+        if (jsonString != null) {
+            if (!jsonString.equals("")) {
+                user = gson.fromJson(jsonString, User.class);
+            }
+            else {
+                // if the app is unable to get user details from SharedPreferences, Log out the app
+                logOut();
+            }
         }
         else {
-            // if the app is unable to get user details from SharedPreferences, Log out the app
             logOut();
         }
+
 
         /* fetch and show the User Avatar on avatarImageView */
         fetchAvatar ();
@@ -91,12 +95,9 @@ public class AccountFragment extends  Fragment{
         /* edit profile button tap */
         final Button editBtn = view.findViewById (R.id.editButton_account);
         editBtn.setOnClickListener (
-                new View.OnClickListener () {
-                    @Override
-                    public void onClick (View v) {
-                        Intent intent = new Intent (requireActivity(), EditProfileActivity.class);
-                        startActivity(intent);
-                    }
+                v -> {
+                    Intent intent = new Intent (requireActivity(), EditProfileActivity.class);
+                    startActivity(intent);
                 }
         );
 
@@ -110,54 +111,51 @@ public class AccountFragment extends  Fragment{
 
         OptionsRecyclerViewAdapter adapter = new OptionsRecyclerViewAdapter(options,
                 // options item click listener
-                new OptionsRecyclerViewAdapter.onOptionsClickListener() {
-                    @Override
-                    public void onOptionsClick(String options) {
-                        switch (options) {
-                            case "Contact":
-                                (requireActivity()).getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .setReorderingAllowed (true)
-                                        .addToBackStack ("contact")
-                                        .replace (R.id.fragmentContainerView, ContactFragment.class, null)
-                                        .commit();
-                                break;
-                            case "Wallet":
-                                (requireActivity()).getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .setReorderingAllowed (true)
-                                        .addToBackStack ("wallet")
-                                        .replace (R.id.fragmentContainerView, WalletFragment.class, null)
-                                        .commit();
-                                break;
-                            case "Achievements":
-                                (requireActivity()).getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .setReorderingAllowed (true)
-                                        .addToBackStack ("achievements")
-                                        .replace (R.id.fragmentContainerView, AchievementsFragment.class, null)
-                                        .commit();
-                                break;
-                            case "Ride History":
-                                (requireActivity()).getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .setReorderingAllowed (true)
-                                        .addToBackStack ("ride history")
-                                        .replace (R.id.fragmentContainerView, RideHistoryFragment.class, null)
-                                        .commit();
-                                break;
-                            case "Report":
-                                (requireActivity()).getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .addToBackStack ("report")
-                                        .setReorderingAllowed (true)
-                                        .replace (R.id.fragmentContainerView, ReportFragment.class, null)
-                                        .commit();
-                                break;
-                            case "Log Out":
-                                logOut();
-                                break;
-                        }
+                options1 -> {
+                    switch (options1) {
+                        case "Contact":
+                            (requireActivity()).getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .setReorderingAllowed (true)
+                                    .addToBackStack ("contact")
+                                    .replace (R.id.fragmentContainerView, ContactFragment.class, null)
+                                    .commit();
+                            break;
+                        case "Wallet":
+                            (requireActivity()).getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .setReorderingAllowed (true)
+                                    .addToBackStack ("wallet")
+                                    .replace (R.id.fragmentContainerView, WalletFragment.class, null)
+                                    .commit();
+                            break;
+                        case "Achievements":
+                            (requireActivity()).getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .setReorderingAllowed (true)
+                                    .addToBackStack ("achievements")
+                                    .replace (R.id.fragmentContainerView, AchievementsFragment.class, null)
+                                    .commit();
+                            break;
+                        case "Ride History":
+                            (requireActivity()).getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .setReorderingAllowed (true)
+                                    .addToBackStack ("ride history")
+                                    .replace (R.id.fragmentContainerView, RideHistoryFragment.class, null)
+                                    .commit();
+                            break;
+                        case "Report":
+                            (requireActivity()).getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .addToBackStack ("report")
+                                    .setReorderingAllowed (true)
+                                    .replace (R.id.fragmentContainerView, ReportFragment.class, null)
+                                    .commit();
+                            break;
+                        case "Log Out":
+                            logOut();
+                            break;
                     }
                 }
         );
@@ -173,6 +171,9 @@ public class AccountFragment extends  Fragment{
 
     /* fetch Avatar from the server */
     private void fetchAvatar () {
+
+        if (user == null)
+            return;
 
         final String avatarUrl = String.format (Locale.getDefault(), "customers/avatar/%d", user.getID());
 
@@ -207,30 +208,22 @@ public class AccountFragment extends  Fragment{
     private void logOut () {
         AlertDialog.Builder builder = new AlertDialog.Builder (requireActivity());
         builder.setTitle ("Are you sure you want to log out?")
-                .setPositiveButton ("LOG OUT", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick (DialogInterface dialogInterface, int which) {
-                        dialogInterface.dismiss();
-                        // remove the sharePreferences value from the device storage
-                        SharedPreferences userPrefs = requireActivity().getSharedPreferences ("User", Context.MODE_PRIVATE);
-                        SharedPreferences preferences = requireActivity().getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = preferences.edit();
-                        SharedPreferences.Editor editor1 = userPrefs.edit();
-                        editor1.clear();
-                        editor1.apply();
-                        editor.clear();
-                        editor.apply();
-                        // logout user
-                        Intent intent = new Intent (requireActivity(), AuthActivity.class);
-                        startActivity(intent);
-                    }
+                .setPositiveButton ("LOG OUT", (dialogInterface, which) -> {
+                    dialogInterface.dismiss();
+                    // remove the sharePreferences value from the device storage
+                    SharedPreferences userPrefs = requireActivity().getSharedPreferences ("User", Context.MODE_PRIVATE);
+                    SharedPreferences preferences = requireActivity().getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    SharedPreferences.Editor editor1 = userPrefs.edit();
+                    editor1.clear();
+                    editor1.apply();
+                    editor.clear();
+                    editor.apply();
+                    // logout user
+                    Intent intent = new Intent (requireActivity(), AuthActivity.class);
+                    startActivity(intent);
                 })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss());
         builder.create();
         builder.show();
     }
