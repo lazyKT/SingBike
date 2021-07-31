@@ -39,6 +39,15 @@
 
     </LinearLayout>
 
+    <ProgressBar
+        android:id="@+id/profileLoadingBar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="50dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout5" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,8 +57,10 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout5">
 
         <LinearLayout
+            android:id="@+id/profileLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:paddingBottom="150dp"
             android:orientation="vertical">
 

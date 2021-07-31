@@ -6,7 +6,6 @@
  */
 
 package com.example.singbike.Authentication;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -19,17 +18,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-import
- com.example.singbike.MainActivity;
+import com.example.singbike.MainActivity;
 import com.example.singbike.Models.User;
-import com.example.singbike.NetworkRequests.RetrofitClient;
-import com.example.singbike.NetworkRequests.RetrofitServices;
+import com.example.singbike.Networking.RetrofitClient;
+import com.example.singbike.Networking.RetrofitServices;
 import com.example.singbike.NetworkRequests.UserRequest;
 import com.example.singbike.R;
 import com.google.gson.Gson;
@@ -48,7 +40,6 @@ import retrofit2.Retrofit;
 public class SignUpActivity extends AppCompatActivity {
 
     private static final String DEBUG_SIGNUP = "DEBUG_SIGN_UP";
-    private static final String DEBUG_SP = "DEBUG_WRITE_SP";
     private static final String DEBUG_REGISTER = "DEBUG_REGISTER_REQUEST";
 
     private TextView errorTV;
@@ -70,66 +61,60 @@ public class SignUpActivity extends AppCompatActivity {
 
         /* Back to Sign In Page */
         signInBtn.setOnClickListener (
-                new View.OnClickListener () {
-                    @Override
-                    public void onClick (View v) {
-                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                        startActivity(intent);
-                    }
+                v -> {
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(intent);
                 }
         );
 
         /* onClick action on Sign Up Button */
         signUpBtn.setOnClickListener (
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick (View v) {
-                        // validate the credentials
+                v -> {
+                    // validate the credentials
 
+                    errorTV.setVisibility(View.VISIBLE);
+
+                    /* username validation */
+                    if ( validateCredentials (unameET.getText().toString(), "uname") < 1) {
                         errorTV.setVisibility(View.VISIBLE);
+                        errorTV.setText(R.string.uname_err);
+                    }
+                    /* email address validation */
+                    else if ( validateCredentials (emailET.getText().toString(), "email") < 1) {
+                        errorTV.setVisibility(View.VISIBLE);
+                        errorTV.setText(R.string.email_err);
+                    }
+                    /* password validation. short password */
+                    else if ( validateCredentials (pwdET.getText().toString(), "pwd") < 0) {
+                        errorTV.setVisibility(View.VISIBLE);
+                        errorTV.setText(R.string.pwd_err_length);
+                    }
+                    /* password validation. long, weak password */
+                    else if ( validateCredentials (pwdET.getText().toString(), "pwd") < 1) {
+                        errorTV.setVisibility(View.VISIBLE);
+                        errorTV.setText(R.string.pwd_err_chars);
+                    }
+                    /* Validation Success */
+                    else {
+                        Log.d (DEBUG_SIGNUP, "Credentials Valid!");
 
-                        /* username validation */
-                        if ( validateCredentials (unameET.getText().toString(), "uname") < 1) {
-                            errorTV.setVisibility(View.VISIBLE);
-                            errorTV.setText(R.string.uname_err);
-                        }
-                        /* email address validation */
-                        else if ( validateCredentials (emailET.getText().toString(), "email") < 1) {
-                            errorTV.setVisibility(View.VISIBLE);
-                            errorTV.setText(R.string.email_err);
-                        }
-                        /* password validation. short password */
-                        else if ( validateCredentials (pwdET.getText().toString(), "pwd") < 0) {
-                            errorTV.setVisibility(View.VISIBLE);
-                            errorTV.setText(R.string.pwd_err_length);
-                        }
-                        /* password validation. long, weak password */
-                        else if ( validateCredentials (pwdET.getText().toString(), "pwd") < 1) {
-                            errorTV.setVisibility(View.VISIBLE);
-                            errorTV.setText(R.string.pwd_err_chars);
-                        }
-                        /* Validation Success */
-                        else {
-                            Log.d (DEBUG_SIGNUP, "Credentials Valid!");
-
-                            /*
-                             * Upon receiving valid signup credentials, post those to the server,
-                             * Currently, the server is not available yet.
-                             * Later, will implement a communication with server here.
-                             * Upon Successful Post Request to Server, the app will receive back the user details
-                             * from the server which will be later created as a User object and be passed
-                             * to MainActivity.
-                             * That details will also be saved in the device memory (exclude password). so that
-                             * the users do not need to sign in everytime when they open the app.
-                             * These details will be deleted only when the app is un-installed or the user signs out.
-                             */
-                            UserRequest newUser = new UserRequest (
-                                    unameET.getText().toString(),
-                                    emailET.getText().toString(),
-                                    pwdET.getText().toString()
-                            );
-                            handleSignUp(newUser);
-                        }
+                        /*
+                         * Upon receiving valid signup credentials, post those to the server,
+                         * Currently, the server is not available yet.
+                         * Later, will implement a communication with server here.
+                         * Upon Successful Post Request to Server, the app will receive back the user details
+                         * from the server which will be later created as a User object and be passed
+                         * to MainActivity.
+                         * That details will also be saved in the device memory (exclude password). so that
+                         * the users do not need to sign in everytime when they open the app.
+                         * These details will be deleted only when the app is un-installed or the user signs out.
+                         */
+                        UserRequest newUser = new UserRequest (
+                                unameET.getText().toString(),
+                                emailET.getText().toString(),
+                                pwdET.getText().toString()
+                        );
+                        handleSignUp(newUser);
                     }
                 }
         );

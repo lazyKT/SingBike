@@ -3,26 +3,33 @@ package com.example.singbike.Models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import java.util.Locale;
 
 public class Transaction implements Parcelable {
 
-    private String type, time;
+    private String type, created_at;
     private double amount;
+    private int customer_id, transaction_id;
 
     public Transaction () {
     }
 
-    public Transaction (String type, String time, double amount) {
-        this.time = time;
+    public Transaction (int transaction_id, int customer_id, String type, String time, double amount) {
+        this.customer_id = customer_id;
+        this.transaction_id = transaction_id;
+        this.created_at = time;
         this.type = type;
         this.amount = amount;
     }
 
     protected Transaction(Parcel in) {
         type = in.readString();
-        time = in.readString();
+        created_at = in.readString();
         amount = in.readDouble();
+        customer_id = in.readInt();
+        transaction_id = in.readInt();
     }
 
     public static final Creator<Transaction> CREATOR = new Creator<Transaction>() {
@@ -42,15 +49,17 @@ public class Transaction implements Parcelable {
     }
 
     public void setTime (String time) {
-        this.time = time;
+        this.created_at = time;
     }
 
     public void setAmount (Double amount) {
         this.amount = amount;
     }
 
+    public int getTransaction_id () { return  this.transaction_id; }
+
     public String getTime() {
-        return time;
+        return created_at;
     }
 
     public String getType() {
@@ -68,6 +77,11 @@ public class Transaction implements Parcelable {
         return String.format (Locale.ENGLISH, "%c%.2f", symbol, this.getAmount());
     }
 
+    @NonNull
+    public String toString() {
+        return String.format (Locale.getDefault(), "Transaction ID: %d, Type: %s", this.getTransaction_id(), this.getType());
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -76,7 +90,7 @@ public class Transaction implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(type);
-        dest.writeString(time);
+        dest.writeString(created_at);
         dest.writeDouble(amount);
     }
 }

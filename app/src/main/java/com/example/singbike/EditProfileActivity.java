@@ -3,7 +3,6 @@ package com.example.singbike;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -14,12 +13,12 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,14 +33,14 @@ import androidx.core.content.ContextCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.singbike.BottomSheets.ChangePasswordBottomSheet;
+import com.example.singbike.Dialogs.ErrorDialog;
 import com.example.singbike.Models.User;
-import com.example.singbike.NetworkRequests.RetrofitClient;
-import com.example.singbike.NetworkRequests.RetrofitServices;
+import com.example.singbike.Networking.RetrofitClient;
+import com.example.singbike.Networking.RetrofitServices;
+import com.example.singbike.Utilities.AppExecutor;
 import com.example.singbike.Utilities.ImageHelper;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
@@ -50,6 +49,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
@@ -59,6 +59,7 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class EditProfileActivity extends AppCompatActivity {
@@ -68,9 +69,13 @@ public class EditProfileActivity extends AppCompatActivity {
     private static final String DEBUG_AVATAR_UPLOAD = "DEBUG_AVATAR_UPLOAD";
     private static final String DEBUG_AVATAR_FETCH = "DEBUG_AVATAR_FETCH";
     private static final String DEBUG_FILE_PERMISSION = "DEBUG_FILE_PERMISSION";
+    private static final String NETWORK_ERROR = "NETWORK_ERROR";
 
     private EditText usernameET, emailET;
     private ImageButton avatarImageButton;
+    private LinearLayout profileLayout;
+    private ProgressBar profileLoadingBar;
+    private TextView joinOnTextView, lastUpdatedTextView, creditScoreTextView, totalTimeTextView, totalDistanceTextView;
     private User user = null;
     private RequestQueue requestQueue;
 
@@ -80,83 +85,84 @@ public class EditProfileActivity extends AppCompatActivity {
         super.onCreate (savedInstanceState);
         setContentView (R.layout.activity_edit_profile);
 
-        Gson gson = new Gson();
-        SharedPreferences userPrefs = getSharedPreferences ("User", MODE_PRIVATE);
-        String jsonString = userPrefs.getString ("UserDetails", "");
-        if (jsonString != null && !jsonString.equals("")) {
-            user = gson.fromJson (jsonString, User.class);
-            Log.d (REQUEST_TAG, user.toString());
-        }
-        else {
-            // if the app is unable to get user details from SharedPreferences, Log out the app
-            startActivity (new Intent(EditProfileActivity.this, AuthActivity.class));
-        }
-
-        /* fetch User Avatar from Server */
-        fetchAvatar();
-
         final ImageButton backButton = findViewById (R.id.backButton_EditProfile);
+        profileLayout = findViewById (R.id.profileLayout);
+        profileLoadingBar = findViewById (R.id.profileLoadingBar);
         avatarImageButton = findViewById (R.id.avatarContainerImageButton);
         usernameET = findViewById (R.id.unameET_profile);
         emailET = findViewById (R.id.emailET_profile);
         final Button changePasswordButton = findViewById (R.id.changePwdButton);
         final Button updateProfileButton = findViewById (R.id.updateBtn_profile);
         final LinearLayout creditScoreLayout = findViewById (R.id.creditScoreLayout);
-        final TextView joinOnTextView = findViewById (R.id.joinOnTextView_Profile);
-        final TextView lastUpdatedTextView = findViewById (R.id.lastUpdatTextView_Profile);
-        final TextView creditScoreTextView = findViewById (R.id.creditScoreTextView_Profile);
+        joinOnTextView = findViewById (R.id.joinOnTextView_Profile);
+        lastUpdatedTextView = findViewById (R.id.lastUpdatTextView_Profile);
+        creditScoreTextView = findViewById (R.id.creditScoreTextView_Profile);
+        totalDistanceTextView = findViewById (R.id.totalDistanceTravelled);
+        totalTimeTextView = findViewById (R.id.totalTimeTravelled);
 
-        joinOnTextView.setText (user.getCreated_at());
-        lastUpdatedTextView.setText (user.getUpdated_at());
-        creditScoreTextView.setText (String.valueOf(user.getCredits()));
+        /* retrieving required information from Local Storage and Web Server on background thread */
+        AppExecutor.getInstance().getDiskIO().execute(() -> {
+            Gson gson = new Gson();
+            SharedPreferences userPrefs = getSharedPreferences ("User", MODE_PRIVATE);
+            String jsonString = userPrefs.getString ("UserDetails", "");
+            User user1 = null;
+            Retrofit retrofit = RetrofitClient.getRetrofit();
+            RetrofitServices services = retrofit.create (RetrofitServices.class);
+
+            if (jsonString != null && !jsonString.equals("")) {
+                user1 = gson.fromJson (jsonString, User.class);
+            }
+
+            if (user1 != null) {
+                /* fetch User Avatar from Server */
+                fetchAvatar (services, user1.getID());
+                fetchTotalRideTime (services, user1.getID());
+                fetchTotalDistance (services, user1);
+            }
+            else {
+                // logout
+                SharedPreferences.Editor editor = userPrefs.edit();
+                editor.clear();
+                editor.apply();
+                runOnUiThread( () ->
+                        startActivity (new Intent(EditProfileActivity.this, MainActivity.class))
+                );
+            }
+        });
 
         backButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent (EditProfileActivity.this, MainActivity.class);
-                        startActivity(intent);
-                    }
+                v -> {
+                    Intent intent = new Intent (EditProfileActivity.this, MainActivity.class);
+                    startActivity(intent);
                 }
         );
 
         avatarImageButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // open avatar change options
-                        openAvatarChangeOptionsSheet();
-                    }
+                v -> {
+                    // open avatar change options
+                    openAvatarChangeOptionsSheet();
                 }
         );
 
         /* on focused event on credit score layout: similar to hover effect */
         creditScoreLayout.setOnHoverListener(
-            new View.OnHoverListener() {
-                @Override
-                public boolean onHover(View v, MotionEvent event) {
+                (v, event) -> {
                     Log.d ("OnHover", "event state = " + event.getAction() );
                     return false;
                 }
-            }
         );
 
         /* on pressed event on credit score layout */
         creditScoreLayout.setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+                v -> {
                     Intent intent = new Intent (EditProfileActivity.this, CreditScoreActivity.class);
                     startActivity(intent);
                 }
-            }
         );
 
         /* update profile */
         updateProfileButton.setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+                v -> {
                     requestQueue = Volley.newRequestQueue (EditProfileActivity.this);
                     final String editProfileURL = String.format (Locale.getDefault(), "http://10.0.2.2:8000/customers/%d", user.getID());
 
@@ -172,9 +178,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                     Log.d (DEBUG_PROFILE_UPDATE, "UPDATE USER URL : " + editProfileURL);
                     JsonObjectRequest updateProfileRequest = new JsonObjectRequest (Request.Method.PUT, editProfileURL, updatedData,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse (JSONObject response) {
+                            response -> {
                                 // update successful
                                 System.out.println (response);
                                 handleUserUpdate (response);
@@ -184,44 +188,29 @@ public class EditProfileActivity extends AppCompatActivity {
                                 lastUpdatedTextView.setText (user.getUpdated_at());
 
                                 Toast.makeText (getApplicationContext(), "Updated Successfully", Toast.LENGTH_LONG).show();
-                            }
-                        }, new Response.ErrorListener () {
-                            @Override
-                            public void onErrorResponse (VolleyError error) {
+                            }, error -> {
                                 // update failed
                                 String errorMessage = "Can't connect to Server";
-                                if (error != null) {
+                                if (error != null && error.networkResponse != null) {
                                     Log.d (DEBUG_PROFILE_UPDATE, "status code: " + error.networkResponse.statusCode);
                                     errorMessage = new String (error.networkResponse.data, StandardCharsets.UTF_8);
                                 }
-                                Log.d (DEBUG_PROFILE_UPDATE, "message : " + errorMessage);
 
-                                AlertDialog.Builder builder = new AlertDialog.Builder (EditProfileActivity.this);
-                                builder.setTitle (errorMessage)
-                                        .setNegativeButton (R.string.ok, new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick (DialogInterface dialogInterface, int which) {
-                                                dialogInterface.dismiss();
-                                            }
-                                        });
-                            }
-                    });
+                                Log.d (DEBUG_PROFILE_UPDATE, "message : " + errorMessage);
+                                displayErrorMessage (NETWORK_ERROR, errorMessage);
+                            });
 
                     updateProfileRequest.setTag ("PROFILE_UPDATE");
                     requestQueue.add (updateProfileRequest);
                 }
-            }
         );
 
         /* change password */
         changePasswordButton.setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+                v -> {
                     ChangePasswordBottomSheet changePasswordBottomSheet = new ChangePasswordBottomSheet(getApplicationContext(), user);
                     changePasswordBottomSheet.show (getSupportFragmentManager(), changePasswordBottomSheet.getTag());
                 }
-            }
         );
 
     }
@@ -273,37 +262,26 @@ public class EditProfileActivity extends AppCompatActivity {
                 R.style.BottomSheetDialogTheme
         );
         final View bottomSheet = LayoutInflater.from (getApplicationContext())
-                .inflate (R.layout.change_avatar_options, (LinearLayout) this.findViewById (R.id.changeAvatarSheet));
+                .inflate (R.layout.change_avatar_options, this.findViewById (R.id.changeAvatarSheet));
         final Button chooseFromGallery = bottomSheet.findViewById (R.id.chooseGalleryButton_UploadAvatar);
         final Button takePhoto = bottomSheet.findViewById (R.id.openCameraButton_UploadAvatar);
         final Button cancelButton = bottomSheet.findViewById (R.id.cancelButton_UploadAvatar);
 
         cancelButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        bottomSheetDialog.dismiss();
-                    }
-                }
+                v -> bottomSheetDialog.dismiss()
         );
 
         takePhoto.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        bottomSheetDialog.dismiss();
-                        viewCamera();
-                    }
+                v -> {
+                    bottomSheetDialog.dismiss();
+                    viewCamera();
                 }
         );
 
         chooseFromGallery.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        bottomSheetDialog.dismiss();
-                        requestExternalStorage();
-                    }
+                v -> {
+                    bottomSheetDialog.dismiss();
+                    requestExternalStorage();
                 }
         );
 
@@ -323,19 +301,8 @@ public class EditProfileActivity extends AppCompatActivity {
             // request app permission
             final AlertDialog.Builder builder = new AlertDialog.Builder (this);
             builder.setTitle (R.string.camera_request)
-                    .setPositiveButton (R.string.allow, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-
-                        }
-                    })
-                    .setNegativeButton(R.string.never, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
+                    .setPositiveButton (R.string.allow, (dialog, which) -> dialog.dismiss())
+                    .setNegativeButton(R.string.never, (dialog, which) -> dialog.dismiss());
             builder.create();
             builder.show();
         }
@@ -361,19 +328,11 @@ public class EditProfileActivity extends AppCompatActivity {
             // request app permission
             final AlertDialog.Builder builder = new AlertDialog.Builder (this);
             builder.setTitle (R.string.file_request)
-                    .setPositiveButton (R.string.allow, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            openFileStorage();
-                        }
+                    .setPositiveButton (R.string.allow, (dialog, which) -> {
+                        dialog.dismiss();
+                        openFileStorage();
                     })
-                    .setNegativeButton(R.string.never, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
+                    .setNegativeButton(R.string.never, (dialog, which) -> dialog.dismiss());
             builder.create();
             builder.show();
         }
@@ -408,25 +367,20 @@ public class EditProfileActivity extends AppCompatActivity {
 
     /* activity result api: get gallery images and upload to server */
     ActivityResultLauncher <Intent> chooseFromGalleryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        Uri imageUri = result.getData().getData();
-                        if (imageUri != null)
-                            uploadAvatar (imageUri);
-                    }
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri imageUri = result.getData().getData();
+                    if (imageUri != null)
+                        uploadAvatar (imageUri);
                 }
             }
     );
 
 
     /* fetch user avatar */
-    private void fetchAvatar () {
+    private void fetchAvatar (RetrofitServices services, int userID) {
 
-        final String avatarUrl = String.format (Locale.getDefault(), "customers/avatar/%d", user.getID());
-        Retrofit retrofit = RetrofitClient.getRetrofit();
-        RetrofitServices services = retrofit.create (RetrofitServices.class);
+        final String avatarUrl = String.format (Locale.getDefault(), "customers/avatar/%d", userID);
 
         Call<ResponseBody> call = services.fetchAvatar (avatarUrl);
         call.enqueue(new Callback<ResponseBody>() {
@@ -463,8 +417,8 @@ public class EditProfileActivity extends AppCompatActivity {
         if (avatarUri == null || avatarUri.getPath() == null)
             return;
 
-        String filePath = ImageHelper.getFilePath (getApplicationContext(), avatarUri);
-//        String filePath = avatarUri.getPath();
+        final String filePath = ImageHelper.getFilePath (getApplicationContext(), avatarUri);
+
         Log.d (DEBUG_AVATAR_UPLOAD, "Avatar Path: " + filePath);
 
         if (filePath == null) {
@@ -489,19 +443,101 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull retrofit2.Response<ResponseBody> response) {
                 // upload success
-                if (response.body() != null) {
-                    avatarImageButton.setImageURI (avatarUri);
-                    Log.d(DEBUG_AVATAR_UPLOAD, response.body().toString());
-                }
-                Log.d (DEBUG_AVATAR_UPLOAD, "status code : " + response.code());
-
+                runOnUiThread( () -> {
+                    if (response.body() != null) {
+                        profileLayout.setVisibility (View.VISIBLE);
+                        profileLoadingBar.setVisibility (View.GONE);
+                        avatarImageButton.setImageURI (avatarUri);
+//                        Log.d(DEBUG_AVATAR_UPLOAD, response.body().toString());
+                    }
+                    else {
+                        displayErrorMessage (NETWORK_ERROR, "Failed to Get Response!");
+                    }
+                });
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 // upload failed
                 Log.d (DEBUG_AVATAR_UPLOAD, "Throwable : " + t.toString() );
+                runOnUiThread(() -> displayErrorMessage (NETWORK_ERROR, t.getMessage()));
             }
         });
+    }
+
+    /* get User Total Ride Time in minutes */
+    private void fetchTotalRideTime (RetrofitServices services, int userID) {
+
+        final String totalRideTimeURL = String.format (Locale.getDefault(), "customers/customer_ride_time/%d", userID);
+
+        Call<ResponseBody> call = services.fetchTotalRideTime (totalRideTimeURL);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        runOnUiThread(() -> {
+                            try {
+                                totalTimeTextView.setText(response.body().string());
+                            } catch (IOException e) {
+                                displayErrorMessage (NETWORK_ERROR, e.getMessage());
+                            }
+                        });
+                    }
+                }
+                else {
+                    runOnUiThread(() -> displayErrorMessage (NETWORK_ERROR, "Failed to Retrieve Ride Time Data!"));
+                }
+            }
+
+            @Override
+            public void onFailure( @NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                displayErrorMessage (NETWORK_ERROR, t.getMessage());
+            }
+        });
+    }
+
+    /* Retrieve User Total Distance Travelled */
+    private void fetchTotalDistance (RetrofitServices services, User _user) {
+        final String totalDistanceURL = String.format (Locale.getDefault(), "customers/customer_distances/%d", _user.getID());
+
+        Call<ResponseBody> call = services.fetchTotalDistance (totalDistanceURL);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        runOnUiThread(() -> {
+                            try {
+                                /* Update UI */
+                                profileLoadingBar.setVisibility (View.GONE);
+                                profileLayout.setVisibility (View.VISIBLE);
+                                totalDistanceTextView.setText (response.body().string());
+                                joinOnTextView.setText (_user.getCreated_at());
+                                lastUpdatedTextView.setText (_user.getUpdated_at());
+                                creditScoreTextView.setText (_user.getCredits());
+                                user = new User(_user);
+                            } catch (IOException e) {
+                                displayErrorMessage (NETWORK_ERROR, e.getMessage());
+                            }
+                        });
+                    }
+                }
+                else {
+                    runOnUiThread(() -> displayErrorMessage (NETWORK_ERROR, "Failed to Retrieve Total Distance Data!"));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                displayErrorMessage (NETWORK_ERROR, t.getMessage());
+            }
+        });
+    }
+
+    /* display error dialog */
+    private void displayErrorMessage (String title, String message) {
+        ErrorDialog errorDialog = new ErrorDialog (EditProfileActivity.this, title, message);
+        errorDialog.show (getSupportFragmentManager(), errorDialog.getTag());
     }
 }

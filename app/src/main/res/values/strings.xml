@@ -29,6 +29,7 @@
     <string name="signInBanner"><u>Already have an account?</u></string>
 
     <!-- error message -->
+    <string name="runtime_error">Runtime Error!</string>
     <string name="uname_err">Username Must be at least 4 characters long.</string>
     <string name="email_err">Invalid Email Format</string>
     <string name="pwd_err_length">Password must contain at least 8 charaters</string>
