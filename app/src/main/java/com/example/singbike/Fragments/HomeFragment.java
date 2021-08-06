@@ -68,7 +68,6 @@ public class HomeFragment extends Fragment implements
     private static final String DEBUG_SHARED_PREFS = "DEBUG_SHARED_PREFS";
 
     private static final int CAMERA_ACCESS = 0;
-    private GoogleMap map;
 
     @Override
     public void onCreate (@Nullable Bundle savedInstanceState) {
@@ -122,14 +121,17 @@ public class HomeFragment extends Fragment implements
                     BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                     if (bluetoothAdapter == null) {
                         Toast.makeText (requireActivity(), "Your device does not support Bluetooth!", Toast.LENGTH_LONG).show();
+//                        return;
                     }
+
                     if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
                         // ask user to enable bluetooth
                         Intent enableBluetooth = new Intent (BluetoothAdapter.ACTION_REQUEST_ENABLE);
                         requestBluetoothLauncher.launch (enableBluetooth);
                     }
-//                        // ask users whether open camera to scan qr code or key in manually
-//                        openUnlockOptions();
+
+                    // ask users whether open camera to scan qr code or key in manually
+                    openUnlockOptions();
                 }
         );
 
@@ -145,38 +147,31 @@ public class HomeFragment extends Fragment implements
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        Log.d (DEBUG_FRAGMENT, "OnResume Home Fragment!");
-    }
-
-    @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         Log.d (DEBUG_MAP, "onMapReady Called!");
-        map = googleMap;
 
-        map.setOnCameraIdleListener(this);
-        map.setOnCameraMoveStartedListener(this);
-        map.setOnCameraMoveListener(this);
-        map.setOnCameraMoveCanceledListener(this);
+        googleMap.setOnCameraIdleListener(this);
+        googleMap.setOnCameraMoveStartedListener(this);
+        googleMap.setOnCameraMoveListener(this);
+        googleMap.setOnCameraMoveCanceledListener(this);
 
         // initial zoom setting
-        map.getUiSettings().setZoomControlsEnabled(false);
-        map.getUiSettings().setMyLocationButtonEnabled(true);
+        googleMap.getUiSettings().setZoomControlsEnabled(false);
+        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
         // initial map setting
-        map.setBuildingsEnabled(true);
+        googleMap.setBuildingsEnabled(true);
 
         // onClick Event on Marker Icons
-        map.setOnMarkerClickListener(this);
+        googleMap.setOnMarkerClickListener(this);
 
         // set initial point on the map at the start
         LatLng rafflesPlace = new LatLng(1.2830, 103.8513); // somewhere near Raffles Place MRT
         // new CameraPosition(target, zoom, tilt, bearing)
-        map.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(rafflesPlace, 20, 45, 45)));
+        googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(rafflesPlace, 20, 45, 45)));
 
         // add markers
-        addMarkers(map);
+        addMarkers(googleMap);
     }
 
     @Override

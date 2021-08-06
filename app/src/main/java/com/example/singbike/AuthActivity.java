@@ -14,10 +14,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.singbike.Authentication.SignUpActivity;
+import com.example.singbike.Dialogs.LoadingDialog;
 import com.example.singbike.Models.User;
 import com.example.singbike.Networking.RetrofitClient;
 import com.example.singbike.Networking.RetrofitServices;
-import com.example.singbike.NetworkRequests.UserRequest;
+import com.example.singbike.Networking.Requests.UserRequest;
+import com.example.singbike.Utilities.AppExecutor;
+import com.example.singbike.Utilities.Utils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
 
@@ -35,6 +38,7 @@ public class AuthActivity extends AppCompatActivity {
 
     private static final String DEBUG_LOGIN = "DEBUG_LOGIN";
 
+    private LoadingDialog loadingDialog;
     private TextView errorTV;
 
     @Override
@@ -91,7 +95,18 @@ public class AuthActivity extends AppCompatActivity {
                     errorTV = bottomSheet.findViewById (R.id.errorTV_SignIn);
 
                     signInButton1.setOnClickListener(
-                            v1 -> handleSignIn (emailET.getText().toString(), passwordET.getText().toString())
+                            v1 -> {
+                                /* display loading state */
+                                loadingDialog = new LoadingDialog (bottomSheet.getContext(), "Loading ...");
+                                loadingDialog.show (getSupportFragmentManager(), loadingDialog.getTag());
+
+                                Log.d (DEBUG_LOGIN, "Loading Dialog Showed!");
+
+                                /* make network request in another thread */
+                                AppExecutor.getInstance().getDiskIO().execute (
+                                        () -> handleSignIn(emailET.getText().toString(), passwordET.getText().toString()
+                                    ));
+                            }
                     );
 
                     bottomSheetDialog.setContentView(bottomSheet);
@@ -143,17 +158,30 @@ public class AuthActivity extends AppCompatActivity {
                             user.setCreated_at (userJsonObject.getString("created_at"));
                             user.setUpdated_at (userJsonObject.getString("updated_at"));
 
-                            /* save user data in Local Storage (SharedPreferences) */
-                            saveToSharedPref (user);
+                            /* save user activity log in local database */
+                            AppExecutor.getInstance().getDiskIO().execute(() -> {
+                                Utils.insertUserActivity (getApplicationContext(), "sign-in", user.getID());
+                            });
 
-                            /* redirect to Home Page */
-                            startActivity (new Intent(AuthActivity.this, MainActivity.class));
+                            runOnUiThread (() -> {
+                                /* save user data in Local Storage (SharedPreferences) */
+                                saveToSharedPref (user);
+
+                                /* dismiss the loading dialog */
+                                loadingDialog.dismiss();
+
+                                /* redirect to Home Page */
+                                startActivity (new Intent(AuthActivity.this, MainActivity.class));
+                            });
 
                         } catch (JSONException | IOException e) {
                             e.printStackTrace();
                         }
                     }
                     else {
+                        /* dismiss the loading dialog */
+                        loadingDialog.dismiss();
+
                         if (errorTV.getVisibility() == View.GONE) {
                             errorTV.setVisibility (View.VISIBLE);
                         }
@@ -162,6 +190,9 @@ public class AuthActivity extends AppCompatActivity {
                     }
                 }
                 else {
+                    /* dismiss the loading dialog */
+                    loadingDialog.dismiss();
+
                     Log.d (DEBUG_LOGIN, "Response has failed!");
                     if (errorTV.getVisibility() == View.GONE) {
                         errorTV.setVisibility (View.VISIBLE);
@@ -173,6 +204,10 @@ public class AuthActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 Log.d (DEBUG_LOGIN, "throwable : " + t.toString());
+
+                /* dismiss the loading dialog */
+                loadingDialog.dismiss();
+
                 if (errorTV.getVisibility() == View.GONE) {
                     errorTV.setVisibility (View.VISIBLE);
                 }
@@ -192,5 +227,4 @@ public class AuthActivity extends AppCompatActivity {
         editor.putString ("UserDetails", json);
         editor.apply();
     }
-
 }

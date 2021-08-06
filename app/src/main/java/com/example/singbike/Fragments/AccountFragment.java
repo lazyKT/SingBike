@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.singbike.Adapters.OptionsRecyclerViewAdapter;
 import com.example.singbike.AuthActivity;
+import com.example.singbike.Dialogs.ErrorDialog;
 import com.example.singbike.EditProfileActivity;
 import com.example.singbike.Fragments.AccountTab.AchievementsFragment;
 import com.example.singbike.Fragments.AccountTab.ContactFragment;
@@ -43,8 +44,7 @@ import retrofit2.Retrofit;
 
 public class AccountFragment extends  Fragment{
 
-    private static final String REQUEST_TAG = "PROFILE_UPDATE";
-    private static final String DEBUG_AVATAR_FETCH = "DEBUG_AVATAR_FETCH";
+    private static final String NETWORK_ERROR = "NETWORK_ERROR";
 
     User user = null;
     private ImageView avatarImageView;
@@ -75,6 +75,7 @@ public class AccountFragment extends  Fragment{
         String jsonString = userPrefs.getString ("UserDetails", "");
         if (jsonString != null) {
             if (!jsonString.equals("")) {
+                Log.d ("Shared Prefs", jsonString);
                 user = gson.fromJson(jsonString, User.class);
             }
             else {
@@ -163,12 +164,6 @@ public class AccountFragment extends  Fragment{
 
     }
 
-    /* display error dialog */
-    private void displayErrorDialog () {
-
-    }
-
-
     /* fetch Avatar from the server */
     private void fetchAvatar () {
 
@@ -189,18 +184,15 @@ public class AccountFragment extends  Fragment{
                         Bitmap bitmap = BitmapFactory.decodeStream (response.body().byteStream());
                         avatarImageView.setImageBitmap (bitmap);
                     }
-                    else {
-                        Log.d (DEBUG_AVATAR_FETCH, "Response body is NULL!");
-                    }
                 }
                 else {
-                    Log.d (DEBUG_AVATAR_FETCH, "Response is not successful!");
+                    displayError ("FETCH AVATAR: Failed to get Response!");
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Log.d (DEBUG_AVATAR_FETCH, "Throwable : " + t.toString());
+                displayError (t.getMessage());
             }
         });
     }
@@ -226,6 +218,11 @@ public class AccountFragment extends  Fragment{
                 .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss());
         builder.create();
         builder.show();
+    }
+
+    private void displayError(String message) {
+        ErrorDialog dialog = new ErrorDialog (requireActivity(), AccountFragment.NETWORK_ERROR, message);
+        dialog.show(requireActivity().getSupportFragmentManager(), dialog.getTag());
     }
 
 }

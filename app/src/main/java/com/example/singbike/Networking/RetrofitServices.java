@@ -11,9 +11,10 @@ import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Url;
 
-import com.example.singbike.NetworkRequests.UserRequest;
 import com.example.singbike.Networking.Requests.ChangePasswordRequest;
+import com.example.singbike.Networking.Requests.TopUpRequest;
 import com.example.singbike.Networking.Requests.TransactionRequest;
+import com.example.singbike.Networking.Requests.UserRequest;
 
 public interface RetrofitServices {
 
@@ -55,6 +56,14 @@ public interface RetrofitServices {
             @Body ChangePasswordRequest request
         );
 
+    /* edit/update user information */
+    @PUT
+    Call<ResponseBody> updateUserProfile (
+            @Url String url,
+            @Body UserRequest body
+    );
+
+
     /* get user transactions */
     @GET
     Call<ResponseBody> fetchTransactions (@Url String transactionURL);
@@ -64,4 +73,10 @@ public interface RetrofitServices {
     Call<ResponseBody> createTransaction (
             @Body TransactionRequest body
         );
+
+    @PUT
+    Call<ResponseBody> topUpBalance (
+            @Url String url,
+            @Body TopUpRequest body
+            );
 }

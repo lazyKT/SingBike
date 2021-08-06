@@ -17,6 +17,8 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.singbike.Adapters.SlidePagerAdapter;
 import com.example.singbike.LocalStorage.Achievement;
 import com.example.singbike.LocalStorage.AchievementDatabase;
+import com.example.singbike.LocalStorage.UserActivity;
+import com.example.singbike.LocalStorage.UserActivityDatabase;
 import com.example.singbike.Utilities.AppExecutor;
 
 import java.util.ArrayList;
@@ -101,13 +103,10 @@ public class IntroActivity extends AppCompatActivity {
 //        viewPager.setPageTransformer(new ZoomO);
 
         rideButton.setOnClickListener (
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick (View v) {
-                        if (dataLoaded) {
-                            Intent intent = new Intent(getApplicationContext(), AuthActivity.class);
-                            startActivity(intent);
-                        }
+                v1 -> {
+                    if (dataLoaded) {
+                        Intent intent = new Intent(getApplicationContext(), AuthActivity.class);
+                        startActivity(intent);
                     }
                 }
         );
@@ -147,20 +146,10 @@ public class IntroActivity extends AppCompatActivity {
             );
         }
 
-        AppExecutor.getInstance().getDiskIO().execute (new Runnable () {
-            @Override
-            public void run () {
-                achievementDatabase.achievementDAO().insertAll(achievementArrayList.toArray (new Achievement[totalAchievements]));
-                dataLoaded = true;
-                runOnUiThread (new Runnable () {
-                    @Override
-                    public void run () {
-                        loadingDialog.dismiss();
-                    }
-                });
-            }
+        AppExecutor.getInstance().getDiskIO().execute (() -> {
+            achievementDatabase.achievementDAO().insertAll(achievementArrayList.toArray (new Achievement[totalAchievements]));
+            dataLoaded = true;
+            runOnUiThread (() -> loadingDialog.dismiss());
         });
-
-
     }
 }
