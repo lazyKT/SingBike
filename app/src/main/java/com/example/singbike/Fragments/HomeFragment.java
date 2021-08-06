@@ -5,11 +5,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,23 +19,21 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
 
+import com.example.singbike.Dialogs.ErrorDialog;
 import com.example.singbike.Dialogs.ReservationDialog;
 import com.example.singbike.Fragments.AccountTab.ReportFragment;
 import com.example.singbike.Models.User;
 import com.example.singbike.R;
 import com.example.singbike.RideActivity;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
@@ -47,16 +44,15 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
+import java.util.Random;
+
 public class HomeFragment extends Fragment implements
         OnMapReadyCallback,
-        GoogleMap.OnCameraIdleListener,
-        GoogleMap.OnCameraMoveListener,
-        GoogleMap.OnCameraMoveStartedListener,
-        GoogleMap.OnCameraMoveCanceledListener,
         GoogleMap.OnMarkerClickListener {
 
     public HomeFragment () {
@@ -68,8 +64,11 @@ public class HomeFragment extends Fragment implements
     private static final String DEBUG_FRAGMENT = "DEBUG_HOME_FRAG";
     private static final String DEBUG_SHARED_PREFS = "DEBUG_SHARED_PREFS";
 
+    private Location myLocation;
+    private LatLng defaultLocation; // move to this location if real location gets some errors
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private GoogleMap map;
     private static final int CAMERA_ACCESS = 0;
-    private static final int LOCATION_PERMISSION_CODE = 1;
     private boolean locationPermissionGranted = false;
 
     @Override
@@ -104,21 +103,11 @@ public class HomeFragment extends Fragment implements
         // request location permission
         requestLocationPermission();
 
-        // map configuration
-        GoogleMapOptions mapOptions = new GoogleMapOptions();
-        mapOptions.mapType(GoogleMap.MAP_TYPE_NORMAL)
-                .compassEnabled(false)
-                .rotateGesturesEnabled(true)
-                .tiltGesturesEnabled(true);
+        // set default Location to somewhere near Raffles Place MRT Station
+        defaultLocation = new LatLng(1.2830, 103.8513);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
-        // create new map fragment instance
-        SupportMapFragment mapFragment = SupportMapFragment.newInstance(mapOptions);
-
-        requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .add (R.id.map, mapFragment)
-                .commit();
-        mapFragment.getMapAsync(this);
+        initMap();
 
         final Button unlockButton = view.findViewById(R.id.unlockButton);
         unlockButton.setOnClickListener (
@@ -132,7 +121,7 @@ public class HomeFragment extends Fragment implements
                     // check bluetooth feature is supported in user's device
                     BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                     if (bluetoothAdapter == null) {
-                        Toast.makeText (requireActivity(), "Your device does not support Bluetooth!", Toast.LENGTH_LONG).show();
+                        displayErrorDialog ("System Error! Bluetooth Not Found!", "Your device does not support Bluetooth!");
 //                        return;
                     }
 
@@ -160,88 +149,114 @@ public class HomeFragment extends Fragment implements
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        Log.d (DEBUG_MAP, "onMapReady Called!");
 
-        googleMap.setOnCameraIdleListener(this);
-        googleMap.setOnCameraMoveStartedListener(this);
-        googleMap.setOnCameraMoveListener(this);
-        googleMap.setOnCameraMoveCanceledListener(this);
+        this.map = googleMap;
 
-        // initial zoom setting
-        googleMap.getUiSettings().setZoomControlsEnabled(false);
-        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+        /* update map interface */
+        updateMapUI();
 
-        // initial map setting
-        googleMap.setBuildingsEnabled(true);
-
-        // onClick Event on Marker Icons
-        googleMap.setOnMarkerClickListener(this);
-
-        // set initial point on the map at the start
-        LatLng rafflesPlace = new LatLng(1.2830, 103.8513); // somewhere near Raffles Place MRT
-        // new CameraPosition(target, zoom, tilt, bearing)
-        googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(rafflesPlace, 20, 45, 45)));
+//        showDummyLocation();
+        getDeviceLocation();
 
         // add markers
         addMarkers(googleMap);
     }
 
-    @Override
-    public void onCameraIdle() {
-        // when the map camera is in IDLE position
+    /* Initiate GoogleMap and Configurations */
+    private void initMap () {
+        // map configuration
+        GoogleMapOptions mapOptions = new GoogleMapOptions();
+        mapOptions.mapType(GoogleMap.MAP_TYPE_NORMAL)
+                .compassEnabled(false)
+                .rotateGesturesEnabled(true)
+                .tiltGesturesEnabled(true);
+
+        // create new map fragment instance
+        SupportMapFragment mapFragment = SupportMapFragment.newInstance(mapOptions);
+
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .add (R.id.map, mapFragment)
+                .commit();
+        mapFragment.getMapAsync(this);
     }
 
-    @Override
-    public void onCameraMove() {
-        // when user moves the map
+    /* update map UI */
+    private void updateMapUI () {
+
+        if (map == null)
+            return;
+
+        // initial zoom setting
+        map.getUiSettings().setZoomControlsEnabled(false);
+        // initial map setting
+        map.setBuildingsEnabled(true);
+
+        // onClick Event on Marker Icons
+        map.setOnMarkerClickListener(this);
+
+        try {
+            map.setMyLocationEnabled (locationPermissionGranted);
+            map.getUiSettings().setMyLocationButtonEnabled (locationPermissionGranted);
+        }
+        catch (SecurityException e) {
+            displayErrorDialog ("SecurityException: Permission Error!", e.getMessage());
+        }
     }
 
-    @Override
-    public void onCameraMoveStarted(int i) {
+    /* get device location */
+    private void getDeviceLocation () {
+        try {
+            if (locationPermissionGranted) {
+                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(task -> {
+                   if (task.isSuccessful()) {
+                       // set last known location as current location
+                       myLocation = task.getResult();
+                       if (myLocation != null) {
+                           map.moveCamera(CameraUpdateFactory.newCameraPosition(
+                                   new CameraPosition(
+                                           new LatLng (myLocation.getLatitude(), myLocation.getLongitude()),
+                                           20,
+                                           45,
+                                           45
+                                   )
+                           ));
+                       }
+                   }
+                   else {
+                       Log.d (DEBUG_MAP, "LastKnownLocation is NULL!!!");
+                       if (task.getException() != null)
+                           displayErrorDialog ("SecurityException: Location Error!", task.getException().getMessage());
 
-    }
-
-    @Override
-    public void onCameraMoveCanceled() {
-
+                       map.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(defaultLocation, 20, 45, 45)));
+                       map.getUiSettings().setMyLocationButtonEnabled (false);
+                   }
+                });
+            }
+        }
+        catch (SecurityException e) {
+            displayErrorDialog ("SecurityException: Location Error!", e.getMessage());
+        }
     }
 
     private void addMarkers (GoogleMap map) {
-        Marker bike1 = map.addMarker(
-                new MarkerOptions ()
-                        .position (new LatLng(1.2830, 103.8513))
-                        .title ("30ad3214")
-                        .snippet ("Bike-1")
-                        .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
-        );
-        bike1.setTag (0);
 
-        Marker bike2 = map.addMarker(
-                new MarkerOptions ()
-                        .position (new LatLng(1.2831, 103.8514))
-                        .title ("0032f413c")
-                        .snippet ("Bike-2")
-                        .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
-        );
-        bike2.setTag (1);
+        if (myLocation == null)
+            return;
 
-        Marker bike3 = map.addMarker(
+        for (int i = 0; i < 4; i++) {
+            double d = (double)i/(double)1000;
+            Marker marker = map.addMarker (
                 new MarkerOptions ()
-                        .position (new LatLng(1.2831, 103.8513))
-                        .title ("003214ca32")
-                        .snippet ("Bike-3")
-                        .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
-        );
-        bike3.setTag (2);
-
-        Marker bike4 = map.addMarker(
-                new MarkerOptions ()
-                        .position (new LatLng(1.2833, 103.8513))
-                        .title ("003214a345")
-                        .snippet ("Bike-4")
-                        .icon (BitmapDescriptorFactory.fromResource(R.drawable.cycle32))
-        );
-        bike4.setTag (3);
+                    .position (new LatLng(myLocation.getLatitude() + d, myLocation.getLongitude() + d))
+                    .title (String.valueOf (new Random().nextInt()))
+                    .icon (BitmapDescriptorFactory.fromResource (R.drawable.cycle32))
+            );
+            if (marker != null) {
+                marker.setTag (i);
+            }
+        }
     }
 
     @Override
@@ -412,6 +427,12 @@ public class HomeFragment extends Fragment implements
         startActivity(cameraIntent);
     }
 
+    private void displayErrorDialog (String title, String message) {
+        ErrorDialog dialog = new ErrorDialog (requireActivity(), title, message);
+        dialog.show (requireActivity().getSupportFragmentManager(), dialog.getTag());
+    }
+
+
     /* Request for Bluetooth Permission */
     private final ActivityResultLauncher<Intent> requestBluetoothLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -421,9 +442,8 @@ public class HomeFragment extends Fragment implements
                 }
             });
 
-    private final ActivityResultLauncher<String> requestLocationLauncher = registerForActivityResult (new ActivityResultContracts.RequestPermission(),
-            isGranted -> {
-        locationPermissionGranted = isGranted;
-    });
+    private final ActivityResultLauncher<String> requestLocationLauncher = registerForActivityResult (
+            new ActivityResultContracts.RequestPermission(), isGranted -> locationPermissionGranted = isGranted
+    );
 
 }
