@@ -26,6 +26,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -68,6 +69,8 @@ public class HomeFragment extends Fragment implements
     private static final String DEBUG_SHARED_PREFS = "DEBUG_SHARED_PREFS";
 
     private static final int CAMERA_ACCESS = 0;
+    private static final int LOCATION_PERMISSION_CODE = 1;
+    private boolean locationPermissionGranted = false;
 
     @Override
     public void onCreate (@Nullable Bundle savedInstanceState) {
@@ -98,6 +101,9 @@ public class HomeFragment extends Fragment implements
             balanceTextView.setText (String.valueOf(user.getBalance()));
         }
 
+        // request location permission
+        requestLocationPermission();
+
         // map configuration
         GoogleMapOptions mapOptions = new GoogleMapOptions();
         mapOptions.mapType(GoogleMap.MAP_TYPE_NORMAL)
@@ -117,6 +123,12 @@ public class HomeFragment extends Fragment implements
         final Button unlockButton = view.findViewById(R.id.unlockButton);
         unlockButton.setOnClickListener (
                 v -> {
+
+                    if (!locationPermissionGranted) {
+                        requestLocationPermission();
+                        return;
+                    }
+
                     // check bluetooth feature is supported in user's device
                     BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                     if (bluetoothAdapter == null) {
@@ -337,6 +349,20 @@ public class HomeFragment extends Fragment implements
         bottomSheetDialog.show();
     }
 
+    /* request permission to get the device's location */
+    private void requestLocationPermission () {
+        if (ContextCompat.checkSelfPermission (
+                requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationPermissionGranted = true;
+        }
+        else {
+            // request to access device's location
+//            ActivityCompat.requestPermissions (requireActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
+            requestLocationLauncher.launch (Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
+
     /* retrieve user details from SharedPreferences */
     private User getUserDetails () {
         Gson gson = new Gson();
@@ -359,19 +385,11 @@ public class HomeFragment extends Fragment implements
             Log.d (DEBUG_CAMERA_PERMISSION, "Camera Permission in Home Fragment. EXPLAIN WHY U NEED THIS!");
             final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage(R.string.camera_request)
-                .setPositiveButton(R.string.allow, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        requireActivity().requestPermissions(new String[] {Manifest.permission.CAMERA}, CAMERA_ACCESS);
-                    }
+                .setPositiveButton(R.string.allow, (dialog, which) -> {
+                    dialog.dismiss();
+                    requireActivity().requestPermissions(new String[] {Manifest.permission.CAMERA}, CAMERA_ACCESS);
                 })
-                .setNegativeButton(R.string.never, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                .setNegativeButton(R.string.never, (dialog, which) -> dialog.dismiss());
             builder.create();
             builder.show();
         }
@@ -395,12 +413,17 @@ public class HomeFragment extends Fragment implements
     }
 
     /* Request for Bluetooth Permission */
-    ActivityResultLauncher<Intent> requestBluetoothLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    private final ActivityResultLauncher<Intent> requestBluetoothLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK) {
                     // user has allowed and enabled bluetooth
                     openUnlockOptions();
                 }
             });
+
+    private final ActivityResultLauncher<String> requestLocationLauncher = registerForActivityResult (new ActivityResultContracts.RequestPermission(),
+            isGranted -> {
+        locationPermissionGranted = isGranted;
+    });
 
 }

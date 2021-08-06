@@ -167,9 +167,6 @@ public class AuthActivity extends AppCompatActivity {
                                 /* save user data in Local Storage (SharedPreferences) */
                                 saveToSharedPref (user);
 
-                                /* dismiss the loading dialog */
-                                loadingDialog.dismiss();
-
                                 /* redirect to Home Page */
                                 startActivity (new Intent(AuthActivity.this, MainActivity.class));
                             });
