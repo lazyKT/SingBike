@@ -64,6 +64,8 @@ dependencies {
 
     implementation "androidx.work:work-runtime:$work_version"
 
+    // communication between components: to send background service status to UI Thread
+    implementation 'org.greenrobot:eventbus:3.2.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

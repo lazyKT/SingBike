@@ -59,7 +59,7 @@ public class HomeFragment extends Fragment implements
         super (R.layout.fragment_home);
     }
 
-    private static final String DEBUG_MAP = "GOOGLE_MAP_DEBUG";
+    private static final String DEBUG_MAP = "DEBUG_MAP";
     private static final String DEBUG_CAMERA_PERMISSION = "DEBUG_CAM_PERMISSION";
     private static final String DEBUG_FRAGMENT = "DEBUG_HOME_FRAG";
     private static final String DEBUG_SHARED_PREFS = "DEBUG_SHARED_PREFS";
@@ -149,6 +149,8 @@ public class HomeFragment extends Fragment implements
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
+
+        Log.d (DEBUG_MAP, "onMapReady!");
 
         this.map = googleMap;
 
@@ -242,11 +244,20 @@ public class HomeFragment extends Fragment implements
 
     private void addMarkers (GoogleMap map) {
 
-        if (myLocation == null)
+        Log.d (DEBUG_MAP, "addMarkers!");
+
+        if (myLocation == null) {
+            Log.d (DEBUG_MAP, "myLocation is NULL!");
             return;
+        }
+
+        Log.d (DEBUG_MAP, "Current Location : " + myLocation.toString());
 
         for (int i = 0; i < 4; i++) {
             double d = (double)i/(double)1000;
+            double latitude = myLocation.getLatitude() + d;
+            double longitude = myLocation.getLongitude() + d;
+            Log.d (DEBUG_MAP, i + ". Latitude : " + latitude + ", Longitude : " + longitude );
             Marker marker = map.addMarker (
                 new MarkerOptions ()
                     .position (new LatLng(myLocation.getLatitude() + d, myLocation.getLongitude() + d))
