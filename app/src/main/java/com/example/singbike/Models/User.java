@@ -8,6 +8,9 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Locale;
 
 public class User implements Parcelable {
@@ -27,6 +30,16 @@ public class User implements Parcelable {
         this.updated_at = user1.updated_at;
         this.id = user1.id;
         this.balance = user1.balance;
+    }
+
+    public User (JSONObject object) throws JSONException {
+        this.id = object.getInt ("id");
+        this.username = object.getString ("username");
+        this.email = object.getString ("email");
+        this.balance = object.getDouble ("balance");
+        this.credits = object.getInt ("credits");
+        this.updated_at = object.getString ("updated_at");
+        this.created_at = object.getString ("created_at");
     }
 
     public User (String username, String email) {
@@ -125,8 +138,8 @@ public class User implements Parcelable {
 
     @NonNull
     public String toString () {
-        return String.format (Locale.getDefault(), "id: %d, username: %s, email: %s, credits: %d\n",
-                this.getID(), this.getUsername(), this.getEmail(), this.getCredits());
+        return String.format (Locale.getDefault(), "id: %d, username: %s, email: %s, credits: %d, balance: %.2f\n",
+                this.getID(), this.getUsername(), this.getEmail(), this.getCredits(), this.getBalance());
     }
 
 }

@@ -31,17 +31,16 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.singbike.BottomSheets.ChangePasswordBottomSheet;
 import com.example.singbike.Dialogs.ErrorDialog;
+import com.example.singbike.Dialogs.LoadingDialog;
 import com.example.singbike.Models.User;
+import com.example.singbike.Networking.Requests.UserRequest;
 import com.example.singbike.Networking.RetrofitClient;
 import com.example.singbike.Networking.RetrofitServices;
 import com.example.singbike.Utilities.AppExecutor;
 import com.example.singbike.Utilities.ImageHelper;
+import com.example.singbike.Utilities.Utils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
 
@@ -50,7 +49,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import okhttp3.MediaType;
@@ -77,7 +75,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private ProgressBar profileLoadingBar;
     private TextView joinOnTextView, lastUpdatedTextView, creditScoreTextView, totalTimeTextView, totalDistanceTextView;
     private User user = null;
-    private RequestQueue requestQueue;
+    private LoadingDialog loadingDialog;
 
 
     @Override
@@ -109,8 +107,19 @@ public class EditProfileActivity extends AppCompatActivity {
             Retrofit retrofit = RetrofitClient.getRetrofit();
             RetrofitServices services = retrofit.create (RetrofitServices.class);
 
-            if (jsonString != null && !jsonString.equals("")) {
-                user1 = gson.fromJson (jsonString, User.class);
+            if (jsonString != null) {
+                if (!jsonString.equals("")) {
+                    user1 = gson.fromJson(jsonString, User.class);
+                }
+                else {
+                    // logout
+                    SharedPreferences.Editor editor = userPrefs.edit();
+                    editor.clear();
+                    editor.apply();
+                    runOnUiThread( () ->
+                            startActivity (new Intent(EditProfileActivity.this, AuthActivity.class))
+                    );
+                }
             }
 
             if (user1 != null) {
@@ -118,15 +127,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 fetchAvatar (services, user1.getID());
                 fetchTotalRideTime (services, user1.getID());
                 fetchTotalDistance (services, user1);
-            }
-            else {
-                // logout
-                SharedPreferences.Editor editor = userPrefs.edit();
-                editor.clear();
-                editor.apply();
-                runOnUiThread( () ->
-                        startActivity (new Intent(EditProfileActivity.this, MainActivity.class))
-                );
             }
         });
 
@@ -163,45 +163,11 @@ public class EditProfileActivity extends AppCompatActivity {
         /* update profile */
         updateProfileButton.setOnClickListener(
                 v -> {
-                    requestQueue = Volley.newRequestQueue (EditProfileActivity.this);
-                    final String editProfileURL = String.format (Locale.getDefault(), "http://10.0.2.2:8000/customers/%d", user.getID());
+                    loadingDialog = new LoadingDialog (EditProfileActivity.this, "Updating ...");
+                    loadingDialog.show (getSupportFragmentManager(), loadingDialog.getTag());
 
-                    JSONObject updatedData = new JSONObject();
-
-                    try {
-                        updatedData.put ("username", usernameET.getText().toString());
-                        updatedData.put ("email", emailET.getText().toString());
-                    }
-                    catch (JSONException je) {
-                        je.printStackTrace();
-                    }
-
-                    Log.d (DEBUG_PROFILE_UPDATE, "UPDATE USER URL : " + editProfileURL);
-                    JsonObjectRequest updateProfileRequest = new JsonObjectRequest (Request.Method.PUT, editProfileURL, updatedData,
-                            response -> {
-                                // update successful
-                                System.out.println (response);
-                                handleUserUpdate (response);
-
-                                /* update UI */
-                                usernameET.setText (user.getUsername());
-                                lastUpdatedTextView.setText (user.getUpdated_at());
-
-                                Toast.makeText (getApplicationContext(), "Updated Successfully", Toast.LENGTH_LONG).show();
-                            }, error -> {
-                                // update failed
-                                String errorMessage = "Can't connect to Server";
-                                if (error != null && error.networkResponse != null) {
-                                    Log.d (DEBUG_PROFILE_UPDATE, "status code: " + error.networkResponse.statusCode);
-                                    errorMessage = new String (error.networkResponse.data, StandardCharsets.UTF_8);
-                                }
-
-                                Log.d (DEBUG_PROFILE_UPDATE, "message : " + errorMessage);
-                                displayErrorMessage (NETWORK_ERROR, errorMessage);
-                            });
-
-                    updateProfileRequest.setTag ("PROFILE_UPDATE");
-                    requestQueue.add (updateProfileRequest);
+                    /* perform update request */
+                    handleUserUpdateRequest();
                 }
         );
 
@@ -215,45 +181,6 @@ public class EditProfileActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (user != null) {
-            usernameET.setText (user.getUsername());
-            emailET.setText (user.getEmail());
-        }
-
-    }
-
-    @Override
-    public void onPause () {
-        super.onPause();
-        if (requestQueue != null)
-            requestQueue.cancelAll (REQUEST_TAG);
-    }
-
-    /* post-update operations */
-    private void handleUserUpdate (JSONObject response) {
-        try {
-            JSONObject updatedUser = response.getJSONObject ("customer");
-
-            /* update the model first */
-            user.setUsername (updatedUser.getString("username"));
-            user.setUpdated_at (updatedUser.getString("updated_at"));
-
-            /* update SharedPreferences (Local Storage) */
-            Gson gson = new Gson();
-            SharedPreferences userPrefs = getSharedPreferences ("User", MODE_PRIVATE);
-            SharedPreferences.Editor editor = userPrefs.edit();
-            String jsonString = gson.toJson (user);
-            editor.putString ("UserDetails", jsonString);
-            editor.apply();
-        }
-        catch (JSONException je) {
-            je.printStackTrace();
-        }
-    }
 
     /* open avatar change options bottom sheet */
     private void openAvatarChangeOptionsSheet () {
@@ -261,7 +188,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 this,
                 R.style.BottomSheetDialogTheme
         );
-        final View bottomSheet = LayoutInflater.from (getApplicationContext())
+        final View bottomSheet = LayoutInflater.from (EditProfileActivity.this)
                 .inflate (R.layout.change_avatar_options, this.findViewById (R.id.changeAvatarSheet));
         final Button chooseFromGallery = bottomSheet.findViewById (R.id.chooseGalleryButton_UploadAvatar);
         final Button takePhoto = bottomSheet.findViewById (R.id.openCameraButton_UploadAvatar);
@@ -390,22 +317,20 @@ public class EditProfileActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
                         Log.d (DEBUG_AVATAR_FETCH, response.body().toString());
+
                         /* create bitmap from response image data */
                         Bitmap bitmap = BitmapFactory.decodeStream (response.body().byteStream());
                         avatarImageButton.setImageBitmap (bitmap);
                     }
-                    else {
-                        Log.d (DEBUG_AVATAR_FETCH, "Response Body is NULL!");
-                    }
                 }
                 else {
-                    Log.d (DEBUG_AVATAR_FETCH, "Response is not Successful!");
+                    displayErrorMessage (NETWORK_ERROR, "FETCH AVATAR: Failed to get response!");
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Log.d (DEBUG_AVATAR_FETCH, "Throwable : " + t.toString());
+                displayErrorMessage (NETWORK_ERROR, t.getMessage());
             }
         });
     }
@@ -512,10 +437,12 @@ public class EditProfileActivity extends AppCompatActivity {
                                 /* Update UI */
                                 profileLoadingBar.setVisibility (View.GONE);
                                 profileLayout.setVisibility (View.VISIBLE);
+                                usernameET.setText (_user.getUsername());
+                                emailET.setText (_user.getEmail());
                                 totalDistanceTextView.setText (response.body().string());
                                 joinOnTextView.setText (_user.getCreated_at());
                                 lastUpdatedTextView.setText (_user.getUpdated_at());
-                                creditScoreTextView.setText (_user.getCredits());
+                                creditScoreTextView.setText (String.valueOf(_user.getCredits()));
                                 user = new User(_user);
                             } catch (IOException e) {
                                 displayErrorMessage (NETWORK_ERROR, e.getMessage());
@@ -534,6 +461,97 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    /* User Update/Edit request */
+    private void handleUserUpdateRequest () {
+
+        if (user == null) {
+            displayErrorMessage("Application Error!", "NULL is not a valid user!");
+            return;
+        }
+
+        final String updateURL = String.format (Locale.getDefault(), "customers/%d", user.getID());
+        final Retrofit retrofit = RetrofitClient.getRetrofit();
+        final RetrofitServices services = retrofit.create(RetrofitServices.class);
+
+        Call<ResponseBody> call = services.updateUserProfile (updateURL, new UserRequest (usernameET.getText().toString(), emailET.getText().toString()));
+
+        /* perform network request in another thread except the main one */
+        AppExecutor.getInstance().getNetworkOps().execute(() -> {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        if (response.body() != null) {
+                            try {
+                                JSONObject jsonObject = new JSONObject (response.body().string());
+                                updateSharedPrefs (jsonObject);
+
+                                /* record user activity */
+                                AppExecutor.getInstance().getDiskIO().execute(
+                                        () -> Utils.insertUserActivity (getApplicationContext(), "profile-update", user.getID())
+                                );
+
+                                runOnUiThread (() -> loadingDialog.dismiss());
+                            }
+                            catch (JSONException | IOException e) {
+                                runOnUiThread (() -> loadingDialog.dismiss());
+                                displayErrorMessage ("Runtime Error!", e.getMessage());
+                            }
+                        }
+                        else {
+                            runOnUiThread (() -> loadingDialog.dismiss());
+                            displayErrorMessage (NETWORK_ERROR, "UPDATE USER: Empty Response Body!!");
+                        }
+                    }
+                    else {
+                        runOnUiThread (() -> loadingDialog.dismiss());
+                        displayErrorMessage (NETWORK_ERROR, "UPDATE USER: Failed to Fetch Response!");
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                    runOnUiThread (() -> loadingDialog.dismiss());
+                    displayErrorMessage (NETWORK_ERROR, t.getMessage());
+                }
+            });
+        });
+    }
+
+    /* post-update operations */
+    private void updateSharedPrefs (JSONObject response) {
+        try {
+            JSONObject updatedUser = response.getJSONObject ("customer");
+            Log.d (DEBUG_PROFILE_UPDATE, updatedUser.toString());
+
+            runOnUiThread(() -> {
+                try {
+                    /* update the model first */
+                    user.setUsername(updatedUser.getString("username"));
+                    user.setEmail(updatedUser.getString("email"));
+                    user.setUpdated_at(updatedUser.getString("updated_at"));
+                }
+                catch (JSONException e) {
+                    displayErrorMessage ("Runtime Error", e.getMessage());
+                }
+            });
+
+
+            /* update SharedPreferences (Local Storage) */
+            Gson gson = new Gson();
+            SharedPreferences userPrefs = getSharedPreferences ("User", MODE_PRIVATE);
+            SharedPreferences.Editor editor = userPrefs.edit();
+            String jsonString = gson.toJson (user);
+            editor.putString ("UserDetails", jsonString);
+            editor.apply();
+        }
+        catch (JSONException je) {
+            je.printStackTrace();
+        }
+    }
+
 
     /* display error dialog */
     private void displayErrorMessage (String title, String message) {

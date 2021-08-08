@@ -10,7 +10,7 @@ This is our FYP of UOW.
 ### Application SDK Infor
 - minimal SDK version -> 23
 - targetted SDK version -> 30
-- minimal API Level -> 23
+- minimal API Level -> 26
 - targetted API Level -> 30
 
 

@@ -18,12 +18,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.singbike.AuthActivity;
 import com.example.singbike.MainActivity;
 import com.example.singbike.Models.User;
 import com.example.singbike.Networking.RetrofitClient;
 import com.example.singbike.Networking.RetrofitServices;
-import com.example.singbike.NetworkRequests.UserRequest;
+import com.example.singbike.Networking.Requests.UserRequest;
 import com.example.singbike.R;
+import com.example.singbike.Utilities.Utils;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -62,7 +64,7 @@ public class SignUpActivity extends AppCompatActivity {
         /* Back to Sign In Page */
         signInBtn.setOnClickListener (
                 v -> {
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), AuthActivity.class);
                     startActivity(intent);
                 }
         );
@@ -208,6 +210,8 @@ public class SignUpActivity extends AppCompatActivity {
 
                             /* save user data in Local Storage (SharedPreferences) */
                             saveToSharedPref (user);
+
+                            Utils.insertUserActivity (getApplicationContext(), "welcome", user.getID());
 
                             /* redirect to Home Page */
                             startActivity (new Intent(SignUpActivity.this, MainActivity.class));

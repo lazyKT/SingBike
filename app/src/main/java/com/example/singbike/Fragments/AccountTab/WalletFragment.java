@@ -51,8 +51,7 @@ public class WalletFragment extends Fragment {
     private ProgressBar transactionLoadingBar;
     private RecyclerView transactionRecyclerView;
     private TransactionRecyclerAdapter adapter;
-
-    private int amountAdded = 0;
+    private User user;
 
     private TextView balanceTextView;
 
@@ -68,32 +67,47 @@ public class WalletFragment extends Fragment {
         /* fragment transition animation */
         TransitionInflater inflater = TransitionInflater.from(requireActivity());
         setEnterTransition(inflater.inflateTransition(R.transition.slide_right));
-
-        /* receive data from TopUp Fragment */
-        getParentFragmentManager().setFragmentResultListener ("TopUp", this,
-                (requestKey, bundle) -> amountAdded = bundle.getInt ("amountAdded"));
-
-        Log.d ("onCreate_WalletFragment", String.valueOf(amountAdded));
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d ("onResume_WalletFragment", String.valueOf(amountAdded));
-        amountAdded = amountAdded + 5;
-        balanceTextView.setText (String.valueOf(amountAdded));
     }
 
     @Override
     public void onViewCreated (@NonNull final View view, Bundle savedInstanceState) {
 
         super.onViewCreated (view, savedInstanceState);
-        Log.d ("onViewCreated_Wallet", String.valueOf (amountAdded));
 
+        balanceTextView = view.findViewById (R.id.balanceTV);
+        final Button topUpButton = view.findViewById (R.id.topUpBtn);
         transactionLoadingBar = view.findViewById (R.id.loadingProgBar_Transactions);
         transactionRecyclerView = view.findViewById (R.id.transactionRecyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager (requireActivity());
         transactionRecyclerView.setLayoutManager(layoutManager);
+
+        /* fetch User Transactions */
+        AppExecutor.getInstance().getDiskIO().execute (
+                () -> {
+                    Log.d ("DEBUG_FETCH_USER", "Fetching User SharedPreferences");
+                    Gson gson = new Gson();
+                    SharedPreferences sharedPreferences = requireActivity().getSharedPreferences ("User", Context.MODE_PRIVATE);
+                    String jsonString = sharedPreferences.getString ("UserDetails", "");
+                    if (jsonString != null) {
+                        if (!jsonString.equals("")) {
+                            user = gson.fromJson (jsonString, User.class);
+                            Log.d (DEBUG_TRANSACTIONS, user.toString());
+                            requireActivity().runOnUiThread(() -> balanceTextView.setText(String.valueOf(user.getBalance())));
+                            fetchTransactions ();
+                        }
+                        else {
+                            requireActivity().runOnUiThread(
+                                    () -> displayError(getString(R.string.runtime_error), "Failed to Retrieve User Details!")
+                            );
+                        }
+                    }
+                    else {
+                        requireActivity().runOnUiThread(
+                                () -> displayError(getString(R.string.runtime_error), "Failed to Retrieve User Details!")
+                        );
+                    }
+                }
+        );
 
         adapter = new TransactionRecyclerAdapter(transactionList, requireActivity(),
                 transaction -> {
@@ -127,33 +141,6 @@ public class WalletFragment extends Fragment {
 
         transactionRecyclerView.setAdapter(adapter);
 
-        /* fetch User Transactions */
-        AppExecutor.getInstance().getDiskIO().execute (
-                () -> {
-                    Log.d (DEBUG_TRANSACTIONS, "Fetching User SharedPreferences");
-                    Gson gson = new Gson();
-                    SharedPreferences sharedPreferences = requireActivity().getSharedPreferences ("User", Context.MODE_PRIVATE);
-                    String jsonString = sharedPreferences.getString ("UserDetails", "");
-                    User user1 = null;
-                    if (jsonString != null && !jsonString.equals("")) {
-                        user1 = gson.fromJson (jsonString, User.class);
-                        Log.d (DEBUG_TRANSACTIONS, user1.toString());
-                    }
-
-                    if (user1 != null) {
-                        fetchTransactions (user1.getID());
-                    }
-                    else {
-                        requireActivity().runOnUiThread(
-                                () -> displayError(getString(R.string.runtime_error), "Failed to Retrieve User Details!")
-                        );
-                    }
-                }
-        );
-
-        balanceTextView = view.findViewById (R.id.balanceTV);
-        final Button topUpButton = view.findViewById (R.id.topUpBtn);
-
         /* Top Up Wallet */
         topUpButton.setOnClickListener (
                 v -> requireActivity().getSupportFragmentManager()
@@ -163,15 +150,17 @@ public class WalletFragment extends Fragment {
                         .setReorderingAllowed (true)
                         .commit()
         );
-        amountAdded = amountAdded + 5;
-        balanceTextView.setText (String.valueOf(amountAdded));
     }
 
 
     /* fetch all User transaction */
-    private void fetchTransactions (int userID) {
+    private void fetchTransactions () {
+
+        if (user == null)
+            return;
+
         Log.d (DEBUG_TRANSACTIONS, "Fetching Transactions");
-        final String transactionURL = String.format(Locale.getDefault(), "customers/customer_transactions/%d", userID);
+        final String transactionURL = String.format(Locale.getDefault(), "customers/customer_transactions/%d", user.getID());
         final String NETWORK_ERROR = "NETWORK_ERROR";
         Retrofit retrofit = RetrofitClient.getRetrofit();
         RetrofitServices services = retrofit.create (RetrofitServices.class);
@@ -192,8 +181,10 @@ public class WalletFragment extends Fragment {
 
                             requireActivity().runOnUiThread ( () -> {
                                 transactionList = new ArrayList<>(Arrays.asList (transactionArr));
-                                for (Transaction t : transactionArr)
-                                    Log.d (DEBUG_TRANSACTIONS, t.toString());
+
+                                /* set user balance */
+                                balanceTextView.setText (String.valueOf(user.getBalance()));
+
                                 transactionLoadingBar.setVisibility (View.GONE);
                                 transactionRecyclerView.setVisibility (View.VISIBLE);
                                 adapter.setTransactions (transactionList);

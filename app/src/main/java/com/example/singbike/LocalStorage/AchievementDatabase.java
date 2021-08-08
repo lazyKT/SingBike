@@ -11,12 +11,12 @@ import androidx.room.RoomDatabase;
  * serves as access point to the Database
  */
 
-@Database (entities = Achievement.class, exportSchema = false, version = 1)
+@Database (entities = Achievement.class, exportSchema = false, version = 2)
 public abstract class AchievementDatabase extends RoomDatabase {
 
     public abstract AchievementDAO achievementDAO();
 
-    private static final String DB_NAME = "achievement_db";
+    private static final String DB_NAME = "sinbike_db";
     private static AchievementDatabase instance;
 
     public static synchronized AchievementDatabase getInstance (Context context) {

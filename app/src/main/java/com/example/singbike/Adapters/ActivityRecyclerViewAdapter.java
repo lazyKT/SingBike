@@ -9,10 +9,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.singbike.Models.UserActivity;
+import com.example.singbike.LocalStorage.UserActivity;
 import com.example.singbike.R;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class ActivityRecyclerViewAdapter extends RecyclerView.Adapter<ActivityRecyclerViewAdapter.ViewHolder> {
 
@@ -31,17 +31,18 @@ public class ActivityRecyclerViewAdapter extends RecyclerView.Adapter<ActivityRe
 
         public void bind (UserActivity userActivity) {
 
-            this.activityTitle.setText (userActivity.getActivityType());
-            this.activityTime.setText (userActivity.getActivityTime());
+            final String type = (userActivity.getType()).substring(0, 1).toUpperCase() + (userActivity.getType()).substring(1);
+            this.activityTitle.setText (type);
+            this.activityTime.setText (userActivity.getTime());
 
-            switch (userActivity.getActivityType()) {
-                case "Ride":
+            switch (userActivity.getType()) {
+                case "ride":
                     this.activityIndicatorIcon.setImageResource (R.drawable.logo);
                     break;
-                case "Top-up":
+                case "top-up":
                     this.activityIndicatorIcon.setImageResource (R.drawable.visa);
                     break;
-                case "Booking":
+                case "booking":
                     this.activityIndicatorIcon.setImageResource (R.drawable.calendar);
                     break;
                 default:
@@ -53,9 +54,13 @@ public class ActivityRecyclerViewAdapter extends RecyclerView.Adapter<ActivityRe
 
     }
 
-    private final ArrayList<UserActivity> activities;
+    private List<UserActivity> activities;
 
-    public ActivityRecyclerViewAdapter (ArrayList<UserActivity> activities) {
+    public ActivityRecyclerViewAdapter (List<UserActivity> activities) {
+        this.activities = activities;
+    }
+
+    public void setActivities (List<UserActivity> activities) {
         this.activities = activities;
     }
 

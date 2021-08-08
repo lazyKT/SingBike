@@ -19,6 +19,9 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <!-- location permission -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <!-- allow app to use camera features -->
     <uses-feature android:name="android.hardware.camera2"/>
@@ -62,7 +65,8 @@
 
         <activity
             android:name=".SplashScreenActivity"
-            android:theme="@style/AppTheme.Launcher">
+            android:theme="@style/AppTheme.Launcher"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -78,6 +82,12 @@
 
         <activity android:name=".RideActivity"
             android:theme="@style/AppTheme" />
+
+        <service android:name=".Services.MyLocationService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location"
+            />
 
     </application>
 

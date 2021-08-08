@@ -68,6 +68,13 @@
     <string name="reserve_question">You are about to make a bike reservation!</string>
     <string name="confirm">Confirm</string>
 
+    <!-- riding screen -->
+    <string name="dummy_time_ride">00:00</string>
+    <string name="dummy_kilo">0.00</string>
+    <string name="time_label">time</string>
+    <string name="kilo_label">Kilometres</string>
+    <string name="finish_ride">Finish Ride</string>
+
     <!-- account tab -->
     <string name="edit_profile">Edit Profile</string>
     <string name="join_on">Joined on</string>

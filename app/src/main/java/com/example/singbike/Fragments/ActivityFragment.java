@@ -3,6 +3,8 @@ package com.example.singbike.Fragments;
 import android.os.Bundle;
 import android.transition.TransitionInflater;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,12 +13,21 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.singbike.Adapters.ActivityRecyclerViewAdapter;
-import com.example.singbike.Models.UserActivity;
+import com.example.singbike.LocalStorage.UserActivity;
+import com.example.singbike.LocalStorage.UserActivityDatabase;
 import com.example.singbike.R;
+import com.example.singbike.Utilities.AppExecutor;
 
-import java.util.ArrayList;
+
+import java.util.Collections;
+import java.util.List;
 
 public class ActivityFragment extends Fragment {
+
+    private List<UserActivity> activities;
+    private LinearLayout userActivityLayout;
+    private ProgressBar loadingProgressBar;
+    private ActivityRecyclerViewAdapter adapter;
 
     public ActivityFragment () {
         super (R.layout.fragment_activity);
@@ -35,21 +46,33 @@ public class ActivityFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ArrayList<UserActivity> activities = new ArrayList<>();
-        activities.add (new UserActivity("Ride", "18 June 2021 5:20 pm"));
-        activities.add (new UserActivity("Booking", "18 June 2021 5:15 pm"));
-        activities.add (new UserActivity("Ride", "17 June 2021 7:23 pm"));
-        activities.add (new UserActivity("Edit-Profile", "17 June 2021 12:15 pm"));
-        activities.add (new UserActivity("Ride", "17 June 2021 9:30 am"));
-        activities.add (new UserActivity("Top-up", "16 June 2021 9:23 pm"));
-
+        userActivityLayout = view.findViewById (R.id.userActivities_layout);
+        loadingProgressBar = view.findViewById (R.id.loadingUserActivityProgBar);
         final RecyclerView activityRecyclerView = view.findViewById (R.id.activityRecyclerView);
         /* set layout manager */
         LinearLayoutManager layoutManager = new LinearLayoutManager (requireActivity());
         activityRecyclerView.setLayoutManager (layoutManager);
 
         /* set adapter */
-        ActivityRecyclerViewAdapter adapter = new ActivityRecyclerViewAdapter(activities);
+        adapter = new ActivityRecyclerViewAdapter(activities);
         activityRecyclerView.setAdapter (adapter);
+
+        fetchAllActivities();
+    }
+
+    /* get all user activities from local storage (RoomDB) */
+    private void fetchAllActivities () {
+        AppExecutor.getInstance().getDiskIO().execute(() -> {
+            UserActivityDatabase userActivityDatabase = UserActivityDatabase.getInstance(requireActivity());
+            activities = userActivityDatabase.userActivityDAO().getAll();
+            Collections.reverse (activities);
+
+            requireActivity().runOnUiThread(() -> {
+                loadingProgressBar.setVisibility (View.GONE);
+                userActivityLayout.setVisibility(View.VISIBLE);
+                adapter.setActivities (activities);
+                adapter.notifyDataSetChanged();
+            });
+        });
     }
 }
