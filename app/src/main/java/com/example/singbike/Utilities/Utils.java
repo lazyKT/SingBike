@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 
 public class Utils {
 
-    public static final String KEY_REQUESTING_LOCATION_UPDATES = "RequestLocationUpdate";
+    public static final String KEY_REQUESTING_LOCATION_UPDATES_BG = "RequestLocationUpdate";
 
     public Utils () {}
 
@@ -42,11 +42,13 @@ public class Utils {
     public static void setRequestLocationUpdates (Context context, boolean flag) {
         PreferenceManager.getDefaultSharedPreferences (context)
                 .edit()
-                .putBoolean (KEY_REQUESTING_LOCATION_UPDATES, flag)
+                .putBoolean (KEY_REQUESTING_LOCATION_UPDATES_BG, flag)
                 .apply();
     }
 
     public static boolean requestLocationUpdates(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences (context).getBoolean(KEY_REQUESTING_LOCATION_UPDATES, false);
+        return PreferenceManager.getDefaultSharedPreferences (context).getBoolean(KEY_REQUESTING_LOCATION_UPDATES_BG, false);
     }
+
+//    public static void setRunServiceInBackGround ()
 }

@@ -174,7 +174,7 @@ public class EditProfileActivity extends AppCompatActivity {
         /* change password */
         changePasswordButton.setOnClickListener(
                 v -> {
-                    ChangePasswordBottomSheet changePasswordBottomSheet = new ChangePasswordBottomSheet(getApplicationContext(), user);
+                    ChangePasswordBottomSheet changePasswordBottomSheet = new ChangePasswordBottomSheet(EditProfileActivity.this, user);
                     changePasswordBottomSheet.show (getSupportFragmentManager(), changePasswordBottomSheet.getTag());
                 }
         );
