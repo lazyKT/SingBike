@@ -61,9 +61,7 @@ public class ChangePasswordBottomSheet extends BottomSheetDialogFragment {
         errorTextView.setVisibility (View.GONE);
 
         changePasswordButton.setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+                v1 -> {
 
                     if (currentPassword.getText().toString().equals(""))
                         showErrorMessage (R.string.currentPasswordEmpty);
@@ -76,7 +74,6 @@ public class ChangePasswordBottomSheet extends BottomSheetDialogFragment {
                         handleChangePasswordRequest(currentPassword.getText().toString(), newPassword.getText().toString());
                     }
                 }
-            }
         );
 
         return v;

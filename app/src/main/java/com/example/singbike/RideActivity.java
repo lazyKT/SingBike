@@ -11,7 +11,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
@@ -24,17 +23,18 @@ import androidx.core.content.ContextCompat;
 
 import com.example.singbike.Dialogs.ErrorDialog;
 import com.example.singbike.Services.MyLocationService;
+import com.example.singbike.Utilities.Utils;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.Task;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class RideActivity extends AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -42,27 +42,20 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String DEBUG_RIDE_STATE = "DEBUG_RIDE_STATE";
     private static final String DEBUG_RIDE_LOCATION = "DEBUG_RIDE_LOCATION";
     private static final String DEBUG_RIDE_TiME = "DEBUG_RIDE_TiME";
-    private static final String DEBUG_RIDE_SERVICE = "DEBUG_RIDE_ACTIVITY";
-    private static final String REQUESTING_LOCATION_UPDATES_KEY = "LOCATION_UPDATE_KEYS";
-    private boolean isLocationGranted, requestingLocationUpdates, bound, isForeGround;
-    private Location lastKnownLocation;
-    private FusedLocationProviderClient fusedLocationProviderClient;
+    private static final String DEBUG_RIDE_ACTIVITY = "DEBUG_RIDE_ACTIVITY";
+    private boolean isLocationGranted, initMapDone = false;
     private TextView timeTextView;
     private long startTime;
     private Handler handler;
     private Runnable runnable;
     private GoogleMap map;
+    private List<Location> visitedLocations = new ArrayList<>();
 
     private MyLocationService myLocationService;
     private boolean mBound = false;
 
 
     private ServiceConnection serviceConnection;
-
-    private LocationRequest locationRequest;
-//    private LocationCallback locationCallback;
-//    private MyLocationService locationService;
-
 
     @Override
     public void onCreate(Bundle savedInstanceStates) {
@@ -77,17 +70,14 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
         Intent intent = getIntent();
         isLocationGranted = intent.getBooleanExtra("isLocationGranted", false);
 
-        updateValuesFromBundles (savedInstanceStates);
-        Log.d (DEBUG_RIDE_STATE, "From savedInstanceStates (Requesting Location) : " + requestingLocationUpdates);
-
-        requestingLocationUpdates = true;
-
+        // request location permission
         if (!isLocationGranted) requestLocationPermission();
 
+        // create service connection for bound service
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                Log.d (DEBUG_RIDE_SERVICE, "onServiceConnected!");
+                Log.d (DEBUG_RIDE_ACTIVITY, "onServiceConnected!");
                 MyLocationService.LocalBinder localBinder = (MyLocationService.LocalBinder) service;
                 myLocationService = localBinder.getService();
                 mBound = true;
@@ -95,44 +85,27 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                Log.d (DEBUG_RIDE_SERVICE, "onServiceDisconnected!");
+                Log.d (DEBUG_RIDE_ACTIVITY, "onServiceDisconnected!");
                 mBound = false;
             }
         };
-
-        Intent startIntent = new Intent (this, MyLocationService.class);
-        startIntent.setAction ("start");
-        startService (startIntent);
 
         startTime = System.currentTimeMillis();
         initMap();
 
         /* start timer to record the ride time */
         startTimer();
-//
-//        /* create and configure location request to update the user routes during the ride  */
-//        createLocationRequest ();
-//
-//        /* instantiate locationCallBack */
-//        locationCallback = new LocationCallback() {
-//            @Override
-//            public void onLocationResult (@NonNull LocationResult result) {
-////                Log.d (DEBUG_RIDE_LOCATION, "onLocationResult: Before 'for' loop");
-//                for (Location location : result.getLocations()) {
-//                    Log.d (DEBUG_RIDE_LOCATION, "onLocationResult: inside 'for' loop" + location.toString());
-//                    updateLocationOnUI (location);
-//                }
-//            }
-//        };
 
-
+        // show notification to user that location tracking is being started
+        Log.d (DEBUG_RIDE_ACTIVITY, "Foreground Service staring inside onResume()");
+        startForeGroundService();
 
         finishRideButton.setOnClickListener(v -> {
+            for (Location location : visitedLocations)
+                Log.d (DEBUG_RIDE_LOCATION, location.toString());
             // cancel the timer runnable
             handler.removeCallbacks(runnable);
-            Intent stopIntent = new Intent(this, MyLocationService.class);
-            stopIntent.setAction("stop");
-            startService(stopIntent);
+            Utils.setRequestLocationUpdates (RideActivity.this, false);
             startActivity(new Intent(RideActivity.this, MainActivity.class));
         });
 
@@ -141,7 +114,7 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d (DEBUG_RIDE_SERVICE, "onStart()");
+        Log.d (DEBUG_RIDE_ACTIVITY, "onStart()");
         /* bind MyLocationService */
         Intent intent = new Intent (RideActivity.this, MyLocationService.class);
         bindService (intent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -151,16 +124,12 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onResume() {
         super.onResume();
         Handler handler = new Handler();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Log.d (DEBUG_RIDE_SERVICE, "mBound : " + mBound);
-                if (mBound) {
-                    int num = myLocationService.getRandomInts();
-                    Log.d (DEBUG_RIDE_SERVICE, "" + num);
-
-                    handler.postDelayed (this, 5000);
-                }
+        Runnable runnable = () -> {
+            Log.d (DEBUG_RIDE_ACTIVITY, "mBound : " + mBound + ", Bound Service Starting inside onResume()");
+            if (mBound) {
+                visitedLocations = myLocationService.getVisitedLocations();
+                updateDeviceLocationOnMap();
+                handler.postDelayed (this.runnable, 5000);
             }
         };
         handler.postDelayed (runnable, 2000);
@@ -169,8 +138,9 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d (DEBUG_RIDE_SERVICE, "onStop()");
+        Log.d (DEBUG_RIDE_ACTIVITY, "onStop()");
         /* unbind MyLocationService */
+        Log.d (DEBUG_RIDE_ACTIVITY, "Bound Service unbind inside onStop()");
         unbindService (serviceConnection);
         mBound = false;
     }
@@ -178,18 +148,9 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Intent stopIntent = new Intent(this, MyLocationService.class);
-        stopIntent.setAction("stop");
-        startService(stopIntent);
+        Utils.setRequestLocationUpdates (RideActivity.this, false);
+        stopForeGroundService();
     }
-
-    @Override
-    public void onSaveInstanceState (@NonNull Bundle outState) {
-        Log.d (DEBUG_RIDE_STATE, "Inside onSaveInstanceState Method!");
-        outState.putBoolean (REQUESTING_LOCATION_UPDATES_KEY, requestingLocationUpdates);
-        super.onSaveInstanceState (outState);
-    }
-
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
@@ -198,8 +159,7 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         updateMapUI();
 
-        /* get Device Location and show the position on map */
-//        getDeviceLocation();
+        setLastKnownLocationOnMap();
     }
 
     /* initiate map */
@@ -261,11 +221,32 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    /* set current location and move the map position on activity start */
+    private void setLastKnownLocationOnMap () {
+        FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient (RideActivity.this);
+        try {
+            if (isLocationGranted) {
+                fusedLocationProviderClient.getLastLocation()
+                        .addOnSuccessListener(RideActivity.this, location -> {
+                            if (location != null) {
+                                map.moveCamera (CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng (location.getLatitude(), location.getLongitude()),
+                                        20
+                                ));
+                                initMapDone = true;
+                            }
+                        });
+            }
+        }
+        catch (SecurityException e) {
+            displayErrorDialog (e.getMessage());
+        }
+    }
+
     /* launch location permission request */
     private final ActivityResultLauncher<String> requestLocationLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
             isGranted -> isLocationGranted = isGranted
     );
-
 
     /* update map UI */
     private void updateMapUI() {
@@ -281,7 +262,6 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
             } else {
                 map.setMyLocationEnabled(false);
                 map.getUiSettings().setMyLocationButtonEnabled(false);
-                lastKnownLocation = null;
                 requestLocationPermission();
             }
         } catch (SecurityException se) {
@@ -289,68 +269,19 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    /* get device location */
-    private void getDeviceLocation() {
-
-        try {
-            if (isLocationGranted) {
-                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(RideActivity.this, task -> {
-                    if (task.isSuccessful()) {
-                        // set current position as last known location of device
-                        lastKnownLocation = task.getResult();
-                        if (lastKnownLocation != null) {
-                            map.moveCamera (CameraUpdateFactory.newLatLngZoom (
-                                    new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()),
-                                    20
-                            ));
-                        }
-                        else {
-                            Log.d (DEBUG_RIDE_TiME, "LastKnownLocation is NULL!!!");
-                            if (task.getException() != null)
-                                displayErrorDialog (task.getException().getMessage());
-                            map.getUiSettings().setMyLocationButtonEnabled (false);
-                        }
-                    }
-                });
-            }
-        }
-        catch (SecurityException se) {
-            displayErrorDialog (se.getMessage());
-        }
-    }
-
-    private void createLocationRequest () {
-        Log.d (DEBUG_RIDE_LOCATION, "Creating Location Request!");
-        locationRequest = LocationRequest.create();
-        locationRequest.setInterval (10000); // make location request every 10 seconds
-        locationRequest.setFastestInterval (5000); // make nearly accurate location updates every 5 seconds
-        locationRequest.setPriority (LocationRequest.PRIORITY_HIGH_ACCURACY);
-    }
-
-    private void startLocationRequest () {
-        try {
-            Log.d (DEBUG_RIDE_LOCATION, "Starting Location Request!");
-//            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-        }
-        catch (SecurityException e) {
-            displayErrorDialog (e.getMessage());
-        }
-    }
-
-    private void stopLocationUpdates () {
-        Log.d (DEBUG_RIDE_LOCATION, "Stopping Location Request!");
-//        fusedLocationProviderClient.removeLocationUpdates (locationCallback);
-    }
-
-    private void updateValuesFromBundles (Bundle savedInstanceState) {
-        if (savedInstanceState == null)
+    private void updateDeviceLocationOnMap () {
+        Log.d (DEBUG_RIDE_LOCATION, "updateDeviceLocationOnMap()");
+        if (!initMapDone)
             return;
-        requestingLocationUpdates = savedInstanceState.getBoolean (REQUESTING_LOCATION_UPDATES_KEY);
-    }
 
-    private void updateLocationOnUI (Location location) {
-        Log.d (DEBUG_RIDE_LOCATION, "Updating Location on UI " + location.toString());
+        for (Location location : visitedLocations) {
+            Log.d (DEBUG_RIDE_LOCATION, "updateDeviceLocationOnMap(): move camera");
+            Log.d (DEBUG_RIDE_LOCATION, location.toString());
+            map.moveCamera (CameraUpdateFactory.newLatLngZoom(
+                    new LatLng (location.getLatitude(), location.getLongitude()),
+                    18
+            ));
+        }
     }
 
     /* display error message */
@@ -362,5 +293,17 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
+    }
+
+    private void stopForeGroundService () {
+        Intent stopIntent = new Intent (RideActivity.this, MyLocationService.class);
+        stopIntent.setAction("stop");
+        startForegroundService (stopIntent);
+    }
+
+    private void startForeGroundService () {
+        Intent startIntent = new Intent (this, MyLocationService.class);
+        startIntent.setAction ("start");
+        startForegroundService (startIntent);
     }
 }

@@ -70,6 +70,7 @@ public class HomeFragment extends Fragment implements
     private GoogleMap map;
     private static final int CAMERA_ACCESS = 0;
     private boolean locationPermissionGranted = false;
+    private boolean isMyLocationFetched = false;
 
     @Override
     public void onCreate (@Nullable Bundle savedInstanceState) {
@@ -208,22 +209,26 @@ public class HomeFragment extends Fragment implements
 
     /* get device location */
     private void getDeviceLocation () {
+        Log.d (DEBUG_MAP, "Getting Device Location!!");
         try {
             if (locationPermissionGranted) {
                 Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(task -> {
                    if (task.isSuccessful()) {
+                       Log.d (DEBUG_MAP, "LastKnownLocation request is successful!!!");
                        // set last known location as current location
                        myLocation = task.getResult();
                        if (myLocation != null) {
+                           Log.d (DEBUG_MAP, "LastKnownLocation is not NULL!!!");
                            map.moveCamera(CameraUpdateFactory.newCameraPosition(
                                    new CameraPosition(
                                            new LatLng (myLocation.getLatitude(), myLocation.getLongitude()),
-                                           20,
+                                           18,
                                            45,
                                            45
                                    )
                            ));
+                           addMarkers (map);
                        }
                    }
                    else {
@@ -254,7 +259,7 @@ public class HomeFragment extends Fragment implements
         Log.d (DEBUG_MAP, "Current Location : " + myLocation.toString());
 
         for (int i = 0; i < 4; i++) {
-            double d = (double)i/(double)1000;
+            double d = (double)(i)/(double)(5000 * new Random().nextInt(5) + 1);
             double latitude = myLocation.getLatitude() + d;
             double longitude = myLocation.getLongitude() + d;
             Log.d (DEBUG_MAP, i + ". Latitude : " + latitude + ", Longitude : " + longitude );
