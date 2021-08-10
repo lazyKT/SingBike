@@ -324,7 +324,7 @@ public class HomeFragment extends Fragment implements
             Marker marker = map.addMarker (
                 new MarkerOptions ()
                     .position (new LatLng(myLocation.getLatitude() + d, myLocation.getLongitude() + d))
-                    .title (String.valueOf (new Random().nextInt()))
+                    .title ("bike_sFWp04qr")
                     .icon (BitmapDescriptorFactory.fromResource (R.drawable.cycle32))
             );
             if (marker != null) {

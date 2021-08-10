@@ -2,73 +2,61 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.singbike">
-
     <!-- Internet permission -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- Access Network State -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <!-- Access Camera -->
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <!-- Access Vibration -->
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- for version 8.3 and earlier, we need a permission to write storage -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28"/>
-    <!-- permission to read external storage (images etc..) -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <!-- for Bluetooth -->
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-    <!-- location permission -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Access Network State -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Access Camera -->
+    <uses-permission android:name="android.permission.CAMERA" /> <!-- Access Vibration -->
+    <uses-permission android:name="android.permission.VIBRATE" /> <!-- for version 8.3 and earlier, we need a permission to write storage -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" /> <!-- permission to read external storage (images etc..) -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- for Bluetooth -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!-- location permission -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-    <!-- allow app to use camera features -->
-    <uses-feature android:name="android.hardware.camera2"/>
-    <!-- allow app to use bluetooth features -->
-    <uses-feature android:name="android.hardware.bluetooth" android:required="true" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- allow app to use camera features -->
+    <uses-feature android:name="android.hardware.camera2" /> <!-- allow app to use bluetooth features -->
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="true" />
 
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-
+        <activity
+            android:name=".CreateReservationActivity"
+            android:exported="true" />
         <!-- API-KEY for Google MAP -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/GOOLE_MAPS_API_KEY" />
-
-        <!-- Google Play Services -->
+            android:value="@string/GOOLE_MAPS_API_KEY" /> <!-- Google Play Services -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
         <activity
             android:name=".MainActivity"
-            android:theme="@style/AppTheme"/>
-
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".AuthActivity"
-            android:theme="@style/AppTheme"/>
-
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".IntroActivity"
-            android:theme="@style/AppTheme"/>
-
-        <activity android:name=".CreditScoreActivity"
-            android:theme="@style/AppTheme"/>
-
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".CreditScoreActivity"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".SplashScreenActivity"
-            android:theme="@style/AppTheme.Launcher"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/AppTheme.Launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -78,22 +66,21 @@
         <activity
             android:name=".Authentication.SignUpActivity"
             android:theme="@style/AppTheme" />
-
-        <activity android:name=".EditProfileActivity"
+        <activity
+            android:name=".EditProfileActivity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".RideActivity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ScannerActivity"
             android:theme="@style/AppTheme" />
 
-        <activity android:name=".RideActivity"
-            android:theme="@style/AppTheme" />
-
-        <activity android:name=".ScannerActivity"
-            android:theme="@style/AppTheme" />
-
-        <service android:name=".Services.MyLocationService"
+        <service
+            android:name=".Services.MyLocationService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="location"
-            />
-
+            android:foregroundServiceType="location" />
     </application>
 
 </manifest>

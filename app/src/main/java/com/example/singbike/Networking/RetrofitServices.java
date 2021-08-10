@@ -101,6 +101,12 @@ public interface RetrofitServices {
             );
 
     @GET
+    Call<ResponseBody> getLastReservation (@Url String url);
+
+    @PUT
+    Call<ResponseBody> cancelReservation (@Url String url);
+
+    @GET
     Call<ResponseBody> fetchUserTrips (@Url String url);
 
 }

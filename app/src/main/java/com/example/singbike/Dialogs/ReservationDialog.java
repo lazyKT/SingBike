@@ -3,6 +3,7 @@ package com.example.singbike.Dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
 
+import com.example.singbike.CreateReservationActivity;
 import com.example.singbike.R;
 
 public class ReservationDialog extends DialogFragment {
@@ -98,7 +100,10 @@ public class ReservationDialog extends DialogFragment {
         confirmButton.setOnClickListener(
                 v -> {
                     // make a reservation
-                    listener.onDialogPositiveClick(ReservationDialog.this);
+                    Intent reserveIntent = new Intent (requireActivity(), CreateReservationActivity.class);
+                    reserveIntent.putExtra ("bikeID", bikeID);
+                    reserveIntent.putExtra ("userID", userID);
+                    startActivity (reserveIntent);
                     dismiss();
                 }
         );
