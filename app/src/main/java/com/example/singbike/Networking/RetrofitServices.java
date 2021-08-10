@@ -14,6 +14,7 @@ import retrofit2.http.Url;
 import com.example.singbike.Networking.Requests.ChangePasswordRequest;
 import com.example.singbike.Networking.Requests.TopUpRequest;
 import com.example.singbike.Networking.Requests.TransactionRequest;
+import com.example.singbike.Networking.Requests.TripRequest;
 import com.example.singbike.Networking.Requests.UserRequest;
 
 public interface RetrofitServices {
@@ -79,4 +80,11 @@ public interface RetrofitServices {
             @Url String url,
             @Body TopUpRequest body
             );
+
+    @POST ("customers/trips/")
+    Call<ResponseBody> createTrip (@Body TripRequest body);
+
+    @PUT
+    Call<ResponseBody> endTrip (@Url String url, @Body TripRequest body);
+
 }

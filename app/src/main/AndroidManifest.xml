@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <!-- Access Camera -->
     <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- Access Vibration -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <!-- for version 8.3 and earlier, we need a permission to write storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28"/>
@@ -81,6 +83,9 @@
             android:theme="@style/AppTheme" />
 
         <activity android:name=".RideActivity"
+            android:theme="@style/AppTheme" />
+
+        <activity android:name=".ScannerActivity"
             android:theme="@style/AppTheme" />
 
         <service android:name=".Services.MyLocationService"

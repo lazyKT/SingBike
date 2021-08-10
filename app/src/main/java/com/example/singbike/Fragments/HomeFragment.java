@@ -10,12 +10,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,10 +30,18 @@ import androidx.fragment.app.Fragment;
 import com.example.singbike.Dialogs.ErrorDialog;
 import com.example.singbike.Dialogs.ReservationDialog;
 import com.example.singbike.Fragments.AccountTab.ReportFragment;
+import com.example.singbike.Models.Trip;
 import com.example.singbike.Models.User;
+import com.example.singbike.Networking.Requests.TripRequest;
+import com.example.singbike.Networking.RetrofitClient;
+import com.example.singbike.Networking.RetrofitServices;
 import com.example.singbike.R;
 import com.example.singbike.RideActivity;
+import com.example.singbike.ScannerActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -49,7 +58,18 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.Locale;
 import java.util.Random;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class HomeFragment extends Fragment implements
         OnMapReadyCallback,
@@ -67,10 +87,13 @@ public class HomeFragment extends Fragment implements
     private Location myLocation;
     private LatLng defaultLocation; // move to this location if real location gets some errors
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
     private GoogleMap map;
     private static final int CAMERA_ACCESS = 0;
     private boolean locationPermissionGranted = false;
-    private boolean isMyLocationFetched = false;
+    private User user;
+    private String qrCode;
 
     @Override
     public void onCreate (@Nullable Bundle savedInstanceState) {
@@ -85,6 +108,18 @@ public class HomeFragment extends Fragment implements
                 });
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        if (getArguments() != null) {
+            qrCode = getArguments().getString("QR_CODE");
+            displayErrorDialog ("QR_CODE", qrCode);
+        }
+
+        return inflater.inflate (R.layout.fragment_home, null);
+    }
+
     @Override
     public void onViewCreated (@NonNull final View view, Bundle savedInstanceState) {
 
@@ -94,7 +129,7 @@ public class HomeFragment extends Fragment implements
         final TextView balanceTextView = view.findViewById (R.id.balanceTextView_Home);
 
         /* get user details from local storage (SharedPreferences) */
-        User user = getUserDetails();
+        user = getUserDetails();
         if (user != null) {
             Log.d (DEBUG_SHARED_PREFS, user.toString());
             creditScoreTextView.setText (String.valueOf(user.getCredits()));
@@ -109,6 +144,27 @@ public class HomeFragment extends Fragment implements
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         initMap();
+
+        createLocationRequest();
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                for (Location location : locationResult.getLocations()) {
+                    myLocation = location;
+                    map.moveCamera(CameraUpdateFactory.newCameraPosition(
+                            new CameraPosition(
+                                    new LatLng (myLocation.getLatitude(), myLocation.getLongitude()),
+                                    18,
+                                    45,
+                                    45
+                            )
+                    ));
+                }
+            }
+        };
+
 
         final Button unlockButton = view.findViewById(R.id.unlockButton);
         unlockButton.setOnClickListener (
@@ -163,6 +219,13 @@ public class HomeFragment extends Fragment implements
 
         // add markers
         addMarkers(googleMap);
+
+        try {
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+        }
+        catch (SecurityException e) {
+            displayErrorDialog ("SECURITY EXCEPTION", e.getMessage());
+        }
     }
 
     /* Initiate GoogleMap and Configurations */
@@ -286,7 +349,7 @@ public class HomeFragment extends Fragment implements
         );
 
         final View bottomSheet = LayoutInflater.from(requireActivity())
-                .inflate (R.layout.bike_bottomsheet, (LinearLayout) requireActivity().findViewById(R.id.bikeBottomSheet));
+                .inflate (R.layout.bike_bottomsheet, requireActivity().findViewById(R.id.bikeBottomSheet));
 
         final TextView bikeIDTitle = bottomSheet.findViewById (R.id.bikeID_bikeBottomSheet);
         final Button unlockNowButton = bottomSheet.findViewById (R.id.unlockNowButton_BikeBtmSheet);
@@ -326,6 +389,13 @@ public class HomeFragment extends Fragment implements
         return false;
     }
 
+    private void createLocationRequest () {
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval (10000);
+        locationRequest.setFastestInterval (5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
     /**
      * Open the BottomSheet which offers users to unlock a bike.
      * Option-1: Open the camera and scan the qr code
@@ -337,7 +407,7 @@ public class HomeFragment extends Fragment implements
                 R.style.BottomSheetDialogTheme
         );
         final View bottomSheet = LayoutInflater.from (requireActivity())
-                .inflate (R.layout.unlock_options_bottomsheet, (LinearLayout) requireActivity().findViewById(R.id.unlcok_options_bottomsheet));
+                .inflate (R.layout.unlock_options_bottomsheet, requireActivity().findViewById(R.id.unlcok_options_bottomsheet));
 
         final Button scanQRCodeButton = bottomSheet.findViewById (R.id.scanQRCodeButton);
         final Button manualKeyInButton = bottomSheet.findViewById (R.id.manualKeyInButton);
@@ -362,8 +432,7 @@ public class HomeFragment extends Fragment implements
                     manualKeyInBikeIDET.setVisibility (View.VISIBLE);
 
                     if (!manualKeyInBikeIDET.getText().toString().equals("")) {
-                        Intent intent = new Intent (requireActivity(), RideActivity.class);
-                        startActivity (intent);
+                        startRiding();
                     }
                 }
         );
@@ -409,7 +478,7 @@ public class HomeFragment extends Fragment implements
                 requireActivity(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             // permission allowed
             Log.d (DEBUG_CAMERA_PERMISSION, "Camera Permission in Home Fragment. GRANTED!!!");
-            openCamera();
+            openScanner();
         }
         else if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
             // tell the user why we need them to allow camera permission
@@ -435,12 +504,54 @@ public class HomeFragment extends Fragment implements
         return requireActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
     }
 
-    private void openCamera () {
+    private void openScanner () {
         if (!checkCameraOK())
             return; // camera is not available
 
-        Intent cameraIntent = new Intent("android.media.action.IMAGE_CAPTURE");
-        startActivity(cameraIntent);
+        startActivity (new Intent (requireActivity(), ScannerActivity.class));
+    }
+
+    private void startRiding () {
+
+        if (user == null)
+            return;
+
+        String startPointStr = String.format (Locale.getDefault(), "(%.5f, %.5f)", myLocation.getLatitude(), myLocation.getLongitude());
+
+        Retrofit retrofit = RetrofitClient.getRetrofit();
+        RetrofitServices services = retrofit.create (RetrofitServices.class);
+
+        Call<ResponseBody> call = services.createTrip (new TripRequest(user.getID(), startPointStr));
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        try {
+                            JSONObject jsonObject = new JSONObject (response.body().string());
+                            Trip trip = new Trip (jsonObject.getJSONObject("trip"));
+                            Intent rideIntent = new Intent (requireActivity(), RideActivity.class);
+                            rideIntent.putExtra ("trip", trip);
+                            startActivity (rideIntent);
+                        }
+                        catch (JSONException | IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        displayErrorDialog ("NETWORK_ERROR", "POST Trip: Response Body is NULL!");
+                    }
+                }
+                else {
+                    displayErrorDialog ("NETWORK_ERROR", "POST Trip: Failed to get response!");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                displayErrorDialog ("NETWORK_ERROR", "POST Trip: " + t.getMessage());
+            }
+        });
     }
 
     private void displayErrorDialog (String title, String message) {

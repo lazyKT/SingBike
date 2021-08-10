@@ -1,6 +1,7 @@
 package com.example.singbike.Utilities;
 
 import android.content.Context;
+import android.location.Location;
 
 import androidx.preference.PreferenceManager;
 
@@ -11,6 +12,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class Utils {
 
@@ -48,6 +50,10 @@ public class Utils {
 
     public static boolean requestLocationUpdates(Context context) {
         return PreferenceManager.getDefaultSharedPreferences (context).getBoolean(KEY_REQUESTING_LOCATION_UPDATES_BG, false);
+    }
+
+    public static String locationToStringFormat (Location location) {
+        return String.format (Locale.getDefault(), "( %.5f/%.5f )", location.getLatitude(), location.getLongitude());
     }
 
 //    public static void setRunServiceInBackGround ()
