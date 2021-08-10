@@ -229,8 +229,11 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                 }
                 else {
-                    Log.d (DEBUG_REGISTER, response.message());
-                    errorTV.setText (R.string.sign_up_fail);
+                    String error = "Network Error: Try Again!";
+                    if (response.code() == 400) {
+                        error = "Sign Up Failed: User Already Exists!";
+                    }
+                    errorTV.setText (error);
                 }
             }
 

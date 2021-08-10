@@ -121,7 +121,7 @@
     </string-array>
 
     <!-- achievements -->
-    <string name="loading_achievement">Loading Achievements ...</string>
+    <string name="loading_achievement">Loading Achievements …</string>
     <string-array name="achievements">
         <item>Complete 10 rides.</item>
         <item>Complete 20 rides.</item>

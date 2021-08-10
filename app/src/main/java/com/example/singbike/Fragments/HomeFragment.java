@@ -14,7 +14,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -94,7 +93,6 @@ public class HomeFragment extends Fragment implements
     private static final int CAMERA_ACCESS = 0;
     private boolean locationPermissionGranted = false;
     private User user;
-    private String qrCode;
     private LoadingDialog loadingDialog;
 
     @Override
