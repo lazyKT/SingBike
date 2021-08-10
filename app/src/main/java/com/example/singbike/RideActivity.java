@@ -22,7 +22,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.singbike.Dialogs.ErrorDialog;
+import com.example.singbike.Models.Trip;
+import com.example.singbike.Models.User;
+import com.example.singbike.Networking.Requests.TransactionRequest;
+import com.example.singbike.Networking.Requests.TripRequest;
+import com.example.singbike.Networking.RetrofitClient;
+import com.example.singbike.Networking.RetrofitServices;
 import com.example.singbike.Services.MyLocationService;
+import com.example.singbike.Utilities.AppExecutor;
 import com.example.singbike.Utilities.Utils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -32,10 +39,21 @@ import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class RideActivity extends AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -54,8 +72,11 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MyLocationService myLocationService;
     private boolean mBound = false;
 
-
+    private Trip trip;
+    private RetrofitServices services;
+    private Retrofit retrofit;
     private ServiceConnection serviceConnection;
+    private User user;
 
     @Override
     public void onCreate(Bundle savedInstanceStates) {
@@ -72,6 +93,17 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // request location permission
         if (!isLocationGranted) requestLocationPermission();
+
+        user = getUserDetails();
+        if (user == null)
+            startActivity (new Intent (RideActivity.this, MainActivity.class));
+
+        // get trip created from Home Fragment
+        trip = getIntent().getParcelableExtra ("trip");
+
+        if (trip == null) {
+            displayErrorDialog ("Application Error!", "Trip is NULL!!");
+        }
 
         // create service connection for bound service
         serviceConnection = new ServiceConnection() {
@@ -90,6 +122,9 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         };
 
+        retrofit = RetrofitClient.getRetrofit();
+        services = retrofit.create (RetrofitServices.class);
+
         startTime = System.currentTimeMillis();
         initMap();
 
@@ -101,12 +136,7 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
         startForeGroundService();
 
         finishRideButton.setOnClickListener(v -> {
-            for (Location location : visitedLocations)
-                Log.d (DEBUG_RIDE_LOCATION, location.toString());
-            // cancel the timer runnable
-            handler.removeCallbacks(runnable);
-            Utils.setRequestLocationUpdates (RideActivity.this, false);
-            startActivity(new Intent(RideActivity.this, MainActivity.class));
+            endTrip();
         });
 
     }
@@ -160,6 +190,13 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
         updateMapUI();
 
         setLastKnownLocationOnMap();
+    }
+
+    private User getUserDetails () {
+        Gson gson = new Gson();
+        SharedPreferences userPrefs = getSharedPreferences ("User", Context.MODE_PRIVATE);
+        String jsonData = userPrefs.getString ("UserDetails", "");
+        return gson.fromJson (jsonData, User.class);
     }
 
     /* initiate map */
@@ -239,7 +276,7 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
         catch (SecurityException e) {
-            displayErrorDialog (e.getMessage());
+            displayErrorDialog ("SecurityException: Permission Error", e.getMessage());
         }
     }
 
@@ -265,7 +302,7 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
                 requestLocationPermission();
             }
         } catch (SecurityException se) {
-            displayErrorDialog (se.getMessage());
+            displayErrorDialog ("SecurityException: Permission Error", se.getMessage());
         }
     }
 
@@ -285,8 +322,8 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     /* display error message */
-    private void displayErrorDialog (String message) {
-        ErrorDialog dialog = new ErrorDialog(RideActivity.this, "SecurityException: Permission Error", message);
+    private void displayErrorDialog (String title, String message) {
+        ErrorDialog dialog = new ErrorDialog(RideActivity.this, title, message);
         dialog.show(getSupportFragmentManager(), dialog.getTag());
     }
 
@@ -305,5 +342,85 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
         Intent startIntent = new Intent (this, MyLocationService.class);
         startIntent.setAction ("start");
         startForegroundService (startIntent);
+    }
+
+    private void endTrip () {
+        if (trip == null)
+            return;
+
+        final String url = String.format (Locale.getDefault(), "/customers/trips/%d", trip.getTripID());
+
+        TripRequest tripRequest = new TripRequest(
+                trip.getTripID(),
+                Utils.locationToStringFormat (visitedLocations.get (visitedLocations.size())),
+                "",
+                0.00,
+                3.12,
+                5.21
+        );
+
+        Call<ResponseBody> call = services.endTrip (url, new TripRequest());
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+
+                        try {
+                            JSONObject object = new JSONObject (response.body().string());
+                            JSONObject tripObject = object.getJSONObject ("trip");
+
+                            // record user activity
+                            AppExecutor.getInstance().getDiskIO().execute(() -> {
+                                Utils.insertUserActivity (RideActivity.this, "ride", user.getID());
+                            });
+                            // perform transaction
+                            performTransaction (tripObject.getDouble("total_fare"));
+
+                        }
+                        catch (JSONException | IOException e) {
+                            displayErrorDialog ("APPLICATION ERROR!", e.getMessage());
+                        }
+                    }
+                    else {
+                        displayErrorDialog ("NETWORK_ERROR", "END Trip: Response Body is Empty!!");
+                    }
+                }
+                else {
+                    displayErrorDialog ("NETWORK_ERROR", "END Trip: Response Body is Empty!!");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                displayErrorDialog ("NETWORK_ERROR", t.getMessage());
+            }
+        });
+    }
+
+    private void performTransaction (double amount) {
+        if (user == null)
+            return;
+
+        Call<ResponseBody> call = services.createTransaction (new TransactionRequest(user.getID(), amount, "ride"));
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        // cancel the timer runnable
+                        handler.removeCallbacks(runnable);
+                        Utils.setRequestLocationUpdates (RideActivity.this, false);
+                        stopForeGroundService();
+                        startActivity(new Intent(RideActivity.this, MainActivity.class));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                displayErrorDialog ("NETWORK_ERROR", t.getMessage());
+            }
+        });
     }
 }
