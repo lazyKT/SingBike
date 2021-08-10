@@ -35,7 +35,8 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
         }
 
         public void bind (final Transaction transaction, Context context, final TransactionItemOnClickListener listener) {
-            this.transactionType.setText (transaction.getType());
+            final String type = (transaction.getType()).substring(0, 1).toUpperCase() + (transaction.getType()).substring(1);
+            this.transactionType.setText (type);
             this.transactionTime.setText (transaction.getTime());
             this.amountTV.setText (transaction.getAmountStr());
 

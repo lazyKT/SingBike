@@ -35,6 +35,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 
 import okhttp3.ResponseBody;
@@ -93,7 +94,7 @@ public class WalletFragment extends Fragment {
                             user = gson.fromJson (jsonString, User.class);
                             Log.d (DEBUG_TRANSACTIONS, user.toString());
                             requireActivity().runOnUiThread(() -> balanceTextView.setText(String.valueOf(user.getBalance())));
-                            fetchTransactions ();
+                            fetchBalance ();
                         }
                         else {
                             requireActivity().runOnUiThread(
@@ -187,6 +188,7 @@ public class WalletFragment extends Fragment {
 
                                 transactionLoadingBar.setVisibility (View.GONE);
                                 transactionRecyclerView.setVisibility (View.VISIBLE);
+                                Collections.reverse (transactionList);
                                 adapter.setTransactions (transactionList);
                                 adapter.notifyDataSetChanged();
                                 Log.d (DEBUG_TRANSACTIONS, "Num of Transactions : " + adapter.getItemCount());
@@ -210,6 +212,57 @@ public class WalletFragment extends Fragment {
             }
         });
     }
+
+    private void fetchBalance () {
+        if (user == null)
+            return;
+
+        final String url = String.format (Locale.getDefault(), "customers/%d", user.getID());
+        final String NETWORK_ERROR = "NETWORK_ERROR";
+        Retrofit retrofit = RetrofitClient.getRetrofit();
+        RetrofitServices services = retrofit.create (RetrofitServices.class);
+
+        Call<ResponseBody> call = services.fetchProfile (url);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        try {
+                            JSONObject jsonObject = new JSONObject (response.body().string());
+                            user = new User (jsonObject.getJSONObject("customer"));
+                            updatePrefs (user);
+                            fetchTransactions();
+                        }
+                        catch (JSONException | IOException e) {
+                            displayError ("APPLICATION ERROR", e.getMessage());
+                        }
+                    }
+                    else {
+                        displayError (NETWORK_ERROR, "GET PROFILE: Response Empty!");
+                    }
+                }
+                else
+                    displayError (NETWORK_ERROR, "GET PROFILE: Response Failed!");
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+
+            }
+        });
+    }
+
+
+    private void updatePrefs (User user) {
+        SharedPreferences prefs = requireActivity().getSharedPreferences ("User", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        Gson gson = new Gson();
+        String jsonString = gson.toJson (user);
+        editor.putString ("UserDetails", jsonString);
+        editor.apply();
+    }
+
 
     private void displayError (String title, String message) {
         ErrorDialog errorDialog = new ErrorDialog(requireActivity(), title, message);

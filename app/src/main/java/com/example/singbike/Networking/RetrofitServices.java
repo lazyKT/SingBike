@@ -31,6 +31,9 @@ public interface RetrofitServices {
             @Body UserRequest body
             );
 
+    @GET
+    Call<ResponseBody> fetchProfile (@Url String url);
+
     // to upload avatar
     @Multipart
     @POST
@@ -82,9 +85,9 @@ public interface RetrofitServices {
             );
 
     @POST ("customers/trips/")
-    Call<ResponseBody> createTrip (@Body TripRequest body);
+    Call<ResponseBody> createTrip (@Body TripRequest.TripCreateRequest body);
 
     @PUT
-    Call<ResponseBody> endTrip (@Url String url, @Body TripRequest body);
+    Call<ResponseBody> endTrip (@Url String url, @Body TripRequest.TripEndRequest body);
 
 }

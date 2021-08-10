@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 
 public class Utils {
@@ -53,8 +54,19 @@ public class Utils {
     }
 
     public static String locationToStringFormat (Location location) {
-        return String.format (Locale.getDefault(), "( %.5f/%.5f )", location.getLatitude(), location.getLongitude());
+        return String.format (Locale.getDefault(), "( %.5f, %.5f )", location.getLatitude(), location.getLongitude());
     }
+
+    public static String locationsToStringPaths (List<Location> locations) {
+
+        String path = "";
+
+        for (Location location : locations) {
+            path = String.format (Locale.getDefault(), "%s | %s", path, Utils.locationToStringFormat (location));
+        }
+        return path;
+    }
+
 
 //    public static void setRunServiceInBackGround ()
 }

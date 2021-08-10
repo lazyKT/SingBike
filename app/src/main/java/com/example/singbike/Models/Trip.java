@@ -8,12 +8,12 @@ import org.json.JSONObject;
 
 public class Trip implements Parcelable {
 
-    private final int cust_id, trip_id;
+    private final int customer_id, trip_id;
     private String start_point, end_point, path; private final String created_at;
     private double fare, promo, distance, time_taken;
 
     public Trip (JSONObject object) throws JSONException {
-        this.cust_id = object.getInt ("cust_id");
+        this.customer_id = object.getInt ("customer_id");
         this.trip_id = object.getInt ("trip_id");
         this.start_point = object.getString ("start_point");
         this.end_point = object.getString ("end_point");
@@ -26,7 +26,7 @@ public class Trip implements Parcelable {
     }
 
     protected Trip(Parcel in) {
-        cust_id = in.readInt();
+        customer_id = in.readInt();
         trip_id = in.readInt();
         start_point = in.readString();
         end_point = in.readString();
@@ -57,7 +57,7 @@ public class Trip implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(cust_id);
+        dest.writeInt(customer_id);
         dest.writeInt(trip_id);
         dest.writeString(start_point);
         dest.writeString(end_point);

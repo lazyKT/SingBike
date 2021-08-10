@@ -25,6 +25,7 @@ import com.example.singbike.Networking.RetrofitClient;
 import com.example.singbike.Networking.RetrofitServices;
 import com.example.singbike.Networking.Requests.UserRequest;
 import com.example.singbike.R;
+import com.example.singbike.Utilities.AppExecutor;
 import com.example.singbike.Utilities.Utils;
 import com.google.gson.Gson;
 
@@ -211,7 +212,9 @@ public class SignUpActivity extends AppCompatActivity {
                             /* save user data in Local Storage (SharedPreferences) */
                             saveToSharedPref (user);
 
-                            Utils.insertUserActivity (getApplicationContext(), "welcome", user.getID());
+                            AppExecutor.getInstance().getDiskIO().execute(
+                                    () -> Utils.insertUserActivity (getApplicationContext(), "welcome", user.getID())
+                            );
 
                             /* redirect to Home Page */
                             startActivity (new Intent(SignUpActivity.this, MainActivity.class));
@@ -226,7 +229,7 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                 }
                 else {
-                    Log.d (DEBUG_REGISTER, "Response has failed!");
+                    Log.d (DEBUG_REGISTER, response.message());
                     errorTV.setText (R.string.sign_up_fail);
                 }
             }
