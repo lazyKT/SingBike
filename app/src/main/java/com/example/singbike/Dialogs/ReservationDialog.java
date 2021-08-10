@@ -29,15 +29,17 @@ public class ReservationDialog extends DialogFragment {
     // instance of Event Listener
     private ReservationDialogListener listener;
     private static final String DEBUG_BIKEID = "DEBUG_BIKEID";
+    private int userID;
 
     /*
     * this method return the new instance of the ReservationDialog.
     * The purpose of this method is to receive the data from host activity/fragment
     * */
-    public static ReservationDialog newInstance (String bikeID) {
+    public static ReservationDialog newInstance (String bikeID, int userID) {
         ReservationDialog dialog = new ReservationDialog();
         Bundle bundle = new Bundle();
         bundle.putString ("bikeID", bikeID);
+        bundle.putInt ("userID", userID);
         dialog.setArguments (bundle);
         return dialog;
     }
@@ -62,13 +64,18 @@ public class ReservationDialog extends DialogFragment {
     public Dialog onCreateDialog (Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
 
-        assert getArguments() != null;
+        if (getArguments() == null)
+            this.dismiss();
+
         String bikeID;
 
         if (getArguments().getString ("bikeID") == null)
             bikeID = "Unknown Status";
         else
             bikeID = getArguments().getString ("bikeID");
+
+        userID = getArguments().getInt ("userID");
+
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.RoundCornerDialog);
         LayoutInflater inflater = requireActivity().getLayoutInflater();
@@ -82,24 +89,18 @@ public class ReservationDialog extends DialogFragment {
         bikeIDTextView.setText (bikeID);
 
         cancelButton.setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+                v -> {
                     listener.onDialogNegativeClick(ReservationDialog.this);
                     dismiss();
                 }
-            }
         );
 
         confirmButton.setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+                v -> {
                     // make a reservation
                     listener.onDialogPositiveClick(ReservationDialog.this);
                     dismiss();
                 }
-            }
         );
 
         return builder.create();

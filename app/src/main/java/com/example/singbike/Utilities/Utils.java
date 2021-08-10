@@ -1,10 +1,12 @@
 package com.example.singbike.Utilities;
 
+import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 
 import androidx.preference.PreferenceManager;
 
+import com.example.singbike.Dialogs.ErrorDialog;
 import com.example.singbike.LocalStorage.UserActivity;
 import com.example.singbike.LocalStorage.UserActivityDatabase;
 
@@ -66,6 +68,11 @@ public class Utils {
         }
         return path;
     }
+
+//    public static void displayErrorDialog (Activity activity, String title, String message) {
+//        ErrorDialog dialog = new ErrorDialog (context, title, message);
+//        dialog.show (activity.getSu);
+//    }
 
 
 //    public static void setRunServiceInBackGround ()

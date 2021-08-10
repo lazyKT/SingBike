@@ -100,4 +100,8 @@ public class Trip implements Parcelable {
     public int getTripID () {
         return this.trip_id;
     }
+
+    public String getCreated_at () { return this.created_at; }
+
+    public double getDistance () { return this.distance; }
 }

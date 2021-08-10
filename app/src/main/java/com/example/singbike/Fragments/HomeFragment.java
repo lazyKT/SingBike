@@ -373,7 +373,7 @@ public class HomeFragment extends Fragment implements
                     // reserve now
                     bottomSheetDialog.dismiss();
                     // send bikeID to the dialogFragment
-                    ReservationDialog dialog = ReservationDialog.newInstance(marker.getTitle());
+                    ReservationDialog dialog = ReservationDialog.newInstance(marker.getTitle(), user.getID());
                     dialog.show (getChildFragmentManager(), dialog.getTag());
                 }
         );
