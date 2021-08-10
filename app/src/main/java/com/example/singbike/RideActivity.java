@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.singbike.Dialogs.ErrorDialog;
+import com.example.singbike.Dialogs.LoadingDialog;
 import com.example.singbike.Models.Trip;
 import com.example.singbike.Models.User;
 import com.example.singbike.Networking.Requests.TransactionRequest;
@@ -77,6 +78,7 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Retrofit retrofit;
     private ServiceConnection serviceConnection;
     private User user;
+    private LoadingDialog loadingDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceStates) {
@@ -136,6 +138,8 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
         startForeGroundService();
 
         finishRideButton.setOnClickListener(v -> {
+            loadingDialog = new LoadingDialog (RideActivity.this, "Finishing ..");
+            loadingDialog.show (getSupportFragmentManager(), loadingDialog.getTag());
             endTrip();
         });
 
@@ -350,16 +354,16 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         final String url = String.format (Locale.getDefault(), "/customers/trips/%d", trip.getTripID());
 
-        TripRequest tripRequest = new TripRequest(
-                trip.getTripID(),
-                Utils.locationToStringFormat (visitedLocations.get (visitedLocations.size())),
-                "",
-                0.00,
+        TripRequest.TripEndRequest tripEndRequest = new TripRequest.TripEndRequest(
+                Utils.locationToStringFormat (visitedLocations.get (visitedLocations.size() - 1)),
+                Utils.locationsToStringPaths (visitedLocations),
+                5.020,
                 3.12,
-                5.21
+                0.00,
+                5.020
         );
 
-        Call<ResponseBody> call = services.endTrip (url, new TripRequest());
+        Call<ResponseBody> call = services.endTrip (url, tripEndRequest);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
@@ -402,18 +406,35 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (user == null)
             return;
 
+        amount = -amount;
+
         Call<ResponseBody> call = services.createTransaction (new TransactionRequest(user.getID(), amount, "ride"));
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
+
+                        // record user activity
+                        AppExecutor.getInstance().getDiskIO().execute(
+                                () -> Utils.insertUserActivity (RideActivity.this, "transaction", user.getID())
+                        );
+
                         // cancel the timer runnable
                         handler.removeCallbacks(runnable);
                         Utils.setRequestLocationUpdates (RideActivity.this, false);
                         stopForeGroundService();
+
+                        runOnUiThread(() -> loadingDialog.dismiss());
+
                         startActivity(new Intent(RideActivity.this, MainActivity.class));
                     }
+                    else {
+                        displayErrorDialog ("NETWORK_ERROR", "TRANSACTION POST: Response Empty!!");
+                    }
+                }
+                else {
+                    displayErrorDialog ("NETWORK_ERROR", "TRANSACTION POST: Response Failed!!");
                 }
             }
 

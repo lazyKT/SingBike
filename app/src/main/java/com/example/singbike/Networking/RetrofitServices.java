@@ -12,6 +12,7 @@ import retrofit2.http.Part;
 import retrofit2.http.Url;
 
 import com.example.singbike.Networking.Requests.ChangePasswordRequest;
+import com.example.singbike.Networking.Requests.ReservationRequest;
 import com.example.singbike.Networking.Requests.TopUpRequest;
 import com.example.singbike.Networking.Requests.TransactionRequest;
 import com.example.singbike.Networking.Requests.TripRequest;
@@ -30,6 +31,9 @@ public interface RetrofitServices {
     Call<ResponseBody> signUpRequest (
             @Body UserRequest body
             );
+
+    @GET
+    Call<ResponseBody> fetchProfile (@Url String url);
 
     // to upload avatar
     @Multipart
@@ -82,9 +86,18 @@ public interface RetrofitServices {
             );
 
     @POST ("customers/trips/")
-    Call<ResponseBody> createTrip (@Body TripRequest body);
+    Call<ResponseBody> createTrip (@Body TripRequest.TripCreateRequest body);
 
     @PUT
-    Call<ResponseBody> endTrip (@Url String url, @Body TripRequest body);
+    Call<ResponseBody> endTrip (@Url String url, @Body TripRequest.TripEndRequest body);
+
+    @POST ("bikes/reservations/")
+    Call<ResponseBody> createReservation (@Body ReservationRequest.CreateReservationRequest body);
+
+    @PUT
+    Call<ResponseBody> editReservation (
+            @Url String url,
+            @Body ReservationRequest.EditReservationRequest body
+            );
 
 }

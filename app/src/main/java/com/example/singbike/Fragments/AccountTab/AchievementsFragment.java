@@ -28,6 +28,7 @@ public class AchievementsFragment extends Fragment {
         super (R.layout.fragment_achievement);
     }
 
+    private static final String DEBUG_ACHIEVEMENTS = "DEBUG_ACHIEVEMENTS";
     private List<Achievement> achievementList;
 
     @Override
@@ -50,18 +51,19 @@ public class AchievementsFragment extends Fragment {
         achievementRecyclerView.setLayoutManager (layoutManager);
 
         achievementRecyclerView.setAdapter(adapter);
+        Log.d (DEBUG_ACHIEVEMENTS, "onViewCreated!");
 
         /* fetching achievements and progress from Local Database (Rooms) */
         AppExecutor.getInstance().getDiskIO().execute(() -> {
             // Run on different thread (not UI Thread)
-            Log.i ("Retrieve Achievements", "Retrieving Achievements");
+            Log.d (DEBUG_ACHIEVEMENTS, "Retrieving Achievements");
             /* retrieve achievements from local database  */
             AchievementDatabase achievementDatabase = AchievementDatabase.getInstance (requireContext());
             achievementList = achievementDatabase.achievementDAO().getAll();
 
             /* update UI Thread */
             requireActivity().runOnUiThread (() -> {
-                Log.i ("Retrieve Achievements", "Updated UI Thread");
+                Log.d (DEBUG_ACHIEVEMENTS, "Updated UI Thread");
                 loadingLayout.setVisibility (View.GONE);
                 refreshLayout.setVisibility (View.VISIBLE);
                 adapter.setAchievements (achievementList);

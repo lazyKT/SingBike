@@ -14,7 +14,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -28,6 +27,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.singbike.Dialogs.ErrorDialog;
+import com.example.singbike.Dialogs.LoadingDialog;
 import com.example.singbike.Dialogs.ReservationDialog;
 import com.example.singbike.Fragments.AccountTab.ReportFragment;
 import com.example.singbike.Models.Trip;
@@ -93,7 +93,7 @@ public class HomeFragment extends Fragment implements
     private static final int CAMERA_ACCESS = 0;
     private boolean locationPermissionGranted = false;
     private User user;
-    private String qrCode;
+    private LoadingDialog loadingDialog;
 
     @Override
     public void onCreate (@Nullable Bundle savedInstanceState) {
@@ -106,18 +106,6 @@ public class HomeFragment extends Fragment implements
                     if (confirmResult == 0)
                         Toast.makeText (requireActivity(), "You have cancel the bike reservation!!", Toast.LENGTH_LONG).show();
                 });
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-        if (getArguments() != null) {
-            qrCode = getArguments().getString("QR_CODE");
-            displayErrorDialog ("QR_CODE", qrCode);
-        }
-
-        return inflater.inflate (R.layout.fragment_home, null);
     }
 
     @Override
@@ -226,6 +214,13 @@ public class HomeFragment extends Fragment implements
         catch (SecurityException e) {
             displayErrorDialog ("SECURITY EXCEPTION", e.getMessage());
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (loadingDialog != null)
+            loadingDialog.dismiss();
     }
 
     /* Initiate GoogleMap and Configurations */
@@ -432,6 +427,8 @@ public class HomeFragment extends Fragment implements
                     manualKeyInBikeIDET.setVisibility (View.VISIBLE);
 
                     if (!manualKeyInBikeIDET.getText().toString().equals("")) {
+                        loadingDialog = new LoadingDialog (requireActivity(), "Starting ..");
+                        loadingDialog.show (requireActivity().getSupportFragmentManager(), loadingDialog.getTag());
                         startRiding();
                     }
                 }
@@ -508,7 +505,9 @@ public class HomeFragment extends Fragment implements
         if (!checkCameraOK())
             return; // camera is not available
 
-        startActivity (new Intent (requireActivity(), ScannerActivity.class));
+        Intent scanIntent = new Intent (requireActivity(), ScannerActivity.class);
+        scanIntent.putExtra ("MyLocation", myLocation);
+        startActivity (scanIntent);
     }
 
     private void startRiding () {
@@ -521,15 +520,19 @@ public class HomeFragment extends Fragment implements
         Retrofit retrofit = RetrofitClient.getRetrofit();
         RetrofitServices services = retrofit.create (RetrofitServices.class);
 
-        Call<ResponseBody> call = services.createTrip (new TripRequest(user.getID(), startPointStr));
+        Call<ResponseBody> call = services.createTrip (new TripRequest.TripCreateRequest(user.getID(), startPointStr));
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
                         try {
+                            Log.d ("TRIP_CREATE", "OK");
                             JSONObject jsonObject = new JSONObject (response.body().string());
-                            Trip trip = new Trip (jsonObject.getJSONObject("trip"));
+                            Log.d ("TRIP_CREATE", jsonObject.getJSONObject("trip").toString());
+//                            Trip trip = new Trip (jsonObject.getJSONObject("trip"));
+                            Gson gson = new Gson();
+                            Trip trip = gson.fromJson (jsonObject.getJSONObject("trip").toString(), Trip.class);
                             Intent rideIntent = new Intent (requireActivity(), RideActivity.class);
                             rideIntent.putExtra ("trip", trip);
                             startActivity (rideIntent);

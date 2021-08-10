@@ -1,42 +1,42 @@
 package com.example.singbike.Networking.Requests;
 
+
 public class TripRequest {
 
-    private int cust_id, trip_id;
-    private String start_point, end_point, path;
-    private double fare, distance, promo, total_fare;
+    public static class TripCreateRequest {
 
-    public TripRequest () {}
+        private int cust_id;
+        private String start_point, end_point, path;
+        private double fare, distance, promo, total;
+
+        public TripCreateRequest () {}
 
 
-    public TripRequest (int cust_id, String start_point) {
-        this.cust_id = cust_id;
-        this.start_point = start_point;
-        this.end_point = "";
-        this.fare = 0.00;
-        this.promo = 0.00;
-        this.total_fare = 0.00;
-        this.distance = 0.00;
+        public TripCreateRequest (int cust_id, String start_point) {
+            this.cust_id = cust_id;
+            this.start_point = start_point;
+            this.end_point = "";
+            this.fare = 0.00;
+            this.promo = 0.00;
+            this.total = 0.00;
+            this.distance = 0.00;
+        }
     }
 
-    public TripRequest (int trip_id, String end_point, String path, double promo, double fare, double distance) {
-        this.trip_id = trip_id;
-        this.end_point = end_point;
-        this.path = path;
-        this.promo = promo;
-        this.fare = fare;
-        this.distance = distance;
-    }
+    public static class TripEndRequest {
 
-    public TripRequest (int cust_id, String start_point, String end_point, double fare, double distance, double promo, double total) {
-        this.cust_id = cust_id;
-        this.start_point = start_point;
-        this.end_point = end_point;
-        this.promo = promo;
-        this.fare = fare;
-        this.distance = distance;
-        this.total_fare = total;
-    }
+        private String end_point, path;
+        private double fare, distance, promo, total_fare;
 
+        public TripEndRequest (String end_point, String path, double fare, double distance, double promo, double total_fare) {
+            this.distance = distance;
+            this.end_point = end_point;
+            this.fare = fare;
+            this.promo = promo;
+            this.path = path;
+            this.total_fare = total_fare;
+        }
+
+    }
 
 }

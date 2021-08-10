@@ -128,7 +128,7 @@ public class IntroActivity extends AppCompatActivity {
 
     private void bulkInsertAchievements () {
 
-        Log.i ("BULK_INSERT", "Inserting into Room DB");
+        Log.i ("DEBUG_ACHIEVEMENTS", "Inserting into Room DB");
         final AchievementDatabase achievementDatabase = AchievementDatabase.getInstance (getApplicationContext());
 
         final String[] achievementTiles = getResources().getStringArray (R.array.achievements_titles);
@@ -139,6 +139,7 @@ public class IntroActivity extends AppCompatActivity {
         final ArrayList<Achievement> achievementArrayList = new ArrayList<>();
 
         for (int i = 0; i < totalAchievements; i++) {
+            Log.i ("DEBUG_ACHIEVEMENTS", "Inserting into Room DB " + i);
             achievementArrayList.add(
                     new Achievement (
                             achievementTiles[i], achievementGoals[i], 0,

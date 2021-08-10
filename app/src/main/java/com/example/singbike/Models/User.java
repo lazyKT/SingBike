@@ -36,7 +36,8 @@ public class User implements Parcelable {
         this.id = object.getInt ("id");
         this.username = object.getString ("username");
         this.email = object.getString ("email");
-        this.balance = object.getDouble ("balance");
+        String balanceStr = String.format (Locale.getDefault(), "%.2f", object.getDouble ("balance"));
+        this.balance = Double.parseDouble (balanceStr);
         this.credits = object.getInt ("credits");
         this.updated_at = object.getString ("updated_at");
         this.created_at = object.getString ("created_at");
