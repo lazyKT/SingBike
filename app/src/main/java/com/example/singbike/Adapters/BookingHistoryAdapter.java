@@ -34,7 +34,7 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter <BookingHistoryA
         public void bind (Booking booking) {
             this.bookingTimeTV.setText (booking.getBookingTime());
             this.bookingDateTV.setText (booking.getBookingDate());
-            if (booking.getBookingStatus().equals("Cancelled")) {
+            if (booking.getBookingStatus().equals("cancelled")) {
                 this.bookingStatusTV.setTextColor(Color.RED);
                 this.bookingIndicatorIcon.setImageResource (R.drawable.delete);
             }
@@ -46,7 +46,7 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter <BookingHistoryA
         }
     }
 
-    private final ArrayList<Booking> bookings;
+    private ArrayList<Booking> bookings;
     private final Context context;
 
     public BookingHistoryAdapter (Context context, ArrayList<Booking> bookings) {
@@ -74,5 +74,9 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter <BookingHistoryA
     public int getItemCount()
     {
         return bookings.size();
+    }
+
+    public void setBookings (ArrayList<Booking> bookings) {
+        this.bookings = bookings;
     }
 }

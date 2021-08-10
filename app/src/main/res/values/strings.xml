@@ -228,6 +228,7 @@
 
     <!-- booking tab -->
     <string name="creatingReservation">Making Reservation …</string>
+    <string name="loadingReservations">Loading Booking …</string>
     <string name="reservation">Reservation</string>
     <string name="expire_at">End Time</string>
     <string name="singleBooking">Booking</string>

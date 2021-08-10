@@ -47,6 +47,16 @@ public class Utils {
         return dateTime.format (dateTimeFormatter);
     }
 
+    public static String toLocalDateTime (String datetime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern ("d/MM/yy HH:mm", Locale.getDefault());
+        LocalDateTime  localDateTime = LocalDateTime.parse (datetime, formatter);
+        ZoneId singaporeTimeZone = ZoneId.of ("Asia/Singapore");
+        ZonedDateTime utcDatetime = ZonedDateTime.of (localDateTime, ZoneOffset.UTC);
+        ZonedDateTime sgDateTime = utcDatetime.withZoneSameInstant (singaporeTimeZone);
+
+        return Utils.dateToStringFormat (sgDateTime);
+    }
+
     /* insert user activity record into Room DB */
     public static void insertUserActivity (Context context, String type, int userID) {
         final UserActivityDatabase database = UserActivityDatabase.getInstance (context);
