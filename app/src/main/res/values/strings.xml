@@ -241,8 +241,9 @@
     <string name="cancelled">Trip Cancelled</string>
     <string name="bikeID">Bike ID :</string>
     <string name="bikeDetails">Bike Details</string>
-    <string name="reservation_in_progress">You current have only one active reservation. One uesr can make one reservation at a time. Sorry for the inconvenience:)</string>
-    <string name="reservation_success">You have reserved a bike for 10 minutes. After 10 minutes, the bike you reserved will be released back to other users.</string>
+    <string name="reservation_in_progress">You current have only one active reservation. One user can make one reservation at a time. Sorry for the inconvenience:)</string>
+    <string name="reservation_success1">You have reserved a bike for 10 minutes.</string>
+    <string name="reservation_success2">After 10 minutes, the bike you reserved will be released back to other users.</string>
 
 
     <!-- Ride History -->

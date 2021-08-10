@@ -107,9 +107,12 @@ public class CreateReservationActivity extends AppCompatActivity {
                                     AlertDialog.Builder builder = new AlertDialog.Builder (CreateReservationActivity.this);
                                     builder.setTitle ("Reservation Failed!")
                                             .setMessage (R.string.reservation_in_progress)
-                                            .setNeutralButton (R.string.ok, (dialogInterface, which) -> {
-                                               startActivity (new Intent(CreateReservationActivity.this, MainActivity.class));
-                                            });
+                                            .setNeutralButton (R.string.ok,
+                                                    (dialogInterface, which) -> startActivity (
+                                                            new Intent(CreateReservationActivity.this, MainActivity.class
+                                                            )
+                                                    )
+                                            );
                                     builder.create();
                                     builder.show();
                                 }
