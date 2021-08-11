@@ -5,6 +5,8 @@
       <map>
         <entry key="app/src/main/res/layout/activity_create_reservation.xml" value="0.24166666666666667" />
         <entry key="app/src/main/res/layout/activity_scanner.xml" value="0.13360507246376813" />
+        <entry key="app/src/main/res/layout/bike_bottomsheet.xml" value="0.18885869565217392" />
+        <entry key="app/src/main/res/layout/current_reservation_actions.xml" value="0.21467391304347827" />
         <entry key="app/src/main/res/layout/dialog_error.xml" value="0.18885869565217392" />
         <entry key="app/src/main/res/layout/dialog_reservation.xml" value="0.18885869565217392" />
         <entry key="app/src/main/res/layout/dialog_reserve_success.xml" value="0.21467391304347827" />

@@ -117,6 +117,9 @@ public class CreateReservationActivity extends AppCompatActivity {
                                     builder.show();
                                 }
                             }
+                            else {
+                                createReservation();
+                            }
                         }
                         catch (JSONException | IOException e) {
                             displayErrorDialog ("RUNTIME ERROR", e.getMessage());

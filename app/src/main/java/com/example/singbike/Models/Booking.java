@@ -61,13 +61,9 @@ public class Booking implements Parcelable {
 
     public String getBookingStatus () { return this.status; }
 
-    public String getBookingTime () { return this.bike_id; }
+    public String getBikeID () { return this.bike_id; }
 
     public String getBookingDate () { return this.created_at; }
-
-    public String getBookingDateTime () {
-        return String.format("%s %s", this.getBookingDate(), getBookingTime());
-    }
 
     public int getReservation_id () { return  this.reservation_id; }
 

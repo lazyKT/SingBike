@@ -32,7 +32,7 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter <BookingHistoryA
         }
 
         public void bind (Booking booking) {
-            this.bookingTimeTV.setText (booking.getBookingTime());
+            this.bookingTimeTV.setText (booking.getBikeID());
             this.bookingDateTV.setText (booking.getBookingDate());
             if (booking.getBookingStatus().equals("cancelled")) {
                 this.bookingStatusTV.setTextColor(Color.RED);

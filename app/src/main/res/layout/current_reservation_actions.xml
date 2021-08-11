@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/currentBookingBottomSheet"
+    android:background="@drawable/bottom_sheet_background"
+    android:orientation="vertical"
+    android:elevation="5dp">
+
+    <!-- title -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bottom_sheet_background"
+        android:backgroundTint="@color/white"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:layout_marginBottom="10dp">
+
+        <Button
+            android:id="@+id/scanQRCodeButton_CurrentReservation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/scan_qr"
+            android:textStyle="bold"
+            android:textColor="@color/colorAccent"
+            android:textAppearance="@style/TextButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            />
+
+        <Button
+            android:id="@+id/manualKeyInButton_CurrentReservation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/manual_unlock"
+            android:textStyle="bold"
+            android:textColor="@color/colorAccent"
+            android:textAppearance="@style/TextButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            />
+
+        <Button
+            android:id="@+id/cancelButton_CurrentReservation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cancelReservation"
+            android:textStyle="bold"
+            android:textColor="@color/darkGray"
+            android:textAppearance="@style/TextButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            />
+
+        <EditText
+            android:id="@+id/manualBikeID_CurrentReservation"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/bikeID"
+            android:autofillHints="bikeID"
+            android:inputType="text"
+            android:paddingHorizontal="10dp"
+            />
+
+        <Button
+            android:id="@+id/manualUnlockButton_CurrentReservation"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/unlock_now"
+            android:textStyle="bold"
+            android:textColor="@color/colorAccent"
+            android:textAppearance="@style/TextButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            />
+
+        <Button
+            android:id="@+id/cancelManualKeyInButton_CurrentReservation"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:textStyle="bold"
+            android:textColor="@color/darkGray"
+            android:textAppearance="@style/TextButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

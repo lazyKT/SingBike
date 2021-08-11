@@ -234,6 +234,7 @@
     <string name="singleBooking">Booking</string>
     <string name="bookingDetails">Booking Details</string>
     <string name="currentBooking">Current Booking(s)</string>
+    <string name="cancelReservation">Cancel Reservation</string>
     <string name="bookHistory">Booking History</string>
     <string name="bookTime">Time</string>
     <string name="bookingDate">Date</string>
