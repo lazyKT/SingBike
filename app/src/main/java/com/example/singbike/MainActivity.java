@@ -33,18 +33,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        User currentUser = null;
-
-        /* Receiving User Details passed from SignUP */
-        Bundle bundle = getIntent().getExtras();
-
-        if (bundle != null)
-            currentUser = bundle.getParcelable ("user");
-
-        if (currentUser != null)
-            Toast.makeText (getApplicationContext(), "Welcome " + currentUser.getUsername(), Toast.LENGTH_LONG ).show();
-
-//        Log.d (DEBUG_SAVEDINSTANCES, savedInstanceState.toString());
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
@@ -55,6 +43,16 @@ public class MainActivity extends AppCompatActivity
                     .add (R.id.fragmentContainerView, HomeFragment.class, null)
                     .commit();
         }
+
+        if (getIntent() != null) {
+            if (getIntent().getStringExtra("goto") != null && getIntent().getStringExtra("goto").equals("reservation"))
+                fragmentManager.beginTransaction()
+                        .setReorderingAllowed (true)
+                        .replace (R.id.fragmentContainerView, BookingFragment.class, null)
+                        .addToBackStack ("booking")
+                        .commit();
+        }
+
         BottomNavigationView botNavigationView = (BottomNavigationView) findViewById (R.id.botNavView);
         /* onClick Action on Navigation Menus */
         botNavigationView.setOnNavigationItemSelectedListener(

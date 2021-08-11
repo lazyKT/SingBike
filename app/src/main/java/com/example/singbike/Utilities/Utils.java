@@ -1,17 +1,23 @@
 package com.example.singbike.Utilities;
 
+import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
+import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
+import com.example.singbike.Dialogs.ErrorDialog;
 import com.example.singbike.LocalStorage.UserActivity;
 import com.example.singbike.LocalStorage.UserActivityDatabase;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 
@@ -21,6 +27,11 @@ public class Utils {
 
     public Utils () {}
 
+//    public static ZonedDateTime getLocalCurrentDateTime () {
+//        ZonedDateTime zonedDateTime = ZonedDateTime.now();
+//
+//    }
+
     /* get current datetime string of Singapore Timezone */
     public static String getCurrentDateTime () {
         Instant now = Instant.now();
@@ -29,6 +40,21 @@ public class Utils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern ("EEEE, MM/dd/yyyy - HH:mm");
 
         return currentDateTime.format (formatter);
+    }
+
+    public static String dateToStringFormat (ZonedDateTime dateTime) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern ("EEEE, MM/dd/yyyy - HH:mm");
+        return dateTime.format (dateTimeFormatter);
+    }
+
+    public static String toLocalDateTime (String datetime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern ("d/MM/yy HH:mm", Locale.getDefault());
+        LocalDateTime  localDateTime = LocalDateTime.parse (datetime, formatter);
+        ZoneId singaporeTimeZone = ZoneId.of ("Asia/Singapore");
+        ZonedDateTime utcDatetime = ZonedDateTime.of (localDateTime, ZoneOffset.UTC);
+        ZonedDateTime sgDateTime = utcDatetime.withZoneSameInstant (singaporeTimeZone);
+
+        return Utils.dateToStringFormat (sgDateTime);
     }
 
     /* insert user activity record into Room DB */
@@ -65,6 +91,26 @@ public class Utils {
             path = String.format (Locale.getDefault(), "%s | %s", path, Utils.locationToStringFormat (location));
         }
         return path;
+    }
+
+    public static boolean isReservationExpired (String createdTime) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern ("d/MM/yy HH:mm", Locale.getDefault());
+        LocalDateTime  localDateTime = LocalDateTime.parse (createdTime, formatter);
+        ZoneId singaporeTimeZone = ZoneId.of ("Asia/Singapore");
+        ZonedDateTime utcDatetime = ZonedDateTime.of (localDateTime, ZoneOffset.UTC);
+        ZonedDateTime sgDateTime = utcDatetime.withZoneSameInstant (singaporeTimeZone);
+//        Log.d ("DEBUG_RESERVATION", sgDateTime.toString() + " : " + ZonedDateTime.now().toString());
+//        Log.d ("DEBUG_RESERVATION", ChronoUnit.MINUTES.between (sgDateTime, ZonedDateTime.now()) + " minutes");
+        if (ChronoUnit.MINUTES.between (sgDateTime, ZonedDateTime.now()) > 10) {
+            Log.d ("DEBUG_RESERVATION", "Reservation Expired!");
+        }
+        else {
+            Log.d ("DEBUG_RESERVATION", "Reservation Still Active!");
+        }
+
+
+        return ChronoUnit.MINUTES.between (sgDateTime, ZonedDateTime.now()) > 10;
     }
 
 

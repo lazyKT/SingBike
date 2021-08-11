@@ -3,9 +3,16 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/layout/activity_create_reservation.xml" value="0.24166666666666667" />
         <entry key="app/src/main/res/layout/activity_scanner.xml" value="0.13360507246376813" />
+        <entry key="app/src/main/res/layout/bike_bottomsheet.xml" value="0.18885869565217392" />
+        <entry key="app/src/main/res/layout/current_reservation_actions.xml" value="0.21467391304347827" />
+        <entry key="app/src/main/res/layout/dialog_error.xml" value="0.18885869565217392" />
+        <entry key="app/src/main/res/layout/dialog_reservation.xml" value="0.18885869565217392" />
+        <entry key="app/src/main/res/layout/dialog_reserve_success.xml" value="0.21467391304347827" />
         <entry key="app/src/main/res/layout/fragment_achievement.xml" value="0.276268115942029" />
         <entry key="app/src/main/res/layout/fragment_activity.xml" value="0.18885869565217392" />
+        <entry key="app/src/main/res/layout/fragment_booking.xml" value="0.18885869565217392" />
         <entry key="app/src/main/res/layout/fragment_wallet.xml" value="0.18885869565217392" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.13645833333333332" />
       </map>

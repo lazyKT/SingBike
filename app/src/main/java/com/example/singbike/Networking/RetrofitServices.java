@@ -100,4 +100,16 @@ public interface RetrofitServices {
             @Body ReservationRequest.EditReservationRequest body
             );
 
+    @GET
+    Call<ResponseBody> getReservations (@Url String url);
+
+    @GET
+    Call<ResponseBody> getLastReservation (@Url String url);
+
+    @PUT
+    Call<ResponseBody> cancelReservation (@Url String url);
+
+    @GET
+    Call<ResponseBody> fetchUserTrips (@Url String url);
+
 }

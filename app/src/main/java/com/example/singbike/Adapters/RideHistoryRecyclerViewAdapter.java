@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.singbike.Models.Ride;
+import com.example.singbike.Models.Trip;
 import com.example.singbike.R;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class RideHistoryRecyclerViewAdapter extends RecyclerView.Adapter<RideHis
 
     /* implement onClick Listener */
     public interface RideHistoryItemOnClickListener {
-        void rideItemOnClickListener (Ride ride);
+        void rideItemOnClickListener (Trip trip);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -30,27 +31,22 @@ public class RideHistoryRecyclerViewAdapter extends RecyclerView.Adapter<RideHis
             this.rideTime = v.findViewById (R.id.rideTime_RideHistory);
         }
 
-        public void bind (final Ride ride, final RideHistoryItemOnClickListener listener) {
-            this.rideTime.setText (ride.getRideTime());
-            this.rideDistance.setText (ride.getRideDistance());
+        public void bind (final Trip trip, final RideHistoryItemOnClickListener listener) {
+            this.rideTime.setText (trip.getCreated_at());
+            this.rideDistance.setText (String.valueOf(trip.getDistance()));
 
             itemView.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            listener.rideItemOnClickListener(ride);
-                        }
-                    }
+                    v -> listener.rideItemOnClickListener(trip)
             );
         }
 
     }
 
-    private final ArrayList<Ride> rides;
+    private ArrayList<Trip> trips;
     private final RideHistoryItemOnClickListener listener;
 
-    public RideHistoryRecyclerViewAdapter (ArrayList<Ride> rides, RideHistoryItemOnClickListener listener) {
-        this.rides = rides;
+    public RideHistoryRecyclerViewAdapter (ArrayList<Trip> trips, RideHistoryItemOnClickListener listener) {
+        this.trips = trips;
         this.listener = listener;
     }
 
@@ -66,10 +62,15 @@ public class RideHistoryRecyclerViewAdapter extends RecyclerView.Adapter<RideHis
 
     @Override
     public void onBindViewHolder (@NonNull ViewHolder viewHolder, final int position) {
-        viewHolder.bind (this.rides.get(position), this.listener);
+        viewHolder.bind (this.trips.get(position), this.listener);
     }
 
     @Override
-    public int getItemCount () { return this.rides.size(); }
+    public int getItemCount () { return this.trips.size(); }
+
+
+    public void setTrips (ArrayList<Trip> trips) {
+        this.trips = trips;
+    }
 
 }
