@@ -37,6 +37,7 @@ import com.example.singbike.MainActivity;
 import com.example.singbike.Models.Booking;
 import com.example.singbike.Models.Trip;
 import com.example.singbike.Models.User;
+import com.example.singbike.Networking.Requests.ReservationRequest;
 import com.example.singbike.Networking.Requests.TripRequest;
 import com.example.singbike.Networking.RetrofitClient;
 import com.example.singbike.Networking.RetrofitServices;
@@ -169,6 +170,7 @@ public class BookingFragment extends Fragment {
             });
 
             manualKeyInButton.setOnClickListener (view1 -> {
+//                Log.d (DEBUG_BOOKING, "manual key in clicked!");
                 scanQRCodeButton.setVisibility (View.GONE);
                 cancelReservationButton.setVisibility (View.GONE);
                 unlockBikeButton.setVisibility (View.VISIBLE);
@@ -186,9 +188,10 @@ public class BookingFragment extends Fragment {
                 manualKeyInButton.setVisibility(View.VISIBLE);
             });
 
-            manualKeyInButton.setOnClickListener (view1 -> {
+            unlockBikeButton.setOnClickListener (view1 -> {
                 if (!bikeIDEditText.getText().toString().equals("")) {
                     loadingDialog = new LoadingDialog (requireActivity(), "Starting Ride ...");
+                    loadingDialog.show (requireActivity().getSupportFragmentManager(), loadingDialog.getTag());
                     completeReservation ();
                 }
             });
@@ -413,7 +416,34 @@ public class BookingFragment extends Fragment {
 
 
     private void completeReservation () {
+        if (user == null)
+            return;
 
+        String url = String.format (Locale.getDefault(), "bikes/reservations/%d", currentBooking.getReservation_id());
+        ReservationRequest.EditReservationRequest request = new ReservationRequest.EditReservationRequest (
+                user.getID(), currentBooking.getBike_id(), "complete");
+        Call<ResponseBody> call = services.editReservation (url, request);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        startRiding();
+                    }
+                    else {
+                        displayErrorDialog ("NETWORK_ERROR", "COMPLETE Reservation : Response Empty!");
+                    }
+                }
+                else {
+                    displayErrorDialog ("NETWORK_ERROR", "COMPLETE Reservation : Response Failed!");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                displayErrorDialog ("NETWORK_ERROR", "COMPLETE Reservation : " + t.getMessage());
+            }
+        });
     }
 
 
@@ -439,6 +469,7 @@ public class BookingFragment extends Fragment {
                             Trip trip = gson.fromJson (jsonObject.getJSONObject("trip").toString(), Trip.class);
                             Intent rideIntent = new Intent (requireActivity(), RideActivity.class);
                             rideIntent.putExtra ("trip", trip);
+                            loadingDialog.dismiss();
                             startActivity (rideIntent);
                         }
                         catch (JSONException | IOException e) {
