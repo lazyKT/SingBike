@@ -117,7 +117,10 @@ public class User implements Parcelable {
 
     public void setUpdated_at (String updated_at) { this.updated_at = updated_at; }
 
-    public void setBalance (Double balance) { this.balance = balance; }
+    public void setBalance (Double balance) {
+        String balanceStr = String.format (Locale.getDefault(), "%.2f", balance);
+        this.balance = Double.parseDouble (balanceStr);
+    }
 
     public void setCredits (int credits) { this.credits = credits; }
 

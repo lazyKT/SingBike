@@ -22,17 +22,17 @@ public class ReservationRequest {
 
     public static class EditReservationRequest {
         private final int cust_id;
-        private final String bike;
+        private final String bike_id;
         private final String status;
 
         public EditReservationRequest (int customer, String bike, String status) {
-            this.bike = bike;
+            this.bike_id = bike;
             this.cust_id = customer;
             this.status = status;
         }
 
         public String getBike () {
-            return this.bike;
+            return this.bike_id;
         }
 
         public int getCustomer () {

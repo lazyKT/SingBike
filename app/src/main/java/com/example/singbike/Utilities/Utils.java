@@ -100,8 +100,8 @@ public class Utils {
         ZoneId singaporeTimeZone = ZoneId.of ("Asia/Singapore");
         ZonedDateTime utcDatetime = ZonedDateTime.of (localDateTime, ZoneOffset.UTC);
         ZonedDateTime sgDateTime = utcDatetime.withZoneSameInstant (singaporeTimeZone);
-//        Log.d ("DEBUG_RESERVATION", sgDateTime.toString() + " : " + ZonedDateTime.now().toString());
-//        Log.d ("DEBUG_RESERVATION", ChronoUnit.MINUTES.between (sgDateTime, ZonedDateTime.now()) + " minutes");
+        Log.d ("DEBUG_RESERVATION", sgDateTime.toString() + " : " + ZonedDateTime.now().toString());
+        Log.d ("DEBUG_RESERVATION", ChronoUnit.MINUTES.between (sgDateTime, ZonedDateTime.now()) + " minutes");
         if (ChronoUnit.MINUTES.between (sgDateTime, ZonedDateTime.now()) > 10) {
             Log.d ("DEBUG_RESERVATION", "Reservation Expired!");
         }
