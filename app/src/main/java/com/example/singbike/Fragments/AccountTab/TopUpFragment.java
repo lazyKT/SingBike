@@ -3,9 +3,10 @@ package com.example.singbike.Fragments.AccountTab;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.View;
@@ -58,7 +59,7 @@ public class TopUpFragment extends Fragment {
     private Boolean showAddCardForm = false;
     private String CARD_TAG;
     private User user;
-    private static final String DEBUG_BS_HEIGHT = "DEBUG_SHEET_HEIGHT";
+    private static final String DEBUG_ET = "DEBUG_ET";
     private ArrayList<PaymentMethod> savedCards;
     private SharedPreferences sharedPreferences;
     private EditText expiryCard;
@@ -90,9 +91,8 @@ public class TopUpFragment extends Fragment {
         TransitionInflater inflater = TransitionInflater.from (requireActivity());
         setEnterTransition (inflater.inflateTransition(R.transition.slide_top));
 
-        getParentFragmentManager().setFragmentResultListener ("card_expiry", this, (requestKey, bundle) -> {
-            expiryCard.setText (bundle.getString ("expiry_card"));
-        });
+        getParentFragmentManager().setFragmentResultListener ("card_expiry", this,
+                (requestKey, bundle) -> expiryCard.setText (bundle.getString ("expiry_card")));
     }
 
     @Override
@@ -131,10 +131,6 @@ public class TopUpFragment extends Fragment {
         /*  hide add new card form */
         newCardForm.setVisibility(View.GONE);
 
-        int maxHeight = Resources.getSystem().getDisplayMetrics().heightPixels - 50; // screen height - 50
-
-        Log.d (DEBUG_BS_HEIGHT, "Layout Height " + maxHeight);
-
         /* components inside add card form */
         final EditText nameOnCard = v.findViewById (R.id.nameOnCardET);
         final EditText cardNumber = v.findViewById (R.id.cardNumberET);
@@ -147,6 +143,8 @@ public class TopUpFragment extends Fragment {
 
         LinearLayoutManager paymentMethodLayoutManager = new LinearLayoutManager (requireActivity());
         paymentMethodRV.setLayoutManager (paymentMethodLayoutManager);
+
+
 
         expiryCard.setInputType (InputType.TYPE_NULL);
         expiryCard.setOnClickListener (v1 -> {
@@ -224,12 +222,7 @@ public class TopUpFragment extends Fragment {
         LinearLayoutManager quickTopUpLayoutManager = new LinearLayoutManager(requireActivity(), LinearLayoutManager.HORIZONTAL, false);
         quickTopUpRV.setLayoutManager(quickTopUpLayoutManager);
         final QuickTopUpRVAdapter quickTopUpRVAdapter = new QuickTopUpRVAdapter(requireActivity(),
-                new QuickTopUpRVAdapter.TopUpOnClickListener() {
-                    @Override
-                    public void onClickTopUpListener(String amount) {
-                        topUpAmountEditText.setText(amount);
-                    }
-                });
+                topUpAmountEditText::setText);
         quickTopUpRV.setAdapter (quickTopUpRVAdapter);
 
         /* onClick event on topUp Button */
