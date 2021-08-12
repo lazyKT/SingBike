@@ -17,6 +17,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.singbike.Adapters.RideHistoryRecyclerViewAdapter;
 import com.example.singbike.AuthActivity;
+import com.example.singbike.BottomSheets.TripDetailsBottomSheet;
 import com.example.singbike.Dialogs.ErrorDialog;
 import com.example.singbike.Dialogs.LoadingDialog;
 import com.example.singbike.Models.Ride;
@@ -87,16 +88,8 @@ public class RideHistoryFragment extends Fragment {
         adapter = new RideHistoryRecyclerViewAdapter(tripList,
                 trip -> {
 
-                    Bundle result = new Bundle();
-                    result.putParcelable ("ride_detail", trip);
-                    getParentFragmentManager().setFragmentResult ("ride_history_key", result);
-
-                    (requireActivity()).getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace (R.id.fragmentContainerView, RideDetailsFragment.class, null)
-                            .setReorderingAllowed (true)
-                            .addToBackStack ("ride-details")
-                            .commit();
+                    TripDetailsBottomSheet bottomSheet = new TripDetailsBottomSheet(trip);
+                    bottomSheet.show (requireActivity().getSupportFragmentManager(), bottomSheet.getTag());
                 });
         rideHistoryRecyclerView.setAdapter (adapter);
 

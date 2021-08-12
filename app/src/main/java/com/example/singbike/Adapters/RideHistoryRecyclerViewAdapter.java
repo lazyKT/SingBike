@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.singbike.Models.Ride;
 import com.example.singbike.Models.Trip;
 import com.example.singbike.R;
+import com.example.singbike.Utilities.Utils;
 
 import java.util.ArrayList;
 
@@ -32,7 +33,7 @@ public class RideHistoryRecyclerViewAdapter extends RecyclerView.Adapter<RideHis
         }
 
         public void bind (final Trip trip, final RideHistoryItemOnClickListener listener) {
-            this.rideTime.setText (trip.getCreated_at());
+            this.rideTime.setText (Utils.toLocalDateTime(trip.getCreated_at()));
             this.rideDistance.setText (String.valueOf(trip.getDistance()));
 
             itemView.setOnClickListener(
