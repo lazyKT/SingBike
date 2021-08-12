@@ -37,6 +37,8 @@ public class TripRequest {
             this.total_fare = total_fare;
         }
 
+        public double getFare () { return this.fare; }
+
     }
 
 }

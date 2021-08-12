@@ -10,7 +10,7 @@ public class Trip implements Parcelable {
 
     private final int customer_id, trip_id;
     private String start_point, end_point, path; private final String created_at;
-    private double fare, promo, distance, time_taken;
+    private double fare, promo, distance, time_taken, total_fare;
 
     public Trip (JSONObject object) throws JSONException {
         this.customer_id = object.getInt ("customer_id");
@@ -23,6 +23,7 @@ public class Trip implements Parcelable {
         this.distance = object.getDouble ("distance");
         this.promo = object.getDouble ("promo");
         this.time_taken = object.getDouble ("time_taken");
+        this.total_fare = object.getDouble ("total_fare");
     }
 
     protected Trip(Parcel in) {
@@ -36,6 +37,7 @@ public class Trip implements Parcelable {
         promo = in.readDouble();
         distance = in.readDouble();
         time_taken = in.readDouble();
+        total_fare = in.readDouble();
     }
 
     public static final Creator<Trip> CREATOR = new Creator<Trip>() {
@@ -67,6 +69,7 @@ public class Trip implements Parcelable {
         dest.writeDouble(promo);
         dest.writeDouble(distance);
         dest.writeDouble(time_taken);
+        dest.writeDouble(total_fare);
     }
 
     public void setStarting_point (String starting_point) {
@@ -104,4 +107,12 @@ public class Trip implements Parcelable {
     public String getCreated_at () { return this.created_at; }
 
     public double getDistance () { return this.distance; }
+
+    public double getFare () { return this.fare; }
+
+    public double getPromo () { return this.promo; }
+
+    public double getTime_taken () { return this.time_taken; }
+
+    public double getTotal_fare () { return this.total_fare; }
 }

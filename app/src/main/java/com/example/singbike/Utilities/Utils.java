@@ -2,6 +2,7 @@ package com.example.singbike.Utilities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
@@ -111,6 +112,27 @@ public class Utils {
 
 
         return ChronoUnit.MINUTES.between (sgDateTime, ZonedDateTime.now()) > 10;
+    }
+
+    /* total ride time in seconds */
+    public static int getTotalRideTime (String rideTime) {
+        int minutesToSeconds = Integer.parseInt (rideTime.split(":")[0]) * 60;
+        return minutesToSeconds + Integer.parseInt (rideTime.split(":")[1]);
+    }
+
+    /* Ride Charges: 1$ per 30 minutes */
+    public static double calculateTripFare (String rideTime) {
+        int totalSeconds = Utils.getTotalRideTime (rideTime);
+        int totalMinutes = totalSeconds / 60;
+
+        return (double) (totalMinutes / 30) + 1;
+    }
+
+    /* calculate distance based on rideTime. Assume rider can reach 200 metres in 10 seconds */
+    public static double calculateDistance (String rideTime) {
+        int totalRideTime = Utils.getTotalRideTime (rideTime); // seconds
+        int distanceInMetres = (totalRideTime % 10) * 200;
+        return (double) distanceInMetres/1000; // convert it to kilomeres
     }
 
 

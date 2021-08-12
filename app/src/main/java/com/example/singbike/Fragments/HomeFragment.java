@@ -216,13 +216,6 @@ public class HomeFragment extends Fragment implements
         }
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (loadingDialog != null)
-            loadingDialog.dismiss();
-    }
-
     /* Initiate GoogleMap and Configurations */
     private void initMap () {
         // map configuration
@@ -429,7 +422,7 @@ public class HomeFragment extends Fragment implements
                     if (!manualKeyInBikeIDET.getText().toString().equals("")) {
                         loadingDialog = new LoadingDialog (requireActivity(), "Starting ..");
                         loadingDialog.show (requireActivity().getSupportFragmentManager(), loadingDialog.getTag());
-                        startRiding();
+                        fetchBalance();
                     }
                 }
         );
@@ -535,6 +528,7 @@ public class HomeFragment extends Fragment implements
                             Trip trip = gson.fromJson (jsonObject.getJSONObject("trip").toString(), Trip.class);
                             Intent rideIntent = new Intent (requireActivity(), RideActivity.class);
                             rideIntent.putExtra ("trip", trip);
+                            loadingDialog.dismiss();
                             startActivity (rideIntent);
                         }
                         catch (JSONException | IOException e) {
@@ -553,6 +547,51 @@ public class HomeFragment extends Fragment implements
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 displayErrorDialog ("NETWORK_ERROR", "POST Trip: " + t.getMessage());
+            }
+        });
+    }
+
+    private void fetchBalance () {
+        if (user == null)
+            return;
+
+        final String url = String.format (Locale.getDefault(), "customers/%d", user.getID());
+        final String NETWORK_ERROR = "NETWORK_ERROR";
+        Retrofit retrofit = RetrofitClient.getRetrofit();
+        RetrofitServices services = retrofit.create (RetrofitServices.class);
+
+        Call<ResponseBody> call = services.fetchProfile (url);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        try {
+                            JSONObject jsonObject = new JSONObject (response.body().string());
+                            double balance = jsonObject.getJSONObject("customer").getDouble("balance");
+                            if (balance < 5.00) {
+                                // user must have at least 5$ in the balance to ride
+                                displayErrorDialog ("LOW BALANCE", "User must have at least 5$ in the balance to ride");
+                                loadingDialog.dismiss();
+                                return;
+                            }
+                            startRiding();
+                        }
+                        catch (JSONException | IOException e) {
+                            displayErrorDialog ("APPLICATION ERROR", e.getMessage());
+                        }
+                    }
+                    else {
+                        displayErrorDialog (NETWORK_ERROR, "GET PROFILE: Response Empty!");
+                    }
+                }
+                else
+                    displayErrorDialog (NETWORK_ERROR, "GET PROFILE: Response Failed!");
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+
             }
         });
     }

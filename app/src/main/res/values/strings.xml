@@ -74,6 +74,10 @@
     <string name="time_label">time</string>
     <string name="kilo_label">Kilometres</string>
     <string name="finish_ride">Finish Ride</string>
+    <string name="ride_summary">Ride Summary</string>
+    <string name="promo_hint">Promo Code: GET2D</string>
+    <string name="apply_promo">Apply</string>
+    <string name="make_payment">Make Payment</string>
 
     <!-- account tab -->
     <string name="edit_profile">Edit Profile</string>
@@ -176,6 +180,8 @@
     <string name="ride_fare">Ride Fare</string>
     <string name="ride_id">Ride ID:</string>
     <string name="report_problem">Report a Problem</string>
+    <string name="ride_time">Ride Time: </string>
+    <string name="minutes">minutes</string>
 
     <!-- report -->
     <string name="report_header">How Can We Help You?</string>
@@ -250,6 +256,7 @@
 
     <!-- Ride History -->
     <string name="ride_history">Ride History</string>
+    <string name="ride_details">Ride Details</string>
     <string name="recent_rides">Recent Rides</string>
 
 </resources>

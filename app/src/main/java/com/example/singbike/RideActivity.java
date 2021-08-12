@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.singbike.Dialogs.ErrorDialog;
 import com.example.singbike.Dialogs.LoadingDialog;
+import com.example.singbike.Dialogs.RideSummaryDialog;
 import com.example.singbike.Models.Trip;
 import com.example.singbike.Models.User;
 import com.example.singbike.Networking.Requests.TransactionRequest;
@@ -56,7 +57,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class RideActivity extends AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
+public class RideActivity extends AppCompatActivity implements OnMapReadyCallback,
+        SharedPreferences.OnSharedPreferenceChangeListener, RideSummaryDialog.OnTripSummaryDismissListener {
 
     private static final String DEBUG_RIDE_STATE = "DEBUG_RIDE_STATE";
     private static final String DEBUG_RIDE_LOCATION = "DEBUG_RIDE_LOCATION";
@@ -138,9 +140,13 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
         startForeGroundService();
 
         finishRideButton.setOnClickListener(v -> {
-            loadingDialog = new LoadingDialog (RideActivity.this, "Finishing ..");
-            loadingDialog.show (getSupportFragmentManager(), loadingDialog.getTag());
-            endTrip();
+            // show trip summary to user and allow user to key in promo code
+            RideSummaryDialog rideSummaryDialog = new RideSummaryDialog (
+                    RideActivity.this,
+                    Utils.calculateTripFare(timeTextView.getText().toString()),
+                    Utils.getTotalRideTime(timeTextView.getText().toString())
+            );
+            rideSummaryDialog.show (getSupportFragmentManager(), rideSummaryDialog.getTag());
         });
 
     }
@@ -348,7 +354,7 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
         startForegroundService (startIntent);
     }
 
-    private void endTrip () {
+    private void endTrip (double fare, double promoFare, double totalFare) {
         if (trip == null)
             return;
 
@@ -357,10 +363,10 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
         TripRequest.TripEndRequest tripEndRequest = new TripRequest.TripEndRequest(
                 Utils.locationToStringFormat (visitedLocations.get (visitedLocations.size() - 1)),
                 Utils.locationsToStringPaths (visitedLocations),
-                5.020,
-                3.12,
-                0.00,
-                5.020
+                fare,
+                Utils.calculateDistance (timeTextView.getText().toString()),
+                promoFare,
+                totalFare
         );
 
         Call<ResponseBody> call = services.endTrip (url, tripEndRequest);
@@ -443,5 +449,12 @@ public class RideActivity extends AppCompatActivity implements OnMapReadyCallbac
                 displayErrorDialog ("NETWORK_ERROR", t.getMessage());
             }
         });
+    }
+
+    @Override
+    public void onTripSummaryDismiss (double fare, double promoFare, double totalFare) {
+        loadingDialog = new LoadingDialog (RideActivity.this, "Finishing ..");
+        loadingDialog.show (getSupportFragmentManager(), loadingDialog.getTag());
+        endTrip (fare, promoFare, totalFare);
     }
 }
