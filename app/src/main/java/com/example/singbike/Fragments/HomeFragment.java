@@ -84,12 +84,15 @@ public class HomeFragment extends Fragment implements
     private static final String DEBUG_FRAGMENT = "DEBUG_HOME_FRAG";
     private static final String DEBUG_SHARED_PREFS = "DEBUG_SHARED_PREFS";
 
+    private TextView balanceTextView;
+
     private Location myLocation;
     private LatLng defaultLocation; // move to this location if real location gets some errors
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
     private GoogleMap map;
+    private double currentBalance;
     private static final int CAMERA_ACCESS = 0;
     private boolean locationPermissionGranted = false;
     private User user;
@@ -114,13 +117,14 @@ public class HomeFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
 
         final TextView creditScoreTextView = view.findViewById (R.id.creditScoreTextView_Home);
-        final TextView balanceTextView = view.findViewById (R.id.balanceTextView_Home);
+        balanceTextView = view.findViewById (R.id.balanceTextView_Home);
 
         /* get user details from local storage (SharedPreferences) */
         user = getUserDetails();
         if (user != null) {
             Log.d (DEBUG_SHARED_PREFS, user.toString());
             creditScoreTextView.setText (String.valueOf(user.getCredits()));
+            currentBalance = user.getBalance();
             balanceTextView.setText (String.valueOf(user.getBalance()));
         }
 
@@ -153,6 +157,8 @@ public class HomeFragment extends Fragment implements
             }
         };
 
+        fetchBalance();
+
 
         final Button unlockButton = view.findViewById(R.id.unlockButton);
         unlockButton.setOnClickListener (
@@ -174,6 +180,11 @@ public class HomeFragment extends Fragment implements
                         // ask user to enable bluetooth
                         Intent enableBluetooth = new Intent (BluetoothAdapter.ACTION_REQUEST_ENABLE);
                         requestBluetoothLauncher.launch (enableBluetooth);
+                    }
+
+                    if (currentBalance < 5.00) {
+                        displayErrorDialog ("LOW BALANCE", getString(R.string.low_balance));
+                        return;
                     }
 
                     // ask users whether open camera to scan qr code or key in manually
@@ -422,7 +433,7 @@ public class HomeFragment extends Fragment implements
                     if (!manualKeyInBikeIDET.getText().toString().equals("")) {
                         loadingDialog = new LoadingDialog (requireActivity(), "Starting ..");
                         loadingDialog.show (requireActivity().getSupportFragmentManager(), loadingDialog.getTag());
-                        fetchBalance();
+                        startRiding();
                     }
                 }
         );
@@ -568,14 +579,8 @@ public class HomeFragment extends Fragment implements
                     if (response.body() != null) {
                         try {
                             JSONObject jsonObject = new JSONObject (response.body().string());
-                            double balance = jsonObject.getJSONObject("customer").getDouble("balance");
-                            if (balance < 5.00) {
-                                // user must have at least 5$ in the balance to ride
-                                displayErrorDialog ("LOW BALANCE", "User must have at least 5$ in the balance to ride");
-                                loadingDialog.dismiss();
-                                return;
-                            }
-                            startRiding();
+                            currentBalance = jsonObject.getJSONObject("customer").getDouble("balance");
+                            balanceTextView.setText (String.format(Locale.getDefault(), "%.2f", currentBalance));
                         }
                         catch (JSONException | IOException e) {
                             displayErrorDialog ("APPLICATION ERROR", e.getMessage());

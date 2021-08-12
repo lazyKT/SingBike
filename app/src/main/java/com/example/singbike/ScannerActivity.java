@@ -15,6 +15,7 @@ import com.example.singbike.Dialogs.ErrorDialog;
 import com.example.singbike.Fragments.HomeFragment;
 import com.example.singbike.Models.Trip;
 import com.example.singbike.Models.User;
+import com.example.singbike.Networking.Requests.ReservationRequest;
 import com.example.singbike.Networking.Requests.TripRequest;
 import com.example.singbike.Networking.RetrofitClient;
 import com.example.singbike.Networking.RetrofitServices;
@@ -39,6 +40,10 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
     private ZXingScannerView scannerView;
     private User user;
     private Location myLocation;
+    private String bikeID;
+    private int reservationID;
+    private boolean rideFromReservation;
+    private RetrofitServices services;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,8 +52,17 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
         scannerView = new ZXingScannerView(this);
         setContentView (scannerView);
 
+        Retrofit retrofit = RetrofitClient.getRetrofit();
+        services = retrofit.create (RetrofitServices.class);
+
         if (getIntent() != null) {
             myLocation = getIntent().getParcelableExtra ("MyLocation");
+            rideFromReservation = getIntent().getBooleanExtra ("reservation", false);
+            reservationID = getIntent().getIntExtra ("reservationID", -1);
+            if (getIntent().getStringExtra ("bikeID") != null)
+                bikeID = getIntent().getStringExtra ("bikeID");
+            if (getIntent().getDoubleExtra ("balance", 5.5) < 5.00)
+                startActivity (new Intent (ScannerActivity.this, MainActivity.class));
         }
 
         user = getUserDetails();
@@ -65,7 +79,13 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
     public void handleResult(Result result) {
         // get qr code result and send back to home fragment
         Log.d ("QRCODE_RESULT", result.getText());
-        startRiding();
+        if (rideFromReservation) {
+            completeReservation();
+            startRiding();
+        }
+        else {
+            startRiding();
+        }
     }
 
     @Override
@@ -87,9 +107,6 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
             return;
 
         String startPointStr = String.format (Locale.getDefault(), "(%.5f, %.5f)", myLocation.getLatitude(), myLocation.getLongitude());
-
-        Retrofit retrofit = RetrofitClient.getRetrofit();
-        RetrofitServices services = retrofit.create (RetrofitServices.class);
 
         Call<ResponseBody> call = services.createTrip (new TripRequest.TripCreateRequest(user.getID(), startPointStr));
         call.enqueue(new Callback<ResponseBody>() {
@@ -124,6 +141,37 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 displayErrorDialog ("NETWORK_ERROR", "POST Trip: " + t.getMessage());
+            }
+        });
+    }
+
+    private void completeReservation () {
+        if (user == null)
+            return;
+
+        String url = String.format (Locale.getDefault(), "bikes/reservations/%d", reservationID);
+        ReservationRequest.EditReservationRequest request = new ReservationRequest.EditReservationRequest (
+                user.getID(), bikeID, "complete");
+        Call<ResponseBody> call = services.editReservation (url, request);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        startRiding();
+                    }
+                    else {
+                        displayErrorDialog ("NETWORK_ERROR", "COMPLETE Reservation : Response Empty!");
+                    }
+                }
+                else {
+                    displayErrorDialog ("NETWORK_ERROR", "COMPLETE Reservation : Response Failed!");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                displayErrorDialog ("NETWORK_ERROR", "COMPLETE Reservation : " + t.getMessage());
             }
         });
     }

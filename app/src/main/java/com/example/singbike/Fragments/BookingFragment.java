@@ -84,6 +84,7 @@ public class BookingFragment extends Fragment {
     private TextView currentBookingDateTimeTV;
     private TextView currentBookingBikeID;
     private CardView currentBookingCardView;
+    private double currentBalance;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private Location myLocation;
     private boolean locationPermissionGranted;
@@ -158,6 +159,8 @@ public class BookingFragment extends Fragment {
             final Button cancelManualKeyInButton = bottomSheet.findViewById (R.id.cancelManualKeyInButton_CurrentReservation);
             final EditText bikeIDEditText = bottomSheet.findViewById (R.id.manualBikeID_CurrentReservation);
 
+            fetchBalance();
+
             cancelReservationButton.setOnClickListener (view1 -> {
                 cancelReservation (currentBooking.getReservation_id());
                 bottomSheetDialog.dismiss();
@@ -166,6 +169,11 @@ public class BookingFragment extends Fragment {
             scanQRCodeButton.setOnClickListener (view1 -> {
                 Intent scanIntent = new Intent (requireActivity(), ScannerActivity.class);
                 scanIntent.putExtra ("MyLocation", myLocation);
+                scanIntent.putExtra ("reservation", true);
+                Log.d (DEBUG_BOOKING, "current balance " + currentBalance);
+                scanIntent.putExtra ("balance", currentBalance);
+                scanIntent.putExtra ("bikeID", currentBooking.getBikeID());
+                scanIntent.putExtra ("reservationID", currentBooking.getReservation_id());
                 startActivity (scanIntent);
             });
 
@@ -192,7 +200,11 @@ public class BookingFragment extends Fragment {
                 if (!bikeIDEditText.getText().toString().equals("")) {
                     loadingDialog = new LoadingDialog (requireActivity(), "Starting Ride ...");
                     loadingDialog.show (requireActivity().getSupportFragmentManager(), loadingDialog.getTag());
-                    completeReservation ();
+                    if (currentBalance < 5.00) {
+                        displayErrorDialog ("LOW BALANCE", getString(R.string.low_balance));
+                        return;
+                    }
+                    completeReservation();
                 }
             });
 
@@ -414,6 +426,44 @@ public class BookingFragment extends Fragment {
         }
     }
 
+    private void fetchBalance () {
+        if (user == null)
+            return;
+
+        final String url = String.format (Locale.getDefault(), "customers/%d", user.getID());
+        final String NETWORK_ERROR = "NETWORK_ERROR";
+        Retrofit retrofit = RetrofitClient.getRetrofit();
+        RetrofitServices services = retrofit.create (RetrofitServices.class);
+
+        Call<ResponseBody> call = services.fetchProfile (url);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        try {
+                            JSONObject jsonObject = new JSONObject (response.body().string());
+                            currentBalance = jsonObject.getJSONObject("customer").getDouble("balance");
+                        }
+                        catch (JSONException | IOException e) {
+                            displayErrorDialog ("APPLICATION ERROR", e.getMessage());
+                        }
+                    }
+                    else {
+                        displayErrorDialog (NETWORK_ERROR, "GET PROFILE: Response Empty!");
+                    }
+                }
+                else
+                    displayErrorDialog (NETWORK_ERROR, "GET PROFILE: Response Failed!");
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+
+            }
+        });
+    }
+
 
     private void completeReservation () {
         if (user == null)
@@ -469,7 +519,7 @@ public class BookingFragment extends Fragment {
                             Trip trip = gson.fromJson (jsonObject.getJSONObject("trip").toString(), Trip.class);
                             Intent rideIntent = new Intent (requireActivity(), RideActivity.class);
                             rideIntent.putExtra ("trip", trip);
-                            loadingDialog.dismiss();
+                            if (loadingDialog != null) loadingDialog.dismiss();
                             startActivity (rideIntent);
                         }
                         catch (JSONException | IOException e) {

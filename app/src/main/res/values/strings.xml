@@ -67,6 +67,7 @@
     <string name="reserve_confirm">Confirm Reservation</string>
     <string name="reserve_question">You are about to make a bike reservation!</string>
     <string name="confirm">Confirm</string>
+    <string name="low_balance">You must have at least 5$ in your wallet to make a ride. Please top up.</string>
 
     <!-- riding screen -->
     <string name="dummy_time_ride">00:00</string>
