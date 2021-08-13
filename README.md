@@ -8,7 +8,7 @@ This is our FYP of UOW.
 - java
 
 ### Application SDK Infor
-- minimal SDK version -> 23
+- minimal SDK version -> 26
 - targetted SDK version -> 30
 - minimal API Level -> 26
 - targetted API Level -> 30
@@ -49,3 +49,27 @@ implementation "com.google.code.gson:gson:2.8.6"
 implementation "androidx.preference:preference:1.1.1"
 ```
 
+- me.dm7.barcodescanner:zxing:1.9
+```
+// qr code scanner
+implementation 'me.dm7.barcodescanner:zxing:1.9'
+```
+
+- com.squareup.retrofit2:retrofit:2.5.0
+```
+// handle networking and files(image) upload/download
+implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+```
+
+- com.google.android.gms:play-services-maps:17.0.1
+```
+// adding a map dependency
+implementation 'com.google.android.gms:play-services-maps:17.0.1'
+```
+
+- com.google.android.gms:play-serices-location:18.0.0
+```
+// google location api
+implementation "com.google.android.gms:play-services-location:18.0.0"
+```
