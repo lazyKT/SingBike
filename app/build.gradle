@@ -51,7 +51,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:17.0.1'
     // google location api
     implementation "com.google.android.gms:play-services-location:18.0.0"
-    // handle files(image) upload/download
+
+    // handle networking and files(image) upload/download
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 
@@ -67,6 +68,7 @@ dependencies {
     // communication between components: to send background service status to UI Thread
     implementation 'org.greenrobot:eventbus:3.2.0'
 
+    // qr code scanner
     implementation 'me.dm7.barcodescanner:zxing:1.9'
 
     testImplementation 'junit:junit:4.12'

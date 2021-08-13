@@ -3,6 +3,7 @@ package com.example.singbike;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -62,7 +63,6 @@ import retrofit2.Retrofit;
 
 public class EditProfileActivity extends AppCompatActivity {
 
-    private static final String REQUEST_TAG = "PROFILE_UPDATE";
     private static final String DEBUG_PROFILE_UPDATE = "DEBUG_PROFILE_UPDATE";
     private static final String DEBUG_AVATAR_UPLOAD = "DEBUG_AVATAR_UPLOAD";
     private static final String DEBUG_AVATAR_FETCH = "DEBUG_AVATAR_FETCH";
@@ -92,6 +92,7 @@ public class EditProfileActivity extends AppCompatActivity {
         final Button changePasswordButton = findViewById (R.id.changePwdButton);
         final Button updateProfileButton = findViewById (R.id.updateBtn_profile);
         final LinearLayout creditScoreLayout = findViewById (R.id.creditScoreLayout);
+        final Button deleteAccountButton = findViewById (R.id.deleteAccountButton);
         joinOnTextView = findViewById (R.id.joinOnTextView_Profile);
         lastUpdatedTextView = findViewById (R.id.lastUpdatTextView_Profile);
         creditScoreTextView = findViewById (R.id.creditScoreTextView_Profile);
@@ -178,6 +179,22 @@ public class EditProfileActivity extends AppCompatActivity {
                     changePasswordBottomSheet.show (getSupportFragmentManager(), changePasswordBottomSheet.getTag());
                 }
         );
+
+        /* delete account */
+        deleteAccountButton.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder (EditProfileActivity.this);
+            builder.setTitle (R.string.delete_account)
+                    .setMessage (R.string.delete_question)
+                    .setPositiveButton (R.string.understand, (dialogInterface, which) -> {
+                        // make delete request
+                        dialogInterface.dismiss();
+                        deleteAccount();
+                    })
+                    .setNegativeButton (R.string.jk, ((dialog, which) -> {
+                        // cancel delete request
+                        dialog.dismiss();
+                    })).create().show();
+        });
 
     }
 
@@ -439,7 +456,8 @@ public class EditProfileActivity extends AppCompatActivity {
                                 profileLayout.setVisibility (View.VISIBLE);
                                 usernameET.setText (_user.getUsername());
                                 emailET.setText (_user.getEmail());
-                                totalDistanceTextView.setText (response.body().string());
+                                double totalDistance = Double.parseDouble (response.body().string());
+                                totalDistanceTextView.setText (String.format(Locale.getDefault(), "%.2f", totalDistance));
                                 joinOnTextView.setText (_user.getCreated_at());
                                 lastUpdatedTextView.setText (_user.getUpdated_at());
                                 creditScoreTextView.setText (String.valueOf(_user.getCredits()));
@@ -552,6 +570,64 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+
+    /* request to permanently delete the account */
+    private void deleteAccount () {
+        if (user == null)
+            return;
+
+        final String url = String.format (Locale.getDefault(), "customers/%d", user.getID());
+        final Retrofit retrofit = RetrofitClient.getRetrofit();
+        final RetrofitServices services = retrofit.create(RetrofitServices.class);
+
+        Call<ResponseBody> call = services.deleteAccount (url);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.code() == 204) {
+                    // account delete successful
+                    // log out the user
+                    // say saronara
+                    logOut();
+                }
+                else {
+                    // delete failed
+                    // welcome back the user, in case he/she changes his/her mind
+                    displayErrorMessage ("NETWORK_ERROR", "DELETE Account: Request Failed!");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                displayErrorMessage ("NETWORK_ERROR", "DELETE Account: " + t.getMessage());
+            }
+        });
+
+    }
+
+    private void logOut () {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder (EditProfileActivity.this);
+        View v = LayoutInflater.from (EditProfileActivity.this)
+                .inflate (R.layout.sayonara, null);
+        builder.setView(v)
+                .setPositiveButton ("LOG OUT", (dialogInterface, which) -> {
+                    dialogInterface.dismiss();
+                    // remove the sharePreferences value from the device storage
+                    SharedPreferences userPrefs = getSharedPreferences ("User", Context.MODE_PRIVATE);
+                    SharedPreferences preferences = getSharedPreferences(getString(R.string.authState), Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    SharedPreferences.Editor editor1 = userPrefs.edit();
+                    editor1.clear();
+                    editor1.apply();
+                    editor.clear();
+                    editor.apply();
+                    // logout user
+                    Intent intent = new Intent (EditProfileActivity.this, AuthActivity.class);
+                    startActivity(intent);
+                });
+        builder.create();
+        builder.show();
+    }
 
     /* display error dialog */
     private void displayErrorMessage (String title, String message) {
