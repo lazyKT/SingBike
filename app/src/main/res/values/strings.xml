@@ -93,6 +93,11 @@
     <string name="dummy_distance">7.9</string>
     <string name="hours">Hours</string>
     <string name="km_travelled">Km Travelled</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="delete_question">Are you sure that do you want to delete your account? All your data will be lost.</string>
+    <string name="understand">I understand. Delete.</string>
+    <string name="jk">Just Kidding. No</string>
+    <string name="goodbye">Good Bye! Sorry to letting you go. Hope to see you again.</string>
 
     <!-- credit score page -->
     <string name="what_is_credit_score">What is a credit score?</string>

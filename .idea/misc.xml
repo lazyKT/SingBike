@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_create_reservation.xml" value="0.24166666666666667" />
+        <entry key="app/src/main/res/layout/activity_edit_profile.xml" value="0.24166666666666667" />
         <entry key="app/src/main/res/layout/activity_scanner.xml" value="0.13360507246376813" />
         <entry key="app/src/main/res/layout/bike_bottomsheet.xml" value="0.18885869565217392" />
         <entry key="app/src/main/res/layout/current_reservation_actions.xml" value="0.21467391304347827" />
@@ -17,6 +18,7 @@
         <entry key="app/src/main/res/layout/promo_apply_dialog.xml" value="0.21467391304347827" />
         <entry key="app/src/main/res/layout/ride_details.xml" value="0.18885869565217392" />
         <entry key="app/src/main/res/layout/ride_summary_dialog.xml" value="0.24166666666666667" />
+        <entry key="app/src/main/res/layout/sayonara.xml" value="0.20878623188405798" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.13645833333333332" />
       </map>
     </option>
