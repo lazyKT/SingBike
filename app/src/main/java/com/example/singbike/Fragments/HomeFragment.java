@@ -97,6 +97,9 @@ public class HomeFragment extends Fragment implements
     private boolean locationPermissionGranted = false;
     private User user;
     private LoadingDialog loadingDialog;
+    private boolean fineLocationGranted = false;
+    private boolean coarseLocationGranted = false;
+    private boolean backgroundLocationGranted = false;
 
     @Override
     public void onCreate (@Nullable Bundle savedInstanceState) {
@@ -173,10 +176,10 @@ public class HomeFragment extends Fragment implements
                     BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                     if (bluetoothAdapter == null) {
                         displayErrorDialog ("System Error! Bluetooth Not Found!", "Your device does not support Bluetooth!");
-//                        return;
+                        return;
                     }
 
-                    if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
+                    if (!bluetoothAdapter.isEnabled()) {
                         // ask user to enable bluetooth
                         Intent enableBluetooth = new Intent (BluetoothAdapter.ACTION_REQUEST_ENABLE);
                         requestBluetoothLauncher.launch (enableBluetooth);
@@ -452,15 +455,34 @@ public class HomeFragment extends Fragment implements
 
     /* request permission to get the device's location */
     private void requestLocationPermission () {
+
         if (ContextCompat.checkSelfPermission (
                 requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationPermissionGranted = true;
+            fineLocationGranted = true;
         }
         else {
             // request to access device's location
 //            ActivityCompat.requestPermissions (requireActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
             requestLocationLauncher.launch (Manifest.permission.ACCESS_FINE_LOCATION);
         }
+
+        if (ContextCompat.checkSelfPermission(
+                requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            coarseLocationGranted = true;
+        }
+        else {
+            requestCoarseLocationLauncher.launch (Manifest.permission.ACCESS_COARSE_LOCATION);
+        }
+
+        if (ContextCompat.checkSelfPermission(
+                requireActivity(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            backgroundLocationGranted = true;
+        }
+        else {
+            requestBackgroundLocationLauncher.launch (Manifest.permission.ACCESS_COARSE_LOCATION);
+        }
+
+        locationPermissionGranted = fineLocationGranted;
     }
 
 
@@ -617,7 +639,14 @@ public class HomeFragment extends Fragment implements
             });
 
     private final ActivityResultLauncher<String> requestLocationLauncher = registerForActivityResult (
-            new ActivityResultContracts.RequestPermission(), isGranted -> locationPermissionGranted = isGranted
+            new ActivityResultContracts.RequestPermission(), isGranted -> fineLocationGranted = isGranted
     );
 
+    private final ActivityResultLauncher<String> requestCoarseLocationLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(), isGranted -> coarseLocationGranted = isGranted
+    );
+
+    private final ActivityResultLauncher<String> requestBackgroundLocationLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(), isGranted -> backgroundLocationGranted = isGranted
+    );
 }

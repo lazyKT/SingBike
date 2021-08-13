@@ -1,11 +1,13 @@
 package com.example.singbike.Fragments;
 
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.transition.TransitionInflater;
 import android.util.Log;
@@ -138,6 +140,9 @@ public class AccountFragment extends  Fragment{
                                     .replace (R.id.fragmentContainerView, AchievementsFragment.class, null)
                                     .commit();
                             break;
+                        case "Help Centre":
+                                    redirectHelpPage();
+                                    break;
                         case "Ride History":
                             (requireActivity()).getSupportFragmentManager()
                                     .beginTransaction()
@@ -218,6 +223,21 @@ public class AccountFragment extends  Fragment{
                 .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss());
         builder.create();
         builder.show();
+    }
+
+    /* redirect to Website Help Page */
+    private void redirectHelpPage () {
+        String url = "http://167.71.221.189/support/";
+        Intent intent = new Intent (Intent.ACTION_VIEW, Uri.parse (url));
+        intent.addFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setPackage ("com.android.chrome");
+        try {
+            requireActivity().startActivity (intent); // if user's device has chrome installed, open via chrome
+        }
+        catch (ActivityNotFoundException e) {
+            intent.setPackage (null);
+            requireActivity().startActivity (intent); // if user doesn't have chrome, then ask user to choose browser
+        }
     }
 
     private void displayError(String message) {

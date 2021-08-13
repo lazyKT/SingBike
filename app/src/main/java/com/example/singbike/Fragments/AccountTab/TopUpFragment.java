@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.InputType;
-import android.text.TextWatcher;
 import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.View;
@@ -59,7 +57,6 @@ public class TopUpFragment extends Fragment {
     private Boolean showAddCardForm = false;
     private String CARD_TAG;
     private User user;
-    private static final String DEBUG_ET = "DEBUG_ET";
     private ArrayList<PaymentMethod> savedCards;
     private SharedPreferences sharedPreferences;
     private EditText expiryCard;

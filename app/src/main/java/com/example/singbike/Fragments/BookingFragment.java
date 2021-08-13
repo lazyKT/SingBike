@@ -84,7 +84,7 @@ public class BookingFragment extends Fragment {
     private TextView currentBookingDateTimeTV;
     private TextView currentBookingBikeID;
     private CardView currentBookingCardView;
-    private double currentBalance;
+    private double currentBalance = 0.00;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private Location myLocation;
     private boolean locationPermissionGranted;
@@ -141,6 +141,7 @@ public class BookingFragment extends Fragment {
         bookingHistoryRecyclerView.setAdapter (bookingHistoryAdapter);
 
         fetchLastReservation();
+        fetchBalance();
 
         currentBookingCardView.setOnClickListener(v1 -> {
 
@@ -159,14 +160,16 @@ public class BookingFragment extends Fragment {
             final Button cancelManualKeyInButton = bottomSheet.findViewById (R.id.cancelManualKeyInButton_CurrentReservation);
             final EditText bikeIDEditText = bottomSheet.findViewById (R.id.manualBikeID_CurrentReservation);
 
-            fetchBalance();
-
             cancelReservationButton.setOnClickListener (view1 -> {
                 cancelReservation (currentBooking.getReservation_id());
                 bottomSheetDialog.dismiss();
             });
 
             scanQRCodeButton.setOnClickListener (view1 -> {
+                if (currentBalance < 5.00) {
+                    displayErrorDialog ("LOW BALANCE", getString (R.string.low_balance));
+                    return;
+                }
                 Intent scanIntent = new Intent (requireActivity(), ScannerActivity.class);
                 scanIntent.putExtra ("MyLocation", myLocation);
                 scanIntent.putExtra ("reservation", true);
@@ -198,12 +201,12 @@ public class BookingFragment extends Fragment {
 
             unlockBikeButton.setOnClickListener (view1 -> {
                 if (!bikeIDEditText.getText().toString().equals("")) {
-                    loadingDialog = new LoadingDialog (requireActivity(), "Starting Ride ...");
-                    loadingDialog.show (requireActivity().getSupportFragmentManager(), loadingDialog.getTag());
                     if (currentBalance < 5.00) {
                         displayErrorDialog ("LOW BALANCE", getString(R.string.low_balance));
                         return;
                     }
+                    loadingDialog = new LoadingDialog (requireActivity(), "Starting Ride ...");
+                    loadingDialog.show (requireActivity().getSupportFragmentManager(), loadingDialog.getTag());
                     completeReservation();
                 }
             });

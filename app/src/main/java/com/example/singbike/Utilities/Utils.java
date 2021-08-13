@@ -1,14 +1,11 @@
 package com.example.singbike.Utilities;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
-import com.example.singbike.Dialogs.ErrorDialog;
 import com.example.singbike.LocalStorage.UserActivity;
 import com.example.singbike.LocalStorage.UserActivityDatabase;
 
@@ -27,11 +24,6 @@ public class Utils {
     public static final String KEY_REQUESTING_LOCATION_UPDATES_BG = "RequestLocationUpdate";
 
     public Utils () {}
-
-//    public static ZonedDateTime getLocalCurrentDateTime () {
-//        ZonedDateTime zonedDateTime = ZonedDateTime.now();
-//
-//    }
 
     /* get current datetime string of Singapore Timezone */
     public static String getCurrentDateTime () {
@@ -132,7 +124,7 @@ public class Utils {
     public static double calculateDistance (String rideTime) {
         int totalRideTime = Utils.getTotalRideTime (rideTime); // seconds
         int distanceInMetres = (totalRideTime % 10) * 200;
-        return (double) distanceInMetres/1000; // convert it to kilomeres
+        return (double) distanceInMetres/1000; // convert it to kilometres
     }
 
 
