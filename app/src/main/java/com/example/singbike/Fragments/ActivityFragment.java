@@ -1,5 +1,7 @@
 package com.example.singbike.Fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.transition.TransitionInflater;
 import android.view.View;
@@ -15,8 +17,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.singbike.Adapters.ActivityRecyclerViewAdapter;
 import com.example.singbike.LocalStorage.UserActivity;
 import com.example.singbike.LocalStorage.UserActivityDatabase;
+import com.example.singbike.Models.User;
 import com.example.singbike.R;
 import com.example.singbike.Utilities.AppExecutor;
+import com.google.gson.Gson;
 
 
 import java.util.Collections;
@@ -28,6 +32,7 @@ public class ActivityFragment extends Fragment {
     private LinearLayout userActivityLayout;
     private ProgressBar loadingProgressBar;
     private ActivityRecyclerViewAdapter adapter;
+    private User user;
 
     public ActivityFragment () {
         super (R.layout.fragment_activity);
@@ -46,6 +51,8 @@ public class ActivityFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        user = getUserDetails();
+
         userActivityLayout = view.findViewById (R.id.userActivities_layout);
         loadingProgressBar = view.findViewById (R.id.loadingUserActivityProgBar);
         final RecyclerView activityRecyclerView = view.findViewById (R.id.activityRecyclerView);
@@ -60,11 +67,19 @@ public class ActivityFragment extends Fragment {
         fetchAllActivities();
     }
 
+    /* get user data from sharedPreferences */
+    private User getUserDetails () {
+        Gson gson = new Gson();
+        SharedPreferences userPrefs = requireActivity().getSharedPreferences ("User", Context.MODE_PRIVATE);
+        String jsonData = userPrefs.getString ("UserDetails", "");
+        return gson.fromJson (jsonData, User.class);
+    }
+
     /* get all user activities from local storage (RoomDB) */
     private void fetchAllActivities () {
         AppExecutor.getInstance().getDiskIO().execute(() -> {
             UserActivityDatabase userActivityDatabase = UserActivityDatabase.getInstance(requireActivity());
-            activities = userActivityDatabase.userActivityDAO().getAll();
+            activities = userActivityDatabase.userActivityDAO().getActivityByUserID(user.getID());
             Collections.reverse (activities);
 
             requireActivity().runOnUiThread(() -> {

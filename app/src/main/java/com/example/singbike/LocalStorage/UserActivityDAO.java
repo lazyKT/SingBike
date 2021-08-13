@@ -14,6 +14,9 @@ public interface UserActivityDAO {
     @Query ("SELECT * FROM userActivity")
     List <UserActivity> getAll();
 
+    @Query ("SELECT * FROM userActivity WHERE userID=:userID")
+    List <UserActivity> getActivityByUserID (int userID);
+
     @Insert
     void insertAll (UserActivity ... activities);
 

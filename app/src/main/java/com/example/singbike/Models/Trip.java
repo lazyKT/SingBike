@@ -10,7 +10,11 @@ public class Trip implements Parcelable {
 
     private final int customer_id, trip_id;
     private String start_point, end_point, path; private final String created_at;
-    private double fare, promo, distance, time_taken, total_fare;
+    private double fare;
+    private double promo;
+    private double distance;
+    private double time_taken;
+    private final double total_fare;
 
     public Trip (JSONObject object) throws JSONException {
         this.customer_id = object.getInt ("customer_id");
